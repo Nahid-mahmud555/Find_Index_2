@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find_Index | Created by MiM</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&family=Poppins:wght@600&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #0f172a;
+            --accent: #10b981;
+            --bg: #f8fafc;
+            --card: #ffffff;
+        }
+
+        * { box-sizing: border-box; font-family: 'Hind Siliguri', sans-serif; transition: 0.3s; }
+        body { margin: 0; background: var(--bg); color: #1e293b; overflow-x: hidden; }
+
+        /* --- 1. Preloader Animation --- */
+        #loader {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--primary); display: flex; flex-direction: column;
+            justify-content: center; align-items: center; z-index: 10000; color: white;
+        }
+        .loader-logo { font-family: 'Poppins', sans-serif; font-size: 3rem; margin-bottom: 10px; animation: scaleUp 1s infinite alternate; }
+        .spinner { width: 40px; height: 40px; border: 4px solid rgba(255,255,255,0.1); border-top: 4px solid var(--accent); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes scaleUp { from { transform: scale(0.9); } to { transform: scale(1.1); } }
+
+        /* --- 2. Fixed Header & Nav --- */
+        header {
+            background: var(--primary); color: white; padding: 40px 20px 80px;
+            text-align: center; clip-path: polygon(0 0, 100% 0, 100% 85%, 0 100%);
+        }
+        .logo { font-family: 'Poppins', sans-serif; font-size: 2.5rem; margin: 0; }
+        .creator { font-size: 0.9rem; opacity: 0.8; letter-spacing: 1px; }
+        .creator b { color: var(--accent); }
+
+        /* --- 3. Fixed Status Bar --- */
+        .status-container {
+            display: flex; justify-content: center; gap: 10px; margin: -40px auto 20px;
+            padding: 0 15px; flex-wrap: wrap; z-index: 100; position: relative;
+        }
+        .pill {
+            background: white; padding: 10px 20px; border-radius: 50px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); font-weight: bold; font-size: 13px;
+            display: flex; align-items: center; gap: 8px; border: 1px solid #e2e8f0;
+        }
+        .dot { height: 8px; width: 8px; background: var(--accent); border-radius: 50%; animation: blink 1s infinite; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+        /* --- 4. Search & Quiz --- */
+        .search-section { max-width: 700px; margin: 20px auto; padding: 0 20px; text-align: center; }
+        .search-box {
+            width: 100%; padding: 16px 25px; border-radius: 50px; border: 2px solid #cbd5e1;
+            font-size: 16px; outline: none; background: white; box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+        }
+        .search-box:focus { border-color: var(--accent); box-shadow: 0 0 15px rgba(16, 185, 129, 0.2); }
+        .quiz-btn {
+            margin-top: 15px; background: white; border: 2px solid var(--primary);
+            padding: 8px 20px; border-radius: 50px; cursor: pointer; font-weight: 700; color: var(--primary);
+        }
+        .quiz-btn:hover { background: var(--primary); color: white; }
+
+        /* --- 5. Book Grid --- */
+        .container { max-width: 1200px; margin: auto; padding: 20px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+        
+        .card {
+            background: white; border-radius: 20px; padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05); border: 1px solid #f1f5f9;
+        }
+        .card:hover { transform: translateY(-8px); box-shadow: 0 15px 30px rgba(0,0,0,0.1); }
+        .card h3 { margin: 10px 0; font-size: 1.3rem; color: var(--primary); }
+        .card p { font-size: 14px; color: #64748b; margin: 5px 0; }
+        .tag { font-size: 11px; background: #f0fdf4; color: #166534; padding: 4px 12px; border-radius: 50px; font-weight: 700; }
+
+        .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
+        .btn {
+            border: none; padding: 12px; border-radius: 12px; cursor: pointer;
+            font-weight: 600; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 6px;
+        }
+        .btn-full { grid-column: span 2; background: #f1f5f9; color: var(--primary); }
+        .btn-map { background: #dcfce7; color: #15803d; }
+        .btn-audio { background: #fef3c7; color: #92400e; }
+
+        /* --- 6. Modals --- */
+        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.8); z-index: 1001; backdrop-filter: blur(4px); }
+        .modal {
+            display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: white; width: 90%; max-width: 500px; padding: 30px; border-radius: 24px; z-index: 1002;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+        }
+        .modal.active { display: block; animation: modalAnim 0.3s ease; }
+        @keyframes modalAnim { from { opacity: 0; transform: translate(-50%, -45%); } }
+        
+        input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 12px; }
+        .submit-btn { background: var(--accent); color: white; border: none; padding: 14px; width: 100%; border-radius: 12px; cursor: pointer; font-weight: bold; margin-top: 10px; }
+
+        @media (max-width: 600px) { .logo { font-size: 2rem; } .grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+<div id="loader">
+    <div class="loader-logo">Find_Index</div>
+    <div class="spinner"></div>
+    <p style="margin-top: 15px; font-size: 0.9rem; opacity: 0.7;">লোড হচ্ছে, দয়া করে অপেক্ষা করুন...</p>
+</div>
+
+<header>
+    <h1 class="logo">Find_Index</h1>
+    <div class="creator">Created & Developed by <b>MiM</b></div>
+</header>
+
+<div class="status-container">
+    <div class="pill"><span class="dot"></span> লাইব্রেরি খোলা</div>
+    <div class="pill">🪑 সিট খালি: <span id="seats">280</span>/300</div>
+    <div class="pill" style="cursor: pointer; background: var(--accent); color: white; border: none;" onclick="openModal('reqModal')">➕ বই রিকোয়েস্ট</div>
+</div>
+
+<div class="search-section">
+    <input type="text" id="search" class="search-box" placeholder="বইয়ের নাম বা একটি অক্ষর দিয়ে খুঁজুন..." onkeyup="filterBooks()">
+    <button class="quiz-btn" onclick="openModal('quizModal')">💡 আজ কী পড়বেন? কুইজ খেলুন</button>
+</div>
+
+<div class="container">
+    <div class="grid" id="bookGrid">
+        <p style="text-align: center; grid-column: 1/-1;">বইগুলো লোড হচ্ছে...</p>
+    </div>
+</div>
+
+<div class="overlay" id="overlay" onclick="closeAll()"></div>
+
+<div class="modal" id="detModal">
+    <h2 id="detTitle">বইয়ের নাম</h2>
+    <hr>
+    <p id="detText" style="line-height: 1.6; color: #475569;"></p>
+    <div style="background: #f8fafc; padding: 15px; border-radius: 12px; margin-top: 15px;">
+        <p><b>ভয়েস সামারি:</b></p>
+        <audio id="audioElement" controls style="width: 100%;"><source src="" type="audio/mpeg"></audio>
+    </div>
+    <button class="submit-btn" style="background: #64748b;" onclick="closeAll()">বন্ধ করুন</button>
+</div>
+
+<div class="modal" id="reqModal">
+    <h3>নতুন বইয়ের রিকোয়েস্ট</h3>
+    <form onsubmit="event.preventDefault(); alert('ধন্যবাদ! আপনার রিকোয়েস্ট MiM এর কাছে পৌঁছেছে।'); closeAll();">
+        <input type="text" placeholder="আপনার নাম ও আইডি" required>
+        <input type="text" placeholder="বইয়ের নাম" required>
+        <select required>
+            <option value="">ক্যাটাগরি</option>
+            <option value="cse">CSE</option>
+            <option value="bba">BBA</option>
+            <option value="other">অন্যান্য</option>
+        </select>
+        <textarea placeholder="কেন এই বইটি দরকার বা ভুল তথ্য থাকলে লিখুন..." rows="3"></textarea>
+        <button type="submit" class="submit-btn">সাবমিট রিকোয়েস্ট</button>
+    </form>
+</div>
+
+<div class="modal" id="quizModal">
+    <h3>স্মার্ট সিলেকশন</h3>
+    <p>আপনার মুড অনুযায়ী বিভাগ বেছে নিন:</p>
+    <button class="submit-btn" style="background: #3b82f6;" onclick="applyQuiz('CSE')">💻 আমি টেকনিক্যাল কিছু পড়তে চাই</button>
+    <button class="submit-btn" style="background: #f59e0b;" onclick="applyQuiz('BBA')">📊 আমি বিজনেস স্টাডিজে আগ্রহী</button>
+</div>
+
+<div class="modal" id="mapModal">
+    <h3>লাইব্রেরি ম্যাপ</h3>
+    <p>আপনার র‍্যাকের অবস্থান: <b id="rackLoc" style="color: var(--accent);"></b></p>
+    <div style="width: 100%; height: 200px; background: #e2e8f0; display: flex; align-items: center; justify-content: center; border-radius: 15px; border: 2px dashed #cbd5e1;">
+        <p>📍 ম্যাপ ইমেজ (B-402 এরিয়া)</p>
+    </div>
+    <button class="submit-btn" style="background: #64748b;" onclick="closeAll()">বন্ধ করুন</button>
+</div>
+
+<script>
+const sheetURL = "https://script.google.com/macros/s/AKfycbwEdGeq5ArZlG213NPA9uc0JhVBu-0WFVRMTiEUAhJMdVIcNz-Aekc4BT3-LmsZY8kTWw/exec";
+
+async function loadBooks() {
+    try {
+        // এই পদ্ধতিটি রিডাইরেক্ট এবং CORS সমস্যা এড়াতে সাহায্য করবে
+        const response = await fetch(sheetURL, {
+            method: 'GET',
+            mode: 'cors', 
+            credentials: 'omit', // গুগল স্ক্রিপ্টের জন্য জরুরি
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
+
+        if (!response.ok) throw new Error('Network response was not ok');
+
+        // গুগল স্ক্রিপ্ট থেকে আসা টেক্সট ডেটা ধরা
+        const rawText = await response.text();
+        console.log("Data Received:", rawText); // চেক করার জন্য
+
+        const data = JSON.parse(rawText); 
+        const bookGrid = document.getElementById('bookGrid');
+        bookGrid.innerHTML = ''; 
+
+        if (!data || data.length === 0) {
+            bookGrid.innerHTML = '<p>শিটে কোনো বই পাওয়া যায়নি!</p>';
+            return;
+        }
+
+        data.forEach(book => {
+            bookGrid.innerHTML += `
+                <div class="card" data-title="${book.Title}" data-cat="${book.Category}">
+                    <span class="tag">${book.Category}</span>
+                    <h3>${book.Title}</h3>
+                    <p>লেখক: ${book.Author}</p>
+                    <p>📍 র‍্যাক: <b>${book.Rack}</b></p>
+                    <div class="btn-group">
+                        <button class="btn btn-full" onclick="showDetails('${book.Title}', '${book.Summary}', '${book.AudioURL}')">📖 বিস্তারিত ও সামারি</button>
+                        <button class="btn btn-map" onclick="showMap('${book.Rack}')">📍 ম্যাপ</button>
+                        <button class="btn btn-audio" onclick="playAudio('${book.AudioURL}')">🔊 অডিও</button>
+                    </div>
+                </div>`;
+        });
+    } catch (error) {
+        console.error("Error Detail:", error);
+        document.getElementById('bookGrid').innerHTML = `
+            <div style="text-align:center; padding:20px; color:red;">
+                <p>ডেটা কানেকশন এরর!</p>
+                <small>দয়া করে পেজটি একবার রিফ্রেশ (Ctrl+F5) দিন।</small>
+            </div>`;
+    }
+}
+// বাকি ফাংশনগুলো (filterBooks, openModal, closeAll, showDetails, showMap, applyQuiz, playAudio) আগের মতোই থাকবে।
+
+window.addEventListener('load', () => {
+    setTimeout(() => {
+        const loader = document.getElementById('loader');
+        if(loader) {
+            loader.style.opacity = '0';
+            setTimeout(() => {
+                loader.style.display = 'none';
+                loadBooks(); 
+            }, 500);
+        }
+    }, 2500);
+});
+
+// filterBooks এবং অন্যান্য ফাংশন এখানে থাকবে...
+function filterBooks() {
+    let input = document.getElementById('search').value.toLowerCase();
+    let cards = document.getElementsByClassName('card');
+    for (let i = 0; i < cards.length; i++) {
+        let title = cards[i].getAttribute('data-title').toLowerCase();
+        cards[i].style.display = title.includes(input) ? "block" : "none";
+    }
+}
+
+function openModal(id) {
+    document.getElementById('overlay').style.display = 'block';
+    document.getElementById(id).classList.add('active');
+}
+
+function closeAll() {
+    document.getElementById('overlay').style.display = 'none';
+    document.querySelectorAll('.modal').forEach(m => m.classList.remove('active'));
+    document.getElementById('audioElement').pause();
+}
+
+function showDetails(title, text, audio) {
+    document.getElementById('detTitle').innerText = title;
+    document.getElementById('detText').innerText = text;
+    document.getElementById('audioElement').src = audio;
+    openModal('detModal');
+}
+
+function showMap(rack) {
+    document.getElementById('rackLoc').innerText = rack;
+    openModal('mapModal');
+}
+
+function applyQuiz(cat) {
+    document.getElementById('search').value = cat;
+    filterBooks();
+    closeAll();
+}
+
+function playAudio(url) {
+    if(url && url !== "undefined") {
+        let audio = document.getElementById('audioElement');
+        audio.src = url;
+        audio.play();
+    } else {
+        alert("এই বইয়ের কোনো অডিও নেই!");
+    }
+}
+</script>
+
+</body>
+</html>
