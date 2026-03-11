@@ -1,299 +1,668 @@
 <!DOCTYPE html>
 <html lang="bn">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Find_Index | Created by MiM</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&family=Poppins:wght@600&display=swap" rel="stylesheet">
-    
-    <style>
-        :root {
-            --primary: #0f172a;
-            --accent: #10b981;
-            --bg: #f8fafc;
-            --card: #ffffff;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Find_Index | MiM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&family=Space+Grotesk:wght@700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#04080f;--s1:#0a1020;--s2:#0e1628;
+  --g:#00ff9d;--b:#38bdf8;--y:#fbbf24;
+  --t:#e2e8f0;--td:#475569;--br:rgba(255,255,255,0.06);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Hind Siliguri',sans-serif;background:var(--bg);color:var(--t);overflow-x:hidden;cursor:none}
 
-        * { box-sizing: border-box; font-family: 'Hind Siliguri', sans-serif; transition: 0.3s; }
-        body { margin: 0; background: var(--bg); color: #1e293b; overflow-x: hidden; }
+/* CURSOR */
+#cur,#cur2{position:fixed;border-radius:50%;pointer-events:none;z-index:99999;top:0;left:0;will-change:transform}
+#cur{width:8px;height:8px;background:var(--g);transform:translate(-50%,-50%);transition:width.15s,height.15s}
+#cur2{width:28px;height:28px;border:1.5px solid rgba(0,255,157,.35);transform:translate(-50%,-50%);transition:transform.12s ease}
 
-        /* --- 1. Preloader Animation --- */
-        #loader {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--primary); display: flex; flex-direction: column;
-            justify-content: center; align-items: center; z-index: 10000; color: white;
-        }
-        .loader-logo { font-family: 'Poppins', sans-serif; font-size: 3rem; margin-bottom: 10px; animation: scaleUp 1s infinite alternate; }
-        .spinner { width: 40px; height: 40px; border: 4px solid rgba(255,255,255,0.1); border-top: 4px solid var(--accent); border-radius: 50%; animation: spin 1s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        @keyframes scaleUp { from { transform: scale(0.9); } to { transform: scale(1.1); } }
+/* BG */
+.bg{position:fixed;inset:0;pointer-events:none;z-index:0}
+.bg-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(0,255,157,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,255,157,.025) 1px,transparent 1px);background-size:48px 48px}
+.orb{position:absolute;border-radius:50%;filter:blur(90px);animation:flt 10s ease-in-out infinite}
+.o1{width:500px;height:500px;background:rgba(0,255,157,.05);top:-150px;right:-100px}
+.o2{width:350px;height:350px;background:rgba(56,189,248,.06);bottom:50px;left:-80px;animation-delay:-4s}
+.o3{width:200px;height:200px;background:rgba(251,191,36,.04);top:45%;right:25%;animation-delay:-7s}
+@keyframes flt{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-25px) scale(1.03)}}
 
-        /* --- 2. Fixed Header & Nav --- */
-        header {
-            background: var(--primary); color: white; padding: 40px 20px 80px;
-            text-align: center; clip-path: polygon(0 0, 100% 0, 100% 85%, 0 100%);
-        }
-        .logo { font-family: 'Poppins', sans-serif; font-size: 2.5rem; margin: 0; }
-        .creator { font-size: 0.9rem; opacity: 0.8; letter-spacing: 1px; }
-        .creator b { color: var(--accent); }
+/* LOADER */
+#ld{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:10000}
+.ld-ring{width:72px;height:72px;position:relative;margin-bottom:20px}
+.ld-ring svg{animation:spin 1.2s linear infinite}
+.ld-ri{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--g)}
+.ld-title{font-family:'Space Grotesk',sans-serif;font-size:2.4rem;background:linear-gradient(135deg,#00ff9d,#38bdf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-2px}
+.ld-bar{width:200px;height:2px;background:rgba(255,255,255,.06);border-radius:2px;margin-top:16px;overflow:hidden}
+.ld-fill{height:100%;background:linear-gradient(90deg,var(--g),var(--b));animation:ldfill 2s ease forwards}
+@keyframes ldfill{from{width:0}to{width:100%}}
+.ld-txt{font-size:11px;color:var(--td);margin-top:8px;font-family:'JetBrains Mono',monospace;letter-spacing:1px}
 
-        /* --- 3. Fixed Status Bar --- */
-        .status-container {
-            display: flex; justify-content: center; gap: 10px; margin: -40px auto 20px;
-            padding: 0 15px; flex-wrap: wrap; z-index: 100; position: relative;
-        }
-        .pill {
-            background: white; padding: 10px 20px; border-radius: 50px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1); font-weight: bold; font-size: 13px;
-            display: flex; align-items: center; gap: 8px; border: 1px solid #e2e8f0;
-        }
-        .dot { height: 8px; width: 8px; background: var(--accent); border-radius: 50%; animation: blink 1s infinite; }
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+/* HEADER */
+header{position:relative;z-index:10;text-align:center;padding:52px 20px 60px;overflow:hidden}
+.hbadge{display:inline-flex;align-items:center;gap:7px;background:rgba(0,255,157,.07);border:1px solid rgba(0,255,157,.18);padding:5px 16px;border-radius:50px;font-size:11px;color:var(--g);font-family:'JetBrains Mono',monospace;letter-spacing:2px;text-transform:uppercase;margin-bottom:16px;animation:fdn .5s ease both}
+.dot{width:6px;height:6px;background:var(--g);border-radius:50%;animation:blk 1s infinite}
+@keyframes blk{0%,100%{opacity:1}50%{opacity:.2}}
+.logo{font-family:'Space Grotesk',sans-serif;font-size:clamp(2.6rem,6.5vw,5rem);background:linear-gradient(130deg,#00ff9d 0%,#38bdf8 45%,#a78bfa 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-3px;line-height:1;animation:fdn .5s .1s ease both}
+.logo-sub{font-size:.95rem;color:var(--td);margin-top:8px;animation:fdn .5s .2s ease both}
+.logo-sub b{color:var(--g)}
 
-        /* --- 4. Search & Quiz --- */
-        .search-section { max-width: 700px; margin: 20px auto; padding: 0 20px; text-align: center; }
-        .search-box {
-            width: 100%; padding: 16px 25px; border-radius: 50px; border: 2px solid #cbd5e1;
-            font-size: 16px; outline: none; background: white; box-shadow: 0 10px 20px rgba(0,0,0,0.05);
-        }
-        .search-box:focus { border-color: var(--accent); box-shadow: 0 0 15px rgba(16, 185, 129, 0.2); }
-        .quiz-btn {
-            margin-top: 15px; background: white; border: 2px solid var(--primary);
-            padding: 8px 20px; border-radius: 50px; cursor: pointer; font-weight: 700; color: var(--primary);
-        }
-        .quiz-btn:hover { background: var(--primary); color: white; }
+/* STATUS */
+.sbar{position:relative;z-index:10;display:flex;justify-content:center;gap:10px;flex-wrap:wrap;padding:0 16px 28px;animation:fup .5s .3s ease both}
+.pill{display:inline-flex;align-items:center;gap:7px;background:var(--s1);border:1px solid var(--br);padding:9px 18px;border-radius:50px;font-size:12.5px;transition:border-color.25s,box-shadow.25s;cursor:default}
+.pill:hover{border-color:rgba(0,255,157,.25);box-shadow:0 0 16px rgba(0,255,157,.06)}
+.pbtn{background:linear-gradient(135deg,var(--g),var(--b));color:#000;font-weight:700;border:none;cursor:pointer;transition:transform.2s,box-shadow.2s}
+.pbtn:hover{transform:scale(1.05);box-shadow:0 0 22px rgba(0,255,157,.35)}
 
-        /* --- 5. Book Grid --- */
-        .container { max-width: 1200px; margin: auto; padding: 20px; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
-        
-        .card {
-            background: white; border-radius: 20px; padding: 25px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05); border: 1px solid #f1f5f9;
-        }
-        .card:hover { transform: translateY(-8px); box-shadow: 0 15px 30px rgba(0,0,0,0.1); }
-        .card h3 { margin: 10px 0; font-size: 1.3rem; color: var(--primary); }
-        .card p { font-size: 14px; color: #64748b; margin: 5px 0; }
-        .tag { font-size: 11px; background: #f0fdf4; color: #166534; padding: 4px 12px; border-radius: 50px; font-weight: 700; }
+/* SEARCH */
+.sw{max-width:660px;margin:0 auto 32px;padding:0 18px;position:relative;z-index:10;animation:fup .5s .4s ease both}
+.sb{width:100%;padding:16px 52px 16px 22px;background:var(--s1);border:1px solid var(--br);border-radius:14px;color:var(--t);font-size:14.5px;font-family:'Hind Siliguri',sans-serif;outline:none;transition:border-color.25s,box-shadow.25s}
+.sb::placeholder{color:var(--td)}
+.sb:focus{border-color:var(--g);box-shadow:0 0 0 3px rgba(0,255,157,.09),0 0 24px rgba(0,255,157,.06)}
+.si{position:absolute;right:34px;top:50%;transform:translateY(-50%);color:var(--td);font-size:17px;pointer-events:none}
+.qbtn{display:block;margin:12px auto 0;background:transparent;border:1px solid var(--br);color:var(--td);padding:9px 22px;border-radius:50px;font-family:'Hind Siliguri',sans-serif;font-size:12.5px;cursor:pointer;transition:all.25s}
+.qbtn:hover{border-color:var(--y);color:var(--y);box-shadow:0 0 16px rgba(251,191,36,.1)}
 
-        .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
-        .btn {
-            border: none; padding: 12px; border-radius: 12px; cursor: pointer;
-            font-weight: 600; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 6px;
-        }
-        .btn-full { grid-column: span 2; background: #f1f5f9; color: var(--primary); }
-        .btn-map { background: #dcfce7; color: #15803d; }
-        .btn-audio { background: #fef3c7; color: #92400e; }
+/* GRID */
+.con{max-width:1240px;margin:auto;padding:0 18px 60px;position:relative;z-index:10}
+.sec-title{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--td);letter-spacing:2px;text-transform:uppercase;margin-bottom:20px;display:flex;align-items:center;gap:10px}
+.sec-title::after{content:'';flex:1;height:1px;background:var(--br)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px;contain:layout}
 
-        /* --- 6. Modals --- */
-        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.8); z-index: 1001; backdrop-filter: blur(4px); }
-        .modal {
-            display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: white; width: 90%; max-width: 500px; padding: 30px; border-radius: 24px; z-index: 1002;
-            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
-        }
-        .modal.active { display: block; animation: modalAnim 0.3s ease; }
-        @keyframes modalAnim { from { opacity: 0; transform: translate(-50%, -45%); } }
-        
-        input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 12px; }
-        .submit-btn { background: var(--accent); color: white; border: none; padding: 14px; width: 100%; border-radius: 12px; cursor: pointer; font-weight: bold; margin-top: 10px; }
+/* CARD — GPU accelerated */
+.card{background:var(--s1);border:1px solid var(--br);border-radius:18px;padding:22px;position:relative;overflow:hidden;will-change:transform;transform:translateZ(0);transition:transform.3s cubic-bezier(.34,1.56,.64,1),border-color.3s,box-shadow.3s;animation:fup .4s ease both}
+.card::after{content:'';position:absolute;inset:0;border-radius:18px;background:radial-gradient(circle at var(--mx,50%) var(--my,50%),rgba(0,255,157,.06),transparent 60%);opacity:0;transition:opacity.3s;pointer-events:none}
+.card:hover{transform:translateY(-8px) translateZ(0);border-color:rgba(0,255,157,.2);box-shadow:0 16px 48px rgba(0,0,0,.45),0 0 24px rgba(0,255,157,.05)}
+.card:hover::after{opacity:1}
 
-        @media (max-width: 600px) { .logo { font-size: 2rem; } .grid { grid-template-columns: 1fr; } }
-    </style>
+.tag{display:inline-flex;align-items:center;gap:4px;font-size:9.5px;font-family:'JetBrains Mono',monospace;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:4px 10px;border-radius:5px;margin-bottom:12px}
+.tc{background:rgba(0,255,157,.09);color:var(--g);border:1px solid rgba(0,255,157,.18)}
+.tb{background:rgba(56,189,248,.09);color:var(--b);border:1px solid rgba(56,189,248,.18)}
+.to{background:rgba(251,191,36,.09);color:var(--y);border:1px solid rgba(251,191,36,.18)}
+
+.card h3{font-family:'Space Grotesk',sans-serif;font-size:1.08rem;color:#f1f5f9;margin-bottom:7px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.cm{font-size:12.5px;color:var(--td);margin-bottom:4px;display:flex;align-items:center;gap:5px}
+.cm span{color:var(--t)}
+.div{height:1px;background:var(--br);margin:14px 0}
+
+.bg2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.btn{display:flex;align-items:center;justify-content:center;gap:6px;padding:11px 8px;border-radius:10px;border:1px solid var(--br);background:transparent;color:var(--td);font-size:11.5px;font-family:'Hind Siliguri',sans-serif;font-weight:600;cursor:pointer;transition:background.2s,border-color.2s,color.2s,transform.15s;white-space:nowrap}
+.btn:active{transform:scale(.96)}
+.btn:hover{background:rgba(255,255,255,.04);color:var(--t)}
+.bdf{grid-column:span 2;border-color:rgba(0,255,157,.18);color:var(--g)}
+.bdf:hover{background:rgba(0,255,157,.08)!important;box-shadow:0 0 16px rgba(0,255,157,.08)}
+.bm:hover{background:rgba(56,189,248,.07)!important;border-color:rgba(56,189,248,.2)!important;color:var(--b)!important}
+.ba:hover{background:rgba(251,191,36,.07)!important;border-color:rgba(251,191,36,.2)!important;color:var(--y)!important}
+
+/* OVERLAY & MODAL */
+.ov{display:none;position:fixed;inset:0;background:rgba(4,8,15,.88);z-index:1000;backdrop-filter:blur(10px)}
+.ov.on{display:block;animation:fdin .2s ease}
+@keyframes fdin{from{opacity:0}to{opacity:1}}
+
+.modal{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--s2);border:1px solid var(--br);width:92%;max-width:540px;border-radius:22px;z-index:1001;box-shadow:0 28px 70px rgba(0,0,0,.6),0 0 36px rgba(0,255,157,.04);overflow:hidden;max-height:90vh;display:none;flex-direction:column}
+.modal.on{display:flex;animation:mdin .3s cubic-bezier(.34,1.56,.64,1)}
+@keyframes mdin{from{opacity:0;transform:translate(-50%,-45%)}to{opacity:1;transform:translate(-50%,-50%)}}
+
+.mh{padding:20px 24px 16px;border-bottom:1px solid var(--br);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.mt{font-family:'Space Grotesk',sans-serif;font-size:1.05rem;color:var(--g)}
+.mc{width:30px;height:30px;border-radius:7px;border:1px solid var(--br);background:transparent;color:var(--td);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all.2s}
+.mc:hover{background:rgba(255,255,255,.05);color:var(--t)}
+.mb{padding:22px 24px 26px;overflow-y:auto;flex:1}
+.mb::-webkit-scrollbar{width:3px}
+.mb::-webkit-scrollbar-thumb{background:var(--br);border-radius:2px}
+
+/* DETAIL */
+.dbt{font-family:'Space Grotesk',sans-serif;font-size:1.4rem;color:#f8fafc;margin-bottom:14px;line-height:1.3}
+.dir{display:flex;align-items:flex-start;gap:8px;margin-bottom:8px;font-size:13px}
+.dil{color:var(--td);width:75px;flex-shrink:0;font-family:'JetBrains Mono',monospace;font-size:11px;padding-top:1px}
+.div2{height:1px;background:var(--br);margin:16px 0}
+.dsl{font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--td);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px}
+.dst{font-size:13.5px;color:var(--t);line-height:1.85}
+
+/* AUDIO PLAYER */
+.ap{background:var(--s1);border:1px solid var(--br);border-radius:13px;padding:14px;display:flex;align-items:center;gap:12px;margin-top:14px}
+.apb{width:40px;height:40px;border-radius:10px;border:none;background:linear-gradient(135deg,var(--y),#f97316);cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform.2s,box-shadow.2s}
+.apb:hover{transform:scale(1.1);box-shadow:0 0 18px rgba(251,191,36,.35)}
+.api{flex:1;min-width:0}
+.apt{font-size:12.5px;font-weight:600;color:var(--t);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.aps{font-size:11px;color:var(--td);margin-top:2px}
+.apbar{width:100%;height:3px;background:rgba(255,255,255,.07);border-radius:2px;margin-top:7px;overflow:hidden;cursor:pointer}
+.apfill{height:100%;background:linear-gradient(90deg,var(--y),#f97316);border-radius:2px;width:0%;transition:width.4s}
+audio{display:none}
+
+/* YT */
+.ytw{margin-top:16px;border-radius:12px;overflow:hidden;border:1px solid var(--br);aspect-ratio:16/9;background:#000}
+.ytw iframe{width:100%;height:100%;border:none}
+
+/* MAP */
+.rack-b{display:inline-block;background:rgba(0,255,157,.09);border:1px solid rgba(0,255,157,.25);color:var(--g);font-size:1.2rem;font-weight:700;padding:7px 18px;border-radius:9px;font-family:'Space Grotesk',sans-serif;margin-bottom:16px}
+.mc2{width:100%;border-radius:14px;overflow:hidden;border:1px solid var(--br)}
+.mc2 svg{width:100%;display:block}
+
+/* FORM */
+.fg{margin-bottom:12px}
+.fl{font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--td);letter-spacing:1px;text-transform:uppercase;margin-bottom:5px;display:block}
+.fi,.fsel,.fta{width:100%;padding:12px 14px;background:var(--s1);border:1px solid var(--br);border-radius:10px;color:var(--t);font-family:'Hind Siliguri',sans-serif;font-size:13.5px;outline:none;transition:border-color.2s,box-shadow.2s}
+.fi:focus,.fsel:focus,.fta:focus{border-color:var(--g);box-shadow:0 0 0 2px rgba(0,255,157,.08)}
+.fsel option{background:var(--s2)}
+.fta{resize:vertical;min-height:80px}
+.sbtn{width:100%;padding:14px;background:linear-gradient(135deg,var(--g),var(--b));border:none;border-radius:10px;color:#000;font-weight:700;font-size:14.5px;font-family:'Hind Siliguri',sans-serif;cursor:pointer;margin-top:6px;transition:transform.2s,box-shadow.2s}
+.sbtn:hover{transform:scale(1.02);box-shadow:0 0 26px rgba(0,255,157,.28)}
+
+/* QUIZ */
+.qopt{width:100%;padding:14px 18px;margin-bottom:10px;border-radius:12px;border:1px solid var(--br);background:var(--s1);color:var(--t);font-size:14px;font-family:'Hind Siliguri',sans-serif;cursor:pointer;text-align:left;display:flex;align-items:center;gap:10px;transition:all.22s}
+.qopt:hover{border-color:var(--g);background:rgba(0,255,157,.04);transform:translateX(5px)}
+.qi{font-size:20px}
+
+/* EMPTY */
+.emp{grid-column:1/-1;text-align:center;padding:50px 20px;color:var(--td)}
+.sp{width:32px;height:32px;border:2.5px solid rgba(255,255,255,.05);border-top-color:var(--g);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 14px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* TOAST */
+#toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:var(--s2);border:1px solid var(--br);color:var(--t);padding:12px 22px;border-radius:50px;z-index:99999;font-size:13px;font-family:'Hind Siliguri',sans-serif;box-shadow:0 10px 36px rgba(0,0,0,.4);opacity:0;transition:opacity.3s;pointer-events:none;white-space:nowrap}
+
+/* ANIMATIONS */
+@keyframes fdn{from{opacity:0;transform:translateY(-16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fup{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+
+/* STAGGER CARDS */
+.card:nth-child(1){animation-delay:.04s}
+.card:nth-child(2){animation-delay:.08s}
+.card:nth-child(3){animation-delay:.12s}
+.card:nth-child(4){animation-delay:.16s}
+.card:nth-child(5){animation-delay:.20s}
+.card:nth-child(6){animation-delay:.24s}
+.card:nth-child(7){animation-delay:.28s}
+.card:nth-child(8){animation-delay:.32s}
+.card:nth-child(9){animation-delay:.36s}
+
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--s2);border-radius:3px}
+
+@media(max-width:580px){
+  .logo{letter-spacing:-1px}
+  .grid{grid-template-columns:1fr}
+  .bg2{grid-template-columns:1fr}
+  .bdf{grid-column:span 1}
+  .modal{width:96%}
+}
+</style>
 </head>
 <body>
+<div id="cur"></div>
+<div id="cur2"></div>
 
-<div id="loader">
-    <div class="loader-logo">Find_Index</div>
-    <div class="spinner"></div>
-    <p style="margin-top: 15px; font-size: 0.9rem; opacity: 0.7;">লোড হচ্ছে, দয়া করে অপেক্ষা করুন...</p>
+<div class="bg">
+  <div class="bg-grid"></div>
+  <div class="orb o1"></div>
+  <div class="orb o2"></div>
+  <div class="orb o3"></div>
 </div>
 
+<!-- LOADER -->
+<div id="ld">
+  <div class="ld-ring">
+    <svg viewBox="0 0 72 72" width="72" height="72">
+      <circle cx="36" cy="36" r="30" fill="none" stroke="rgba(0,255,157,.1)" stroke-width="5"/>
+      <circle cx="36" cy="36" r="30" fill="none" stroke="url(#lg)" stroke-width="5" stroke-dasharray="44 145" stroke-linecap="round"/>
+      <defs><linearGradient id="lg" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#00ff9d"/><stop offset="100%" stop-color="#38bdf8"/></linearGradient></defs>
+    </svg>
+    <div class="ld-ri">FI</div>
+  </div>
+  <div class="ld-title">Find_Index</div>
+  <div class="ld-bar"><div class="ld-fill"></div></div>
+  <div class="ld-txt">INITIALIZING...</div>
+</div>
+
+<!-- HEADER -->
 <header>
-    <h1 class="logo">Find_Index</h1>
-    <div class="creator">Created & Developed by <b>MiM</b></div>
+  <div class="hbadge"><span class="dot"></span>LIBRARY SYSTEM v2.1</div>
+  <h1 class="logo">Find_Index</h1>
+  <p class="logo-sub">Designed by <b>MiM</b> — University Library Management</p>
 </header>
 
-<div class="status-container">
-    <div class="pill"><span class="dot"></span> লাইব্রেরি খোলা</div>
-    <div class="pill">🪑 সিট খালি: <span id="seats">280</span>/300</div>
-    <div class="pill" style="cursor: pointer; background: var(--accent); color: white; border: none;" onclick="openModal('reqModal')">➕ বই রিকোয়েস্ট</div>
+<!-- STATUS BAR -->
+<div class="sbar">
+  <div class="pill"><span class="dot"></span>লাইব্রেরি খোলা</div>
+  <div class="pill">🪑 <span id="seats">280</span>/300 সিট</div>
+  <div class="pill">📚 <span id="totalB">—</span> টি বই</div>
+  <div class="pill pbtn" onclick="openM('reqM')">➕ বই রিকোয়েস্ট</div>
 </div>
 
-<div class="search-section">
-    <input type="text" id="search" class="search-box" placeholder="বইয়ের নাম বা একটি অক্ষর দিয়ে খুঁজুন..." onkeyup="filterBooks()">
-    <button class="quiz-btn" onclick="openModal('quizModal')">💡 আজ কী পড়বেন? কুইজ খেলুন</button>
+<!-- SEARCH -->
+<div class="sw">
+  <input type="text" id="search" class="sb" placeholder="🔍  বই, লেখক বা ক্যাটাগরি খুঁজুন..." oninput="filter()">
+  <span class="si">⌘</span>
+  <button class="qbtn" onclick="openM('quizM')">💡 স্মার্ট বুক সিলেকশন</button>
 </div>
 
-<div class="container">
-    <div class="grid" id="bookGrid">
-        <p style="text-align: center; grid-column: 1/-1;">বইগুলো লোড হচ্ছে...</p>
+<!-- GRID -->
+<div class="con">
+  <div class="sec-title">বইয়ের তালিকা</div>
+  <div class="grid" id="grid">
+    <div class="emp"><div class="sp"></div><p>ডেটা লোড হচ্ছে...</p></div>
+  </div>
+</div>
+
+<!-- OVERLAY -->
+<div class="ov" id="ov" onclick="closeAll()"></div>
+
+<!-- DETAIL MODAL -->
+<div class="modal" id="detM">
+  <div class="mh"><span class="mt">📖 বিস্তারিত তথ্য</span><button class="mc" onclick="closeAll()">✕</button></div>
+  <div class="mb">
+    <div class="dbt" id="dT"></div>
+    <div class="dir"><span class="dil">লেখক</span><span id="dA"></span></div>
+    <div class="dir"><span class="dil">এডিশন</span><span id="dE"></span></div>
+    <div class="dir"><span class="dil">ক্যাটাগরি</span><span id="dC"></span></div>
+    <div class="dir"><span class="dil">র‍্যাক</span><span id="dR"></span></div>
+    <div class="div2"></div>
+    <div class="dsl">📋 সামারি</div>
+    <div class="dst" id="dS"></div>
+    <!-- Audio -->
+    <div id="auSec" style="margin-top:16px;display:none">
+      <div class="dsl" style="margin-bottom:8px">🎧 ভয়েস সামারি</div>
+      <div class="ap">
+        <button class="apb" id="apb" onclick="toggleAu()">▶</button>
+        <div class="api">
+          <div class="apt" id="apTitle"></div>
+          <div class="aps">ভয়েস সামারি</div>
+          <div class="apbar" onclick="seekAu(event)"><div class="apfill" id="apf"></div></div>
+        </div>
+      </div>
+      <audio id="au" ontimeupdate="auTick()" onended="auEnd()"></audio>
     </div>
-</div>
-
-<div class="overlay" id="overlay" onclick="closeAll()"></div>
-
-<div class="modal" id="detModal">
-    <h2 id="detTitle">বইয়ের নাম</h2>
-    <hr>
-    <p id="detText" style="line-height: 1.6; color: #475569;"></p>
-    <div style="background: #f8fafc; padding: 15px; border-radius: 12px; margin-top: 15px;">
-        <p><b>ভয়েস সামারি:</b></p>
-        <audio id="audioElement" controls style="width: 100%;"><source src="" type="audio/mpeg"></audio>
+    <!-- YouTube -->
+    <div id="ytSec" style="display:none">
+      <div class="div2"></div>
+      <div class="dsl">🎬 সংশ্লিষ্ট ভিডিও</div>
+      <div class="ytw"><iframe id="ytF" allowfullscreen allow="autoplay;encrypted-media"></iframe></div>
     </div>
-    <button class="submit-btn" style="background: #64748b;" onclick="closeAll()">বন্ধ করুন</button>
+  </div>
 </div>
 
-<div class="modal" id="reqModal">
-    <h3>নতুন বইয়ের রিকোয়েস্ট</h3>
-    <form onsubmit="event.preventDefault(); alert('ধন্যবাদ! আপনার রিকোয়েস্ট MiM এর কাছে পৌঁছেছে।'); closeAll();">
-        <input type="text" placeholder="আপনার নাম ও আইডি" required>
-        <input type="text" placeholder="বইয়ের নাম" required>
-        <select required>
-            <option value="">ক্যাটাগরি</option>
-            <option value="cse">CSE</option>
-            <option value="bba">BBA</option>
-            <option value="other">অন্যান্য</option>
-        </select>
-        <textarea placeholder="কেন এই বইটি দরকার বা ভুল তথ্য থাকলে লিখুন..." rows="3"></textarea>
-        <button type="submit" class="submit-btn">সাবমিট রিকোয়েস্ট</button>
-    </form>
-</div>
-
-<div class="modal" id="quizModal">
-    <h3>স্মার্ট সিলেকশন</h3>
-    <p>আপনার মুড অনুযায়ী বিভাগ বেছে নিন:</p>
-    <button class="submit-btn" style="background: #3b82f6;" onclick="applyQuiz('CSE')">💻 আমি টেকনিক্যাল কিছু পড়তে চাই</button>
-    <button class="submit-btn" style="background: #f59e0b;" onclick="applyQuiz('BBA')">📊 আমি বিজনেস স্টাডিজে আগ্রহী</button>
-</div>
-
-<div class="modal" id="mapModal">
-    <h3>লাইব্রেরি ম্যাপ</h3>
-    <p>আপনার র‍্যাকের অবস্থান: <b id="rackLoc" style="color: var(--accent);"></b></p>
-    <div style="width: 100%; height: 200px; background: #e2e8f0; display: flex; align-items: center; justify-content: center; border-radius: 15px; border: 2px dashed #cbd5e1;">
-        <p>📍 ম্যাপ ইমেজ (B-402 এরিয়া)</p>
+<!-- MAP MODAL -->
+<div class="modal" id="mapM">
+  <div class="mh"><span class="mt">📍 লাইব্রেরি ম্যাপ</span><button class="mc" onclick="closeAll()">✕</button></div>
+  <div class="mb">
+    <div style="font-size:12px;color:var(--td);font-family:'JetBrains Mono',monospace;margin-bottom:6px">আপনার র‍্যাক</div>
+    <div class="rack-b" id="rackLbl">—</div>
+    <div class="mc2">
+      <svg id="mapSVG" viewBox="0 0 460 290" xmlns="http://www.w3.org/2000/svg">
+        <rect width="460" height="290" fill="#0a1020" rx="12"/>
+        <!-- WALL -->
+        <rect x="10" y="10" width="440" height="265" fill="none" stroke="#1e293b" stroke-width="1.5" rx="10"/>
+        <!-- ENTRY -->
+        <rect x="185" y="265" width="90" height="14" rx="3" fill="#1e293b"/>
+        <text x="230" y="276" font-size="8" fill="#475569" text-anchor="middle" font-family="monospace">ENTRANCE</text>
+        <!-- ROW 1 RACKS -->
+        <g id="racks">
+          <g data-rack="RACK-A"><rect x="28" y="28" width="58" height="26" rx="5" fill="#0e2040" stroke="#38bdf8" stroke-width="1"/><text x="57" y="45" font-size="10" fill="#38bdf8" text-anchor="middle" font-weight="bold" font-family="monospace">A</text></g>
+          <g data-rack="RACK-B"><rect x="108" y="28" width="58" height="26" rx="5" fill="#0e2040" stroke="#38bdf8" stroke-width="1"/><text x="137" y="45" font-size="10" fill="#38bdf8" text-anchor="middle" font-weight="bold" font-family="monospace">B</text></g>
+          <g data-rack="RACK-C"><rect x="188" y="28" width="58" height="26" rx="5" fill="#0e2040" stroke="#38bdf8" stroke-width="1"/><text x="217" y="45" font-size="10" fill="#38bdf8" text-anchor="middle" font-weight="bold" font-family="monospace">C</text></g>
+          <g data-rack="RACK-D"><rect x="268" y="28" width="58" height="26" rx="5" fill="#0e2040" stroke="#38bdf8" stroke-width="1"/><text x="297" y="45" font-size="10" fill="#38bdf8" text-anchor="middle" font-weight="bold" font-family="monospace">D</text></g>
+          <g data-rack="RACK-E"><rect x="348" y="28" width="90" height="26" rx="5" fill="#0e2040" stroke="#38bdf8" stroke-width="1"/><text x="393" y="45" font-size="10" fill="#38bdf8" text-anchor="middle" font-weight="bold" font-family="monospace">E</text></g>
+          <!-- ROW 2 -->
+          <g data-rack="RACK-F"><rect x="28" y="94" width="58" height="26" rx="5" fill="#0e2040" stroke="#38bdf8" stroke-width="1"/><text x="57" y="111" font-size="10" fill="#38bdf8" text-anchor="middle" font-weight="bold" font-family="monospace">F</text></g>
+          <g data-rack="RACK-G"><rect x="108" y="94" width="58" height="26" rx="5" fill="#0e2040" stroke="#38bdf8" stroke-width="1"/><text x="137" y="111" font-size="10" fill="#38bdf8" text-anchor="middle" font-weight="bold" font-family="monospace">G</text></g>
+          <g data-rack="RACK-H"><rect x="188" y="94" width="58" height="26" rx="5" fill="#0e2040" stroke="#38bdf8" stroke-width="1"/><text x="217" y="111" font-size="10" fill="#38bdf8" text-anchor="middle" font-weight="bold" font-family="monospace">H</text></g>
+          <g data-rack="RACK-I"><rect x="268" y="94" width="58" height="26" rx="5" fill="#0e2040" stroke="#38bdf8" stroke-width="1"/><text x="297" y="111" font-size="10" fill="#38bdf8" text-anchor="middle" font-weight="bold" font-family="monospace">I</text></g>
+          <g data-rack="RACK-J"><rect x="348" y="94" width="90" height="26" rx="5" fill="#0e2040" stroke="#38bdf8" stroke-width="1"/><text x="393" y="111" font-size="10" fill="#38bdf8" text-anchor="middle" font-weight="bold" font-family="monospace">J</text></g>
+          <!-- ROW 3 -->
+          <g data-rack="RACK-K"><rect x="28" y="160" width="58" height="26" rx="5" fill="#0e2040" stroke="#38bdf8" stroke-width="1"/><text x="57" y="177" font-size="10" fill="#38bdf8" text-anchor="middle" font-weight="bold" font-family="monospace">K</text></g>
+          <g data-rack="RACK-L"><rect x="108" y="160" width="58" height="26" rx="5" fill="#0e2040" stroke="#38bdf8" stroke-width="1"/><text x="137" y="177" font-size="10" fill="#38bdf8" text-anchor="middle" font-weight="bold" font-family="monospace">L</text></g>
+          <g data-rack="RACK-M"><rect x="188" y="160" width="58" height="26" rx="5" fill="#0e2040" stroke="#38bdf8" stroke-width="1"/><text x="217" y="177" font-size="10" fill="#38bdf8" text-anchor="middle" font-weight="bold" font-family="monospace">M</text></g>
+          <g data-rack="RACK-N"><rect x="268" y="160" width="58" height="26" rx="5" fill="#0e2040" stroke="#38bdf8" stroke-width="1"/><text x="297" y="177" font-size="10" fill="#38bdf8" text-anchor="middle" font-weight="bold" font-family="monospace">N</text></g>
+        </g>
+        <!-- READING AREA -->
+        <rect x="348" y="150" width="100" height="90" rx="7" fill="#080f1e" stroke="#1e293b" stroke-width="1"/>
+        <text x="398" y="185" font-size="8" fill="#334155" text-anchor="middle" font-family="monospace">READING</text>
+        <text x="398" y="197" font-size="8" fill="#334155" text-anchor="middle" font-family="monospace">AREA</text>
+        <circle cx="368" cy="215" r="4" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+        <circle cx="388" cy="215" r="4" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+        <circle cx="408" cy="215" r="4" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+        <circle cx="428" cy="215" r="4" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+        <!-- ARROW LAYER -->
+        <g id="arrowLayer"></g>
+        <!-- YOU MARKER -->
+        <g id="youM" style="display:none">
+          <circle id="youC" r="9" fill="rgba(0,255,157,.18)" stroke="#00ff9d" stroke-width="1.5"/>
+          <text id="youTx" font-size="7" fill="#00ff9d" text-anchor="middle" dy="2.5" font-family="monospace" font-weight="bold">YOU</text>
+        </g>
+      </svg>
     </div>
-    <button class="submit-btn" style="background: #64748b;" onclick="closeAll()">বন্ধ করুন</button>
+    <p style="font-size:11px;color:var(--td);margin-top:10px">🟢 আপনার অবস্থান &nbsp;|&nbsp; 🔵 র‍্যাক &nbsp;|&nbsp; ➡️ পথ</p>
+  </div>
 </div>
+
+<!-- REQUEST MODAL -->
+<div class="modal" id="reqM">
+  <div class="mh"><span class="mt">➕ বই রিকোয়েস্ট</span><button class="mc" onclick="closeAll()">✕</button></div>
+  <div class="mb">
+    <div class="fg"><label class="fl">নাম ও স্টুডেন্ট আইডি</label><input class="fi" id="rName" placeholder="আপনার নাম এবং আইডি"></div>
+    <div class="fg"><label class="fl">বইয়ের নাম</label><input class="fi" id="rBook" placeholder="বইয়ের নাম লিখুন"></div>
+    <div class="fg"><label class="fl">ক্যাটাগরি</label>
+      <select class="fsel" id="rCat"><option value="">বেছে নিন</option><option value="CSE">💻 CSE</option><option value="BBA">📊 BBA</option><option value="Other">📚 অন্যান্য</option></select>
+    </div>
+    <div class="fg"><label class="fl">বিস্তারিত</label><textarea class="fta" id="rNote" placeholder="কেন দরকার বা ভুল তথ্য থাকলে জানান..."></textarea></div>
+    <button class="sbtn" onclick="submitReq()">📬 রিকোয়েস্ট পাঠান</button>
+  </div>
+</div>
+
+<!-- QUIZ MODAL -->
+<div class="modal" id="quizM">
+  <div class="mh"><span class="mt">💡 স্মার্ট সিলেকশন</span><button class="mc" onclick="closeAll()">✕</button></div>
+  <div class="mb">
+    <p style="color:var(--td);font-size:13.5px;margin-bottom:18px">আজ কেমন মুড? বই সাজেস্ট করবো 👇</p>
+    <button class="qopt" onclick="applyQ('CSE')"><span class="qi">💻</span><div><b>টেকনিক্যাল পড়তে চাই</b><br><small style="color:var(--td)">CSE, Programming, Tech</small></div></button>
+    <button class="qopt" onclick="applyQ('BBA')"><span class="qi">📊</span><div><b>বিজনেস স্টাডিজ</b><br><small style="color:var(--td)">BBA, Management, Finance</small></div></button>
+    <button class="qopt" onclick="applyQ('')"><span class="qi">📚</span><div><b>সব বই দেখতে চাই</b><br><small style="color:var(--td)">পুরো সংগ্রহ</small></div></button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
 
 <script>
-const sheetURL = "https://script.google.com/macros/s/AKfycbwEdGeq5ArZlG213NPA9uc0JhVBu-0WFVRMTiEUAhJMdVIcNz-Aekc4BT3-LmsZY8kTWw/exec";
+/* ── CURSOR ── */
+const cur=document.getElementById('cur'),cur2=document.getElementById('cur2');
+let mx=0,my=0,tx=0,ty=0;
+document.addEventListener('mousemove',e=>{
+  mx=e.clientX;my=e.clientY;
+  cur.style.left=mx+'px';cur.style.top=my+'px';
+});
+let raf;function moveCur2(){
+  tx+=(mx-tx)*.16;ty+=(my-ty)*.16;
+  cur2.style.left=tx+'px';cur2.style.top=ty+'px';
+  raf=requestAnimationFrame(moveCur2);
+}moveCur2();
 
-async function loadBooks() {
-    try {
-        // এই পদ্ধতিটি রিডাইরেক্ট এবং CORS সমস্যা এড়াতে সাহায্য করবে
-        const response = await fetch(sheetURL, {
-            method: 'GET',
-            mode: 'cors', 
-            credentials: 'omit', // গুগল স্ক্রিপ্টের জন্য জরুরি
-            headers: {
-                'Accept': 'application/json'
-            }
-        });
-
-        if (!response.ok) throw new Error('Network response was not ok');
-
-        // গুগল স্ক্রিপ্ট থেকে আসা টেক্সট ডেটা ধরা
-        const rawText = await response.text();
-        console.log("Data Received:", rawText); // চেক করার জন্য
-
-        const data = JSON.parse(rawText); 
-        const bookGrid = document.getElementById('bookGrid');
-        bookGrid.innerHTML = ''; 
-
-        if (!data || data.length === 0) {
-            bookGrid.innerHTML = '<p>শিটে কোনো বই পাওয়া যায়নি!</p>';
-            return;
-        }
-
-        data.forEach(book => {
-            bookGrid.innerHTML += `
-                <div class="card" data-title="${book.Title}" data-cat="${book.Category}">
-                    <span class="tag">${book.Category}</span>
-                    <h3>${book.Title}</h3>
-                    <p>লেখক: ${book.Author}</p>
-                    <p>📍 র‍্যাক: <b>${book.Rack}</b></p>
-                    <div class="btn-group">
-                        <button class="btn btn-full" onclick="showDetails('${book.Title}', '${book.Summary}', '${book.AudioURL}')">📖 বিস্তারিত ও সামারি</button>
-                        <button class="btn btn-map" onclick="showMap('${book.Rack}')">📍 ম্যাপ</button>
-                        <button class="btn btn-audio" onclick="playAudio('${book.AudioURL}')">🔊 অডিও</button>
-                    </div>
-                </div>`;
-        });
-    } catch (error) {
-        console.error("Error Detail:", error);
-        document.getElementById('bookGrid').innerHTML = `
-            <div style="text-align:center; padding:20px; color:red;">
-                <p>ডেটা কানেকশন এরর!</p>
-                <small>দয়া করে পেজটি একবার রিফ্রেশ (Ctrl+F5) দিন।</small>
-            </div>`;
-    }
-}
-// বাকি ফাংশনগুলো (filterBooks, openModal, closeAll, showDetails, showMap, applyQuiz, playAudio) আগের মতোই থাকবে।
-
-window.addEventListener('load', () => {
-    setTimeout(() => {
-        const loader = document.getElementById('loader');
-        if(loader) {
-            loader.style.opacity = '0';
-            setTimeout(() => {
-                loader.style.display = 'none';
-                loadBooks(); 
-            }, 500);
-        }
-    }, 2500);
+/* ── CARD MOUSE GLOW ── */
+document.addEventListener('mousemove',e=>{
+  const card=e.target.closest('.card');
+  if(!card)return;
+  const r=card.getBoundingClientRect();
+  card.style.setProperty('--mx',((e.clientX-r.left)/r.width*100)+'%');
+  card.style.setProperty('--my',((e.clientY-r.top)/r.height*100)+'%');
 });
 
-// filterBooks এবং অন্যান্য ফাংশন এখানে থাকবে...
-function filterBooks() {
-    let input = document.getElementById('search').value.toLowerCase();
-    let cards = document.getElementsByClassName('card');
-    for (let i = 0; i < cards.length; i++) {
-        let title = cards[i].getAttribute('data-title').toLowerCase();
-        cards[i].style.display = title.includes(input) ? "block" : "none";
-    }
+/* ══════════════════════════════
+   GOOGLE SHEET CONFIG
+   ══════════════════════════════
+   👉 নিচের sheetURL এ তোমার
+      Google Apps Script URL দাও।
+   ══════════════════════════════ */
+const sheetURL = "https://script.google.com/macros/s/AKfycbwEdGeq5ArZlG213NPA9uc0JhVBu-0WFVRMTiEUAhJMdVIcNz-Aekc4BT3-LmsZY8kTWw/exec";
+/* ─── শিট কলাম অর্ডার (Apps Script থেকে JSON আসার format):
+   { Title, Author, Edition, Category, Rack, Summary, AudioURL, YouTubeURL }
+─────────────────────────────────── */
+
+/* FALLBACK SAMPLE */
+const sample=[
+  {Title:"Introduction to Algorithms",Author:"Cormen, Leiserson, Rivest",Edition:"3rd",Category:"CSE",Rack:"RACK-A",Summary:"অ্যালগরিদম ডিজাইন ও অ্যানালাইসিসের সেরা রেফারেন্স বই। ডেটা স্ট্রাকচার, গ্রাফ থিওরি ও ডাইনামিক প্রোগ্রামিং নিয়ে বিস্তারিত আলোচনা।",AudioURL:"",YouTubeURL:"https://www.youtube.com/embed/HtSuA80QTyo"},
+  {Title:"Clean Code",Author:"Robert C. Martin",Edition:"1st",Category:"CSE",Rack:"RACK-B",Summary:"পেশাদার কোড লেখার সোনালি নিয়ম। রিফ্যাক্টরিং, নামকরণ ও টেস্টিং নিয়ে বাস্তবমুখী গাইড।",AudioURL:"",YouTubeURL:"https://www.youtube.com/embed/7EmboKQH8lM"},
+  {Title:"Principles of Marketing",Author:"Philip Kotler",Edition:"16th",Category:"BBA",Rack:"RACK-F",Summary:"মার্কেটিং-এর মূলনীতি, ডিজিটাল ট্রেন্ড ও গ্লোবাল স্ট্র্যাটেজি নিয়ে বিস্তারিত।",AudioURL:"",YouTubeURL:"https://www.youtube.com/embed/VkjZ2-S9b3o"},
+  {Title:"Operating System Concepts",Author:"Silberschatz & Galvin",Edition:"10th",Category:"CSE",Rack:"RACK-C",Summary:"OS এর মূল ধারণা — প্রসেস, মেমোরি, ফাইল সিস্টেম ও সিকিউরিটি নিয়ে সম্পূর্ণ আলোচনা।",AudioURL:"",YouTubeURL:"https://www.youtube.com/embed/9GDX-IyZ_C8"},
+  {Title:"Financial Management",Author:"Prasanna Chandra",Edition:"9th",Category:"BBA",Rack:"RACK-G",Summary:"কর্পোরেট ফিন্যান্স, ইনভেস্টমেন্ট অ্যানালাইসিস ও বাজেটিং-এর উপর আদর্শ গাইড।",AudioURL:"",YouTubeURL:""},
+  {Title:"Database System Concepts",Author:"Silberschatz & Korth",Edition:"7th",Category:"CSE",Rack:"RACK-D",Summary:"SQL, NoSQL, ট্রানজেকশন ও ডেটা মডেলিং নিয়ে সম্পূর্ণ রেফারেন্স।",AudioURL:"",YouTubeURL:"https://www.youtube.com/embed/HXV3zeQKqGY"},
+];
+
+let books=[];
+
+async function loadBooks(){
+  try{
+    if(!sheetURL) throw new Error('no url');
+    const res=await fetch(sheetURL,{method:'GET',mode:'cors',credentials:'omit'});
+    if(!res.ok) throw new Error('bad res');
+    const txt=await res.text();
+    books=JSON.parse(txt);
+  }catch(e){
+    books=sample;
+  }
+  document.getElementById('totalB').textContent=books.length;
+  render(books);
 }
 
-function openModal(id) {
-    document.getElementById('overlay').style.display = 'block';
-    document.getElementById(id).classList.add('active');
+function tagCls(cat){
+  if(!cat)return'to';
+  const c=cat.toLowerCase();
+  if(c.includes('cse')||c.includes('cs'))return'tc';
+  if(c.includes('bba')||c.includes('bus'))return'tb';
+  return'to';
 }
 
-function closeAll() {
-    document.getElementById('overlay').style.display = 'none';
-    document.querySelectorAll('.modal').forEach(m => m.classList.remove('active'));
-    document.getElementById('audioElement').pause();
+function render(list){
+  const g=document.getElementById('grid');
+  if(!list.length){g.innerHTML='<div class="emp"><p>কোনো বই পাওয়া যায়নি 😔</p></div>';return;}
+  const frag=document.createDocumentFragment();
+  list.forEach((b,i)=>{
+    const d=document.createElement('div');
+    d.className='card';
+    d.style.animationDelay=(i*.055)+'s';
+    d.dataset.title=(b.Title||'').toLowerCase();
+    d.dataset.author=(b.Author||'').toLowerCase();
+    d.dataset.cat=(b.Category||'').toLowerCase();
+    const tc=tagCls(b.Category);
+    const bj=JSON.stringify(b).replace(/'/g,"&apos;");
+    d.innerHTML=`
+      <span class="tag ${tc}">${b.Category||'General'}</span>
+      <h3>${b.Title||'Unknown'}</h3>
+      <div class="cm">✍️ <span>${b.Author||'—'}</span></div>
+      <div class="cm">📌 <span>Edition: ${b.Edition||'—'}</span></div>
+      <div class="cm">📍 <span>Rack: ${b.Rack||'—'}</span></div>
+      <div class="div"></div>
+      <div class="bg2">
+        <button class="btn bdf" onclick='showDet(${bj})'>📖 বিস্তারিত ও সামারি</button>
+        <button class="btn bm" onclick="showMap('${b.Rack||''}')">📍 ম্যাপ</button>
+        <button class="btn ba" onclick='playAudio(${bj})'>🔊 অডিও</button>
+      </div>`;
+    frag.appendChild(d);
+  });
+  g.innerHTML='';
+  g.appendChild(frag);
 }
 
-function showDetails(title, text, audio) {
-    document.getElementById('detTitle').innerText = title;
-    document.getElementById('detText').innerText = text;
-    document.getElementById('audioElement').src = audio;
-    openModal('detModal');
+/* ── FILTER ── */
+let ft;
+function filter(){
+  clearTimeout(ft);
+  ft=setTimeout(()=>{
+    const q=document.getElementById('search').value.toLowerCase().trim();
+    document.querySelectorAll('.card').forEach(c=>{
+      c.style.display=(c.dataset.title.includes(q)||c.dataset.author.includes(q)||c.dataset.cat.includes(q))?'':'none';
+    });
+  },120);
 }
 
-function showMap(rack) {
-    document.getElementById('rackLoc').innerText = rack;
-    openModal('mapModal');
+/* ── MODALS ── */
+function openM(id){
+  document.getElementById('ov').classList.add('on');
+  document.getElementById(id).classList.add('on');
+}
+function closeAll(){
+  document.getElementById('ov').classList.remove('on');
+  document.querySelectorAll('.modal').forEach(m=>m.classList.remove('on'));
+  const a=document.getElementById('au');
+  if(a){a.pause();a.src='';}
+  document.getElementById('apb').textContent='▶';
+  document.getElementById('apf').style.width='0%';
+  const yt=document.getElementById('ytF');
+  if(yt) yt.src='';
 }
 
-function applyQuiz(cat) {
-    document.getElementById('search').value = cat;
-    filterBooks();
-    closeAll();
+/* ── DETAIL ── */
+function showDet(b){
+  document.getElementById('dT').textContent=b.Title||'—';
+  document.getElementById('dA').textContent=b.Author||'—';
+  document.getElementById('dE').textContent=b.Edition||'—';
+  document.getElementById('dC').textContent=b.Category||'—';
+  document.getElementById('dR').textContent=b.Rack||'—';
+  document.getElementById('dS').textContent=b.Summary||'সামারি যোগ করা হয়নি।';
+  document.getElementById('apTitle').textContent=b.Title||'—';
+  const au=document.getElementById('au');
+  const auSec=document.getElementById('auSec');
+  if(b.AudioURL){au.src=b.AudioURL;auSec.style.display='block';}
+  else{au.src='';auSec.style.display='none';}
+  const ytSec=document.getElementById('ytSec');
+  const ytF=document.getElementById('ytF');
+  if(b.YouTubeURL){ytF.src=b.YouTubeURL+'?rel=0&modestbranding=1';ytSec.style.display='block';}
+  else{ytF.src='';ytSec.style.display='none';}
+  openM('detM');
 }
 
-function playAudio(url) {
-    if(url && url !== "undefined") {
-        let audio = document.getElementById('audioElement');
-        audio.src = url;
-        audio.play();
-    } else {
-        alert("এই বইয়ের কোনো অডিও নেই!");
-    }
+/* ── AUDIO ── */
+function playAudio(b){
+  if(!b.AudioURL){toast('এই বইয়ের অডিও নেই 😔');return;}
+  showDet(b);
+  setTimeout(()=>{document.getElementById('au').play();document.getElementById('apb').textContent='⏸';},250);
 }
+function toggleAu(){
+  const a=document.getElementById('au');
+  if(!a.src||a.src===location.href){toast('অডিও পাওয়া যায়নি');return;}
+  if(a.paused){a.play();document.getElementById('apb').textContent='⏸';}
+  else{a.pause();document.getElementById('apb').textContent='▶';}
+}
+function auTick(){
+  const a=document.getElementById('au');
+  if(a.duration) document.getElementById('apf').style.width=(a.currentTime/a.duration*100)+'%';
+}
+function auEnd(){document.getElementById('apb').textContent='▶';document.getElementById('apf').style.width='0%';}
+function seekAu(e){
+  const a=document.getElementById('au');
+  if(!a.duration)return;
+  const r=e.currentTarget.getBoundingClientRect();
+  a.currentTime=((e.clientX-r.left)/r.width)*a.duration;
+}
+
+/* ── MAP ── */
+const RP={
+  'RACK-A':{x:57,y:41},'RACK-B':{x:137,y:41},'RACK-C':{x:217,y:41},'RACK-D':{x:297,y:41},'RACK-E':{x:393,y:41},
+  'RACK-F':{x:57,y:107},'RACK-G':{x:137,y:107},'RACK-H':{x:217,y:107},'RACK-I':{x:297,y:107},'RACK-J':{x:393,y:107},
+  'RACK-K':{x:57,y:173},'RACK-L':{x:137,y:173},'RACK-M':{x:217,y:173},'RACK-N':{x:297,y:173},
+};
+const YOU={x:230,y:272};
+
+function showMap(rack){
+  document.getElementById('rackLbl').textContent=rack||'—';
+  const al=document.getElementById('arrowLayer');
+  const ym=document.getElementById('youM');
+  al.innerHTML='';
+  // reset all racks
+  document.querySelectorAll('#racks rect').forEach(r=>{r.setAttribute('fill','#0e2040');r.setAttribute('stroke','#38bdf8');r.setAttribute('stroke-width','1');});
+  const pos=RP[rack];
+  if(pos){
+    // highlight rack
+    document.querySelectorAll(`#racks [data-rack="${rack}"] rect`).forEach(r=>{
+      r.setAttribute('fill','rgba(0,255,157,.15)');r.setAttribute('stroke','#00ff9d');r.setAttribute('stroke-width','1.8');
+    });
+    // dashed path
+    const sx=YOU.x,sy=YOU.y-8,ex=pos.x,ey=pos.y+18;
+    const cp=`${sx},${(sy+ey)/2}`;
+    const path=document.createElementNS('http://www.w3.org/2000/svg','path');
+    path.setAttribute('d',`M${sx},${sy} Q${cp} ${ex},${ey}`);
+    path.setAttribute('fill','none');path.setAttribute('stroke','#00ff9d');
+    path.setAttribute('stroke-width','1.8');path.setAttribute('stroke-dasharray','5 4');
+    path.setAttribute('opacity','.65');
+    // animated dash
+    path.innerHTML='<animate attributeName="stroke-dashoffset" from="100" to="0" dur="1s" repeatCount="indefinite"/>';
+    al.appendChild(path);
+    // arrowhead
+    const ah=document.createElementNS('http://www.w3.org/2000/svg','polygon');
+    ah.setAttribute('points',`${ex},${ey-8} ${ex-5},${ey-16} ${ex+5},${ey-16}`);
+    ah.setAttribute('fill','#00ff9d');
+    al.appendChild(ah);
+    // YOU
+    document.getElementById('youC').setAttribute('cx',YOU.x);
+    document.getElementById('youC').setAttribute('cy',YOU.y-8);
+    document.getElementById('youTx').setAttribute('x',YOU.x);
+    document.getElementById('youTx').setAttribute('y',YOU.y-8);
+    ym.style.display='block';
+  }else{ym.style.display='none';}
+  openM('mapM');
+}
+
+/* ── QUIZ ── */
+function applyQ(cat){
+  document.getElementById('search').value=cat;
+  filter();closeAll();
+}
+
+/* ── REQUEST ── */
+function submitReq(){
+  const n=document.getElementById('rName').value.trim();
+  const b=document.getElementById('rBook').value.trim();
+  if(!n||!b){toast('নাম এবং বইয়ের নাম দিন ⚠️');return;}
+  toast('✅ রিকোয়েস্ট পাঠানো হয়েছে!');
+  closeAll();
+}
+
+/* ── TOAST ── */
+let toastTimer;
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.style.opacity='1';
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.style.opacity='0',2800);
+}
+
+/* ── INIT ── */
+window.addEventListener('load',()=>{
+  setTimeout(()=>{
+    const ld=document.getElementById('ld');
+    ld.style.transition='opacity .55s';ld.style.opacity='0';
+    setTimeout(()=>{ld.style.display='none';loadBooks();},560);
+  },2300);
+});
 </script>
 
+<!--
+════════════════════════════════════════════════════════════
+  📋 GOOGLE SHEET → APPS SCRIPT সেটআপ গাইড
+════════════════════════════════════════════════════════════
+
+  STEP 1 ► Google Sheet বানাও এই কলাম দিয়ে (Row 1 = Header):
+  ┌───────┬────────┬─────────┬──────────┬──────┬─────────┬──────────┬────────────┐
+  │ Title │ Author │ Edition │ Category │ Rack │ Summary │ AudioURL │ YouTubeURL │
+  └───────┴────────┴─────────┴──────────┴──────┴─────────┴──────────┴────────────┘
+
+  STEP 2 ► Sheet খুলে উপরে:
+           Extensions → Apps Script → নতুন প্রজেক্ট খোলো
+
+  STEP 3 ► নিচের কোডটা Apps Script এ পেস্ট করো:
+
+  ─────────────────────────────────────────
+  function doGet(e) {
+    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    var data  = sheet.getDataRange().getValues();
+    var keys  = data[0]; // প্রথম row = header
+    var result = [];
+    for (var i = 1; i < data.length; i++) {
+      var row = {};
+      keys.forEach(function(k, j){ row[k] = data[i][j]; });
+      result.push(row);
+    }
+    return ContentService
+      .createTextOutput(JSON.stringify(result))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+  ─────────────────────────────────────────
+
+  STEP 4 ► Deploy করো:
+           Deploy → New Deployment
+           Type: Web App
+           Execute as: Me
+           Who has access: Anyone
+           → Deploy চাপো → URL কপি করো
+
+  STEP 5 ► উপরে এই ফাইলে:
+           const sheetURL = "এখানে তোমার URL দাও";
+
+════════════════════════════════════════════════════════════
+-->
 </body>
 </html>
