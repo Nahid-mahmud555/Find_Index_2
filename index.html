@@ -621,14 +621,7 @@ const EXCHANGE_URL = "https://script.google.com/macros/s/AKfycbyQdUouMBlKIiTjOb3
 const FEEDBACK_URL = "https://script.google.com/macros/s/AKfycbzy5SBo_bZJp4uPttreaYztD4OFTD1EwxfutyAGvh0TCV66Ihjl9QoItYf-erC1r6yyKQ/exec";   // Feedback Apps Script URL
 
 /* ══ DATA ══ */
-const SAMPLE = [
-  {Title:"Introduction to Algorithms",Author:"Cormen, Leiserson, Rivest",Edition:"3rd",Category:"CSE",Rack:"RACK-A",Summary:"অ্যালগরিদম ডিজাইন ও অ্যানালাইসিসের সেরা রেফারেন্স বই। ডেটা স্ট্রাকচার, গ্রাফ থিওরি ও ডাইনামিক প্রোগ্রামিং নিয়ে বিস্তারিত।",AudioURL:""},
-  {Title:"Clean Code",Author:"Robert C. Martin",Edition:"1st",Category:"CSE",Rack:"RACK-B",Summary:"পেশাদার কোড লেখার সোনালি নিয়ম। রিফ্যাক্টরিং, নামকরণ ও টেস্টিং নিয়ে বাস্তবমুখী গাইড।",AudioURL:""},
-  {Title:"Principles of Marketing",Author:"Philip Kotler",Edition:"16th",Category:"BBA",Rack:"RACK-F",Summary:"মার্কেটিং-এর মূলনীতি, ডিজিটাল ট্রেন্ড ও গ্লোবাল স্ট্র্যাটেজি নিয়ে বিস্তারিত আলোচনা।",AudioURL:""},
-  {Title:"Operating System Concepts",Author:"Silberschatz & Galvin",Edition:"10th",Category:"CSE",Rack:"RACK-C",Summary:"OS এর মূল ধারণা — প্রসেস, মেমোরি, ফাইল সিস্টেম ও সিকিউরিটি নিয়ে সম্পূর্ণ আলোচনা।",AudioURL:""},
-  {Title:"Financial Management",Author:"Prasanna Chandra",Edition:"9th",Category:"BBA",Rack:"RACK-G",Summary:"কর্পোরেট ফিন্যান্স, ইনভেস্টমেন্ট অ্যানালাইসিস ও বাজেটিং-এর উপর আদর্শ গাইড।",AudioURL:""},
-  {Title:"Database System Concepts",Author:"Silberschatz & Korth",Edition:"7th",Category:"CSE",Rack:"RACK-D",Summary:"SQL, NoSQL, ট্রানজেকশন ও ডেটা মডেলিং নিয়ে সম্পূর্ণ রেফারেন্স।",AudioURL:""},
-];
+const SAMPLE = [];
 
 let books = [];
 let exchanges = [];
@@ -676,23 +669,25 @@ function saveVoteCounts(v){try{localStorage.setItem('fi_vcounts',JSON.stringify(
 
 /* ══ LOAD BOOKS (fast fetch + cache) ══ */
 async function loadBooks(){
-  // try cache first for instant render
+  if(!BOOKS_URL){books=SAMPLE;renderBooks();updateStatus();return;}
+  // show loader state
+  document.getElementById('grid').innerHTML='<div class="emp"><div class="sp"></div><p>শীট থেকে লোড হচ্ছে...</p></div>';
   try{
-    const cached=sessionStorage.getItem('fi_books');
-    if(cached){books=JSON.parse(cached);renderBooks();updateStatus();}
-  }catch{}
-  // then fetch fresh
-  try{
-    if(!BOOKS_URL)throw new Error('no url');
+    const url=BOOKS_URL+(BOOKS_URL.includes('?')?'&':'?')+'sheet=Books';
     const ctrl=new AbortController();
-    const tid=setTimeout(()=>ctrl.abort(),5000);
-    const res=await fetch(BOOKS_URL,{signal:ctrl.signal,cache:'no-store'});
+    const tid=setTimeout(()=>ctrl.abort(),8000);
+    const res=await fetch(url,{signal:ctrl.signal,redirect:'follow'});
     clearTimeout(tid);
-    if(!res.ok)throw new Error('bad');
-    const fresh=await res.json();
+    const text=await res.text();
+    const fresh=JSON.parse(text);
+    if(!Array.isArray(fresh)||fresh.length===0)throw new Error('empty');
     books=fresh;
     try{sessionStorage.setItem('fi_books',JSON.stringify(books));}catch{}
-  }catch{if(!books.length)books=SAMPLE;}
+  }catch(err){
+    console.warn('Sheet fetch failed:',err);
+    // only use sample if fetch completely failed
+    if(!books.length)books=SAMPLE;
+  }
   renderBooks();updateStatus();
 }
 
