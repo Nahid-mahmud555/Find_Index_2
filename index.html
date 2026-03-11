@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="bn" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,245 +7,422 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&family=Space+Grotesk:wght@700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
-:root{
-  --bg:#04080f;--s1:#0a1020;--s2:#0e1628;
-  --g:#00ff9d;--b:#38bdf8;--y:#fbbf24;
-  --t:#e2e8f0;--td:#475569;--br:rgba(255,255,255,0.06);
+[data-theme="light"]{
+  --bg:#f0ecff;--s1:#fdf9ff;--s2:#f3eeff;--s3:#e8dfff;
+  --g:#7c3aed;--g2:#6d28d9;--b:#06b6d4;--y:#f59e0b;--p:#ec4899;
+  --t:#1e1040;--td:#6b6a8a;--tbr:#a89fc0;
+  --br:rgba(124,58,237,0.1);
+  --shadow:0 2px 16px rgba(124,58,237,0.08);
+  --shadow-hover:0 14px 44px rgba(124,58,237,0.16);
+  --card-border:rgba(124,58,237,0.15);
+  --pill-bg:rgba(255,253,255,0.75);--loader-bg:#f0ecff;
+}
+[data-theme="dark"]{
+  --bg:#04080f;--s1:#0a1020;--s2:#0e1628;--s3:#111d30;
+  --g:#00ff9d;--g2:#00cc7d;--b:#38bdf8;--y:#fbbf24;--p:#a78bfa;
+  --t:#e2e8f0;--td:#475569;--tbr:#334155;
+  --br:rgba(255,255,255,0.06);
+  --shadow:0 2px 12px rgba(0,0,0,0.3);
+  --shadow-hover:0 16px 46px rgba(0,0,0,0.5);
+  --card-border:rgba(0,255,157,0.1);
+  --pill-bg:#0a1020;--loader-bg:#04080f;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
-body{font-family:'Hind Siliguri',sans-serif;background:var(--bg);color:var(--t);overflow-x:hidden;cursor:none}
+body{font-family:'Hind Siliguri',sans-serif;background:var(--bg);color:var(--t);overflow-x:hidden;cursor:none;transition:background .3s,color .3s}
+[data-theme="light"] body{background:linear-gradient(145deg,#ecdeff 0%,#dff0ff 38%,#e8fff5 70%,#ffedf7 100%) fixed}
+[data-theme="light"] .card{background:rgba(255,253,255,0.82);backdrop-filter:blur(10px)}
+[data-theme="light"] .modal{background:rgba(255,253,255,0.97);backdrop-filter:blur(20px)}
+[data-theme="light"] .pill{background:rgba(255,253,255,0.75);backdrop-filter:blur(8px)}
+[data-theme="light"] .sb{background:rgba(255,253,255,0.85);backdrop-filter:blur(8px)}
 
 /* CURSOR */
 #cur,#cur2{position:fixed;border-radius:50%;pointer-events:none;z-index:99999;top:0;left:0;will-change:transform}
-#cur{width:8px;height:8px;background:var(--g);transform:translate(-50%,-50%);transition:width.15s,height.15s}
-#cur2{width:28px;height:28px;border:1.5px solid rgba(0,255,157,.35);transform:translate(-50%,-50%);transition:transform.12s ease}
+#cur{width:8px;height:8px;background:var(--g);transform:translate(-50%,-50%);transition:width .15s,height .15s}
+#cur2{width:28px;height:28px;border:1.5px solid var(--g);opacity:.35;transform:translate(-50%,-50%)}
 
 /* BG */
 .bg{position:fixed;inset:0;pointer-events:none;z-index:0}
-.bg-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(0,255,157,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,255,157,.025) 1px,transparent 1px);background-size:48px 48px}
-.orb{position:absolute;border-radius:50%;filter:blur(90px);animation:flt 10s ease-in-out infinite}
-.o1{width:500px;height:500px;background:rgba(0,255,157,.05);top:-150px;right:-100px}
-.o2{width:350px;height:350px;background:rgba(56,189,248,.06);bottom:50px;left:-80px;animation-delay:-4s}
-.o3{width:200px;height:200px;background:rgba(251,191,36,.04);top:45%;right:25%;animation-delay:-7s}
-@keyframes flt{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-25px) scale(1.03)}}
+.bg-grid{position:absolute;inset:0;background-image:linear-gradient(var(--br) 1px,transparent 1px),linear-gradient(90deg,var(--br) 1px,transparent 1px);background-size:48px 48px;opacity:.5}
+[data-theme="light"] .bg-grid{opacity:.28}
+.orb{position:absolute;border-radius:50%;filter:blur(100px);animation:flt 10s ease-in-out infinite}
+[data-theme="light"] .o1{width:600px;height:600px;background:rgba(168,85,247,.18);top:-200px;right:-150px}
+[data-theme="light"] .o2{width:460px;height:460px;background:rgba(56,189,248,.16);bottom:40px;left:-100px;animation-delay:-4s}
+[data-theme="light"] .o3{width:340px;height:340px;background:rgba(244,114,182,.18);top:40%;right:20%;animation-delay:-7s}
+[data-theme="dark"] .o1{width:520px;height:520px;background:rgba(0,255,157,.05);top:-160px;right:-120px}
+[data-theme="dark"] .o2{width:360px;height:360px;background:rgba(56,189,248,.055);bottom:40px;left:-90px;animation-delay:-4s}
+[data-theme="dark"] .o3{width:220px;height:220px;background:rgba(167,139,250,.04);top:42%;right:22%;animation-delay:-7s}
+@keyframes flt{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-28px) scale(1.04)}}
 
 /* LOADER */
-#ld{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:10000}
+#ld{position:fixed;inset:0;background:var(--loader-bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:10000;transition:opacity .5s}
 .ld-ring{width:72px;height:72px;position:relative;margin-bottom:20px}
 .ld-ring svg{animation:spin 1.2s linear infinite}
-.ld-ri{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--g)}
-.ld-title{font-family:'Space Grotesk',sans-serif;font-size:2.4rem;background:linear-gradient(135deg,#00ff9d,#38bdf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-2px}
-.ld-bar{width:200px;height:2px;background:rgba(255,255,255,.06);border-radius:2px;margin-top:16px;overflow:hidden}
+.ld-ri{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--g);font-weight:700}
+.ld-title{font-family:'Space Grotesk',sans-serif;font-size:2.4rem;background:linear-gradient(135deg,#7c3aed,#06b6d4);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-2px;display:inline-block}
+.ld-bar{width:200px;height:2px;background:var(--br);border-radius:2px;margin-top:16px;overflow:hidden}
 .ld-fill{height:100%;background:linear-gradient(90deg,var(--g),var(--b));animation:ldfill 2s ease forwards}
 @keyframes ldfill{from{width:0}to{width:100%}}
 .ld-txt{font-size:11px;color:var(--td);margin-top:8px;font-family:'JetBrains Mono',monospace;letter-spacing:1px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* TOPBAR */
+.topbar{position:relative;z-index:20;display:flex;justify-content:flex-end;padding:16px 24px 0;animation:fdn .4s ease both}
+.theme-toggle{display:flex;align-items:center;gap:8px;background:var(--s1);border:1px solid var(--br);padding:8px 16px;border-radius:50px;cursor:pointer;font-size:12.5px;font-family:'Hind Siliguri',sans-serif;color:var(--td);box-shadow:var(--shadow);transition:all .25s;user-select:none}
+.theme-toggle:hover{border-color:var(--g);color:var(--g)}
+.toggle-icon{font-size:16px;transition:transform .4s}
+.theme-toggle:hover .toggle-icon{transform:rotate(20deg)}
 
 /* HEADER */
-header{position:relative;z-index:10;text-align:center;padding:52px 20px 60px;overflow:hidden}
-.hbadge{display:inline-flex;align-items:center;gap:7px;background:rgba(0,255,157,.07);border:1px solid rgba(0,255,157,.18);padding:5px 16px;border-radius:50px;font-size:11px;color:var(--g);font-family:'JetBrains Mono',monospace;letter-spacing:2px;text-transform:uppercase;margin-bottom:16px;animation:fdn .5s ease both}
+header{position:relative;z-index:10;text-align:center;padding:28px 20px 44px;display:flex;flex-direction:column;align-items:center}
+.hbadge{display:inline-flex;align-items:center;gap:7px;background:var(--s2);border:1px solid var(--card-border);padding:5px 16px;border-radius:50px;font-size:11px;color:var(--g);font-family:'JetBrains Mono',monospace;letter-spacing:2px;text-transform:uppercase;margin-bottom:18px;animation:fdn .5s ease both;box-shadow:var(--shadow);white-space:nowrap}
 .dot{width:6px;height:6px;background:var(--g);border-radius:50%;animation:blk 1s infinite}
 @keyframes blk{0%,100%{opacity:1}50%{opacity:.2}}
-.logo{font-family:'Space Grotesk',sans-serif;font-size:clamp(2.6rem,6.5vw,5rem);background:linear-gradient(130deg,#00ff9d 0%,#38bdf8 45%,#a78bfa 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-3px;line-height:1;animation:fdn .5s .1s ease both}
-.logo-sub{font-size:.95rem;color:var(--td);margin-top:8px;animation:fdn .5s .2s ease both}
+.logo{font-family:'Space Grotesk',sans-serif;font-size:clamp(2.4rem,6vw,4.8rem);background:linear-gradient(130deg,#7c3aed 0%,#06b6d4 50%,#ec4899 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:-3px;line-height:1.1;animation:fdn .5s .1s ease both;display:block;margin-bottom:6px}
+[data-theme="dark"] .logo{background:linear-gradient(130deg,#00ff9d 0%,#38bdf8 50%,#a78bfa 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.logo-sub{font-size:.9rem;color:var(--td);margin-top:6px;animation:fdn .5s .2s ease both}
 .logo-sub b{color:var(--g)}
 
-/* STATUS */
-.sbar{position:relative;z-index:10;display:flex;justify-content:center;gap:10px;flex-wrap:wrap;padding:0 16px 28px;animation:fup .5s .3s ease both}
-.pill{display:inline-flex;align-items:center;gap:7px;background:var(--s1);border:1px solid var(--br);padding:9px 18px;border-radius:50px;font-size:12.5px;transition:border-color.25s,box-shadow.25s;cursor:default}
-.pill:hover{border-color:rgba(0,255,157,.25);box-shadow:0 0 16px rgba(0,255,157,.06)}
-.pbtn{background:linear-gradient(135deg,var(--g),var(--b));color:#000;font-weight:700;border:none;cursor:pointer;transition:transform.2s,box-shadow.2s}
-.pbtn:hover{transform:scale(1.05);box-shadow:0 0 22px rgba(0,255,157,.35)}
+/* STATUS BAR */
+.sbar{position:relative;z-index:10;display:flex;justify-content:center;gap:10px;flex-wrap:wrap;padding:0 16px 24px;animation:fup .5s .3s ease both}
+.pill{display:inline-flex;align-items:center;gap:7px;background:var(--pill-bg);border:1px solid var(--br);padding:9px 18px;border-radius:50px;font-size:12.5px;box-shadow:var(--shadow);transition:all .22s;cursor:default}
+.pill:hover{border-color:var(--g);box-shadow:var(--shadow-hover);transform:translateY(-1px)}
+.pbtn{background:linear-gradient(135deg,#7c3aed,#06b6d4)!important;color:#fff!important;font-weight:700;border:none!important;cursor:pointer;backdrop-filter:none!important;font-family:'Hind Siliguri',sans-serif}
+[data-theme="dark"] .pbtn{background:linear-gradient(135deg,#00ff9d,#38bdf8)!important;color:#000!important}
+.pbtn:hover{transform:scale(1.05) translateY(-2px)!important;box-shadow:0 6px 22px rgba(124,58,237,.35)!important}
 
 /* SEARCH */
-.sw{max-width:660px;margin:0 auto 32px;padding:0 18px;position:relative;z-index:10;animation:fup .5s .4s ease both}
-.sb{width:100%;padding:16px 52px 16px 22px;background:var(--s1);border:1px solid var(--br);border-radius:14px;color:var(--t);font-size:14.5px;font-family:'Hind Siliguri',sans-serif;outline:none;transition:border-color.25s,box-shadow.25s}
-.sb::placeholder{color:var(--td)}
-.sb:focus{border-color:var(--g);box-shadow:0 0 0 3px rgba(0,255,157,.09),0 0 24px rgba(0,255,157,.06)}
-.si{position:absolute;right:34px;top:50%;transform:translateY(-50%);color:var(--td);font-size:17px;pointer-events:none}
-.qbtn{display:block;margin:12px auto 0;background:transparent;border:1px solid var(--br);color:var(--td);padding:9px 22px;border-radius:50px;font-family:'Hind Siliguri',sans-serif;font-size:12.5px;cursor:pointer;transition:all.25s}
-.qbtn:hover{border-color:var(--y);color:var(--y);box-shadow:0 0 16px rgba(251,191,36,.1)}
+.sw{max-width:680px;margin:0 auto 28px;padding:0 18px;position:relative;z-index:10;animation:fup .5s .4s ease both}
+.sb{width:100%;padding:15px 52px 15px 22px;background:var(--s1);border:1px solid var(--br);border-radius:14px;color:var(--t);font-size:14.5px;font-family:'Hind Siliguri',sans-serif;outline:none;box-shadow:var(--shadow);transition:all .22s}
+.sb::placeholder{color:var(--tbr)}
+.sb:focus{border-color:var(--g);box-shadow:0 0 0 3px rgba(124,58,237,.09)}
+/* SEARCH SUGGESTIONS */
+.sugg-wrap{position:relative}
+.si-icon{position:absolute;right:34px;top:18px;color:var(--tbr);font-size:17px;pointer-events:none}
+.qbtn{display:block;margin:10px auto 0;background:transparent;border:1px solid var(--br);color:var(--td);padding:9px 22px;border-radius:50px;font-family:'Hind Siliguri',sans-serif;font-size:12.5px;cursor:pointer;transition:all .22s;box-shadow:var(--shadow)}
+.qbtn:hover{border-color:var(--y);color:var(--y)}
 
 /* GRID */
 .con{max-width:1240px;margin:auto;padding:0 18px 60px;position:relative;z-index:10}
-.sec-title{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--td);letter-spacing:2px;text-transform:uppercase;margin-bottom:20px;display:flex;align-items:center;gap:10px}
+.tabs{display:flex;gap:8px;margin-bottom:22px;flex-wrap:wrap}
+.tab{padding:8px 18px;border-radius:50px;border:1px solid var(--br);background:transparent;color:var(--td);font-family:'Hind Siliguri',sans-serif;font-size:12.5px;cursor:pointer;transition:all .22s;font-weight:600}
+.tab.active,.tab:hover{background:var(--g);color:#fff;border-color:var(--g)}
+[data-theme="dark"] .tab.active,[data-theme="dark"] .tab:hover{color:#000}
+.sec-title{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--td);letter-spacing:2px;text-transform:uppercase;margin-bottom:18px;display:flex;align-items:center;gap:10px}
 .sec-title::after{content:'';flex:1;height:1px;background:var(--br)}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px;contain:layout}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(295px,1fr));gap:16px}
 
-/* CARD — GPU accelerated */
-.card{background:var(--s1);border:1px solid var(--br);border-radius:18px;padding:22px;position:relative;overflow:hidden;will-change:transform;transform:translateZ(0);transition:transform.3s cubic-bezier(.34,1.56,.64,1),border-color.3s,box-shadow.3s;animation:fup .4s ease both}
-.card::after{content:'';position:absolute;inset:0;border-radius:18px;background:radial-gradient(circle at var(--mx,50%) var(--my,50%),rgba(0,255,157,.06),transparent 60%);opacity:0;transition:opacity.3s;pointer-events:none}
-.card:hover{transform:translateY(-8px) translateZ(0);border-color:rgba(0,255,157,.2);box-shadow:0 16px 48px rgba(0,0,0,.45),0 0 24px rgba(0,255,157,.05)}
+/* TOP LIST */
+.top-section{margin-bottom:32px}
+.top-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));gap:10px}
+.top-card{background:var(--s1);border:1px solid var(--br);border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow);transition:all .22s;cursor:pointer}
+[data-theme="light"] .top-card{background:rgba(255,253,255,0.82);backdrop-filter:blur(8px)}
+.top-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-hover);border-color:var(--card-border)}
+.top-rank{font-family:'Space Grotesk',sans-serif;font-size:1.3rem;font-weight:800;min-width:30px;text-align:center}
+.top-info{flex:1;min-width:0}
+.top-title{font-size:13px;font-weight:700;color:var(--t);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.top-count{font-size:11px;color:var(--td);margin-top:3px;font-family:'JetBrains Mono',monospace}
+.top-like-badge{display:flex;align-items:center;gap:4px;font-size:12px;font-weight:700;padding:4px 10px;border-radius:20px}
+.like-badge{background:rgba(16,185,129,.1);color:#059669;border:1px solid rgba(16,185,129,.2)}
+.dislike-badge{background:rgba(239,68,68,.1);color:#dc2626;border:1px solid rgba(239,68,68,.2)}
+
+/* BOOK EXCHANGE LIST */
+.exlist{display:grid;gap:12px}
+.ex-card{background:var(--s1);border:1px solid var(--br);border-radius:14px;padding:16px 18px;box-shadow:var(--shadow);transition:all .22s;position:relative;overflow:hidden}
+[data-theme="light"] .ex-card{background:rgba(255,253,255,0.82);backdrop-filter:blur(8px)}
+.ex-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--b),var(--p));opacity:.7}
+.ex-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-hover)}
+.ex-card-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px}
+.ex-title{font-family:'Space Grotesk',sans-serif;font-size:1rem;font-weight:800;color:var(--t);line-height:1.3}
+.ex-badge{font-size:9px;font-family:'JetBrains Mono',monospace;font-weight:700;padding:3px 8px;border-radius:20px;text-transform:uppercase;letter-spacing:1px;white-space:nowrap;margin-left:8px;flex-shrink:0}
+.ex-badge-have{background:rgba(16,185,129,.1);color:#059669;border:1px solid rgba(16,185,129,.2)}
+.ex-badge-want{background:rgba(124,58,237,.1);color:#7c3aed;border:1px solid rgba(124,58,237,.2)}
+.ex-meta{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px}
+.ex-m{font-size:11.5px;color:var(--td);display:flex;align-items:center;gap:4px}
+.ex-m b{color:var(--t)}
+.ex-summary{font-size:12.5px;color:var(--t);opacity:.8;line-height:1.7;margin-bottom:10px}
+.ex-footer{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.ex-contact{font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--g);font-weight:700}
+.ex-req-btn{padding:8px 16px;border-radius:8px;border:1px solid var(--card-border);background:transparent;color:var(--g);font-size:12px;font-family:'Hind Siliguri',sans-serif;font-weight:700;cursor:pointer;transition:all .2s}
+.ex-req-btn:hover{background:var(--s2)}
+.ex-empty{text-align:center;padding:40px 20px;color:var(--td)}
+.ex-empty-icon{font-size:2.5rem;margin-bottom:10px}
+
+/* CARD */
+.card{background:var(--s1);border:1px solid var(--br);border-radius:18px;padding:20px;position:relative;overflow:hidden;will-change:transform;transform:translateZ(0);box-shadow:var(--shadow);transition:transform .3s cubic-bezier(.34,1.56,.64,1),border-color .3s,box-shadow .3s;animation:fup .4s ease both}
+.card::after{content:'';position:absolute;inset:0;border-radius:18px;background:radial-gradient(circle at var(--mx,50%) var(--my,50%),rgba(124,58,237,.06),transparent 55%);opacity:0;transition:opacity .3s;pointer-events:none}
+[data-theme="dark"] .card::after{background:radial-gradient(circle at var(--mx,50%) var(--my,50%),rgba(0,255,157,.055),transparent 55%)}
+.card:hover{transform:translateY(-6px) translateZ(0);border-color:var(--card-border);box-shadow:var(--shadow-hover)}
 .card:hover::after{opacity:1}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--g),var(--b));border-radius:18px 18px 0 0;opacity:0;transition:opacity .3s}
+.card:hover::before{opacity:1}
 
-.tag{display:inline-flex;align-items:center;gap:4px;font-size:9.5px;font-family:'JetBrains Mono',monospace;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:4px 10px;border-radius:5px;margin-bottom:12px}
-.tc{background:rgba(0,255,157,.09);color:var(--g);border:1px solid rgba(0,255,157,.18)}
-.tb{background:rgba(56,189,248,.09);color:var(--b);border:1px solid rgba(56,189,248,.18)}
-.to{background:rgba(251,191,36,.09);color:var(--y);border:1px solid rgba(251,191,36,.18)}
-
-.card h3{font-family:'Space Grotesk',sans-serif;font-size:1.08rem;color:#f1f5f9;margin-bottom:7px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.cm{font-size:12.5px;color:var(--td);margin-bottom:4px;display:flex;align-items:center;gap:5px}
+/* CLEAN CARD TOP — just title+author */
+.card-top{margin-bottom:10px}
+.card-title{font-family:'Space Grotesk',sans-serif;font-size:1.06rem;color:var(--t);line-height:1.3;margin-bottom:5px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card-author{font-size:12.5px;color:var(--td);display:flex;align-items:center;gap:5px}
+/* expanded details (hidden by default, shown on hover/expand) */
+.card-details{overflow:hidden;max-height:0;transition:max-height .35s cubic-bezier(.4,0,.2,1),opacity .3s;opacity:0}
+.card-details.show{max-height:120px;opacity:1}
+.tag{display:inline-flex;align-items:center;font-size:9.5px;font-family:'JetBrains Mono',monospace;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:4px 10px;border-radius:5px;margin-bottom:10px}
+[data-theme="light"] .tc{background:rgba(124,58,237,.09);color:#7c3aed;border:1px solid rgba(124,58,237,.2)}
+[data-theme="light"] .tb{background:rgba(6,182,212,.09);color:#0891b2;border:1px solid rgba(6,182,212,.2)}
+[data-theme="light"] .to{background:rgba(236,72,153,.08);color:#db2777;border:1px solid rgba(236,72,153,.2)}
+[data-theme="dark"] .tc{background:rgba(0,255,157,.09);color:#00ff9d;border:1px solid rgba(0,255,157,.18)}
+[data-theme="dark"] .tb{background:rgba(56,189,248,.09);color:#38bdf8;border:1px solid rgba(56,189,248,.18)}
+[data-theme="dark"] .to{background:rgba(251,191,36,.09);color:#fbbf24;border:1px solid rgba(251,191,36,.18)}
+.cm{font-size:12px;color:var(--td);margin-bottom:3px;display:flex;align-items:center;gap:5px}
 .cm span{color:var(--t)}
-.div{height:1px;background:var(--br);margin:14px 0}
+.cdiv{height:1px;background:var(--br);margin:12px 0}
 
-.bg2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.btn{display:flex;align-items:center;justify-content:center;gap:6px;padding:11px 8px;border-radius:10px;border:1px solid var(--br);background:transparent;color:var(--td);font-size:11.5px;font-family:'Hind Siliguri',sans-serif;font-weight:600;cursor:pointer;transition:background.2s,border-color.2s,color.2s,transform.15s;white-space:nowrap}
-.btn:active{transform:scale(.96)}
-.btn:hover{background:rgba(255,255,255,.04);color:var(--t)}
-.bdf{grid-column:span 2;border-color:rgba(0,255,157,.18);color:var(--g)}
-.bdf:hover{background:rgba(0,255,157,.08)!important;box-shadow:0 0 16px rgba(0,255,157,.08)}
-.bm:hover{background:rgba(56,189,248,.07)!important;border-color:rgba(56,189,248,.2)!important;color:var(--b)!important}
-.ba:hover{background:rgba(251,191,36,.07)!important;border-color:rgba(251,191,36,.2)!important;color:var(--y)!important}
+/* VOTE */
+.vote-row{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.vote-counts{display:flex;gap:6px}
+.vc{font-size:11px;font-family:'JetBrains Mono',monospace;padding:3px 8px;border-radius:20px;font-weight:700}
+.vc-like{background:rgba(16,185,129,.1);color:#059669}
+.vc-dislike{background:rgba(239,68,68,.1);color:#dc2626}
+.vote-progress{flex:1;height:3px;background:var(--br);border-radius:4px;overflow:hidden}
+.vp-fill{height:100%;background:linear-gradient(90deg,#10b981,#06b6d4);border-radius:4px;transition:width .5s}
+
+.bg2{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.bg3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:7px}
+.btn{display:flex;align-items:center;justify-content:center;gap:5px;padding:10px 6px;border-radius:10px;border:1px solid var(--br);background:transparent;color:var(--td);font-size:11px;font-family:'Hind Siliguri',sans-serif;font-weight:600;cursor:pointer;transition:all .18s;white-space:nowrap}
+.btn:active{transform:scale(.95)}
+.btn:hover{background:var(--s2);color:var(--t)}
+[data-theme="light"] .bdf{grid-column:span 2;border-color:rgba(124,58,237,.2);color:#7c3aed}
+[data-theme="light"] .bdf:hover{background:rgba(124,58,237,.06)!important}
+[data-theme="dark"] .bdf{grid-column:span 2;border-color:rgba(0,255,157,.18);color:#00ff9d}
+[data-theme="dark"] .bdf:hover{background:rgba(0,255,157,.07)!important}
+[data-theme="light"] .bm:hover{background:rgba(6,182,212,.07)!important;border-color:rgba(6,182,212,.25)!important;color:#0891b2!important}
+[data-theme="dark"] .bm:hover{background:rgba(56,189,248,.07)!important;color:#38bdf8!important}
+[data-theme="light"] .ba:hover{background:rgba(245,158,11,.07)!important;border-color:rgba(245,158,11,.25)!important;color:#d97706!important}
+[data-theme="dark"] .ba:hover{background:rgba(251,191,36,.07)!important;color:#fbbf24!important}
+.btn-like{border-color:rgba(16,185,129,.25);color:#059669;font-size:12px}
+.btn-like:hover,.btn-like.voted{background:rgba(16,185,129,.1)!important;border-color:rgba(16,185,129,.4)!important;color:#059669!important}
+.btn-like.voted{box-shadow:0 0 10px rgba(16,185,129,.2)}
+.btn-dislike{border-color:rgba(239,68,68,.25);color:#dc2626;font-size:12px}
+.btn-dislike:hover,.btn-dislike.voted{background:rgba(239,68,68,.08)!important;border-color:rgba(239,68,68,.35)!important;color:#dc2626!important}
+.btn-dislike.voted{box-shadow:0 0 10px rgba(239,68,68,.15)}
 
 /* OVERLAY & MODAL */
-.ov{display:none;position:fixed;inset:0;background:rgba(4,8,15,.88);z-index:1000;backdrop-filter:blur(10px)}
-.ov.on{display:block;animation:fdin .2s ease}
+.ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;backdrop-filter:blur(10px)}
+[data-theme="light"] .ov{background:rgba(15,23,42,.4)}
+.ov.on{display:block;animation:fdin .18s ease}
 @keyframes fdin{from{opacity:0}to{opacity:1}}
-
-.modal{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--s2);border:1px solid var(--br);width:92%;max-width:540px;border-radius:22px;z-index:1001;box-shadow:0 28px 70px rgba(0,0,0,.6),0 0 36px rgba(0,255,157,.04);overflow:hidden;max-height:90vh;display:none;flex-direction:column}
-.modal.on{display:flex;animation:mdin .3s cubic-bezier(.34,1.56,.64,1)}
-@keyframes mdin{from{opacity:0;transform:translate(-50%,-45%)}to{opacity:1;transform:translate(-50%,-50%)}}
-
-.mh{padding:20px 24px 16px;border-bottom:1px solid var(--br);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.modal{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--s1);border:1px solid var(--br);width:92%;max-width:560px;border-radius:22px;z-index:1001;box-shadow:0 28px 70px rgba(0,0,0,.18);overflow:hidden;flex-direction:column;max-height:90vh}
+[data-theme="dark"] .modal{box-shadow:0 28px 70px rgba(0,0,0,.6)}
+.modal.on{display:flex;animation:mdin .28s cubic-bezier(.34,1.56,.64,1)}
+@keyframes mdin{from{opacity:0;transform:translate(-50%,-44%)}to{opacity:1;transform:translate(-50%,-50%)}}
+.mh{padding:18px 22px 14px;border-bottom:1px solid var(--br);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
 .mt{font-family:'Space Grotesk',sans-serif;font-size:1.05rem;color:var(--g)}
-.mc{width:30px;height:30px;border-radius:7px;border:1px solid var(--br);background:transparent;color:var(--td);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all.2s}
-.mc:hover{background:rgba(255,255,255,.05);color:var(--t)}
-.mb{padding:22px 24px 26px;overflow-y:auto;flex:1}
+.mc{width:30px;height:30px;border-radius:7px;border:1px solid var(--br);background:transparent;color:var(--td);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .18s}
+.mc:hover{background:var(--s2);color:var(--t)}
+.mb{padding:20px 22px 24px;overflow-y:auto;flex:1}
 .mb::-webkit-scrollbar{width:3px}
 .mb::-webkit-scrollbar-thumb{background:var(--br);border-radius:2px}
 
-/* DETAIL */
-.dbt{font-family:'Space Grotesk',sans-serif;font-size:1.4rem;color:#f8fafc;margin-bottom:14px;line-height:1.3}
-.dir{display:flex;align-items:flex-start;gap:8px;margin-bottom:8px;font-size:13px}
+/* DETAIL MODAL */
+.dbt{font-family:'Space Grotesk',sans-serif;font-size:1.35rem;color:var(--t);margin-bottom:12px;line-height:1.3}
+.dir{display:flex;align-items:flex-start;gap:8px;margin-bottom:7px;font-size:13px}
 .dil{color:var(--td);width:75px;flex-shrink:0;font-family:'JetBrains Mono',monospace;font-size:11px;padding-top:1px}
-.div2{height:1px;background:var(--br);margin:16px 0}
+.div2{height:1px;background:var(--br);margin:14px 0}
 .dsl{font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--td);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px}
-.dst{font-size:13.5px;color:var(--t);line-height:1.85}
+.dst{font-size:13.5px;color:var(--t);line-height:1.88;opacity:.85}
 
-/* AUDIO PLAYER */
-.ap{background:var(--s1);border:1px solid var(--br);border-radius:13px;padding:14px;display:flex;align-items:center;gap:12px;margin-top:14px}
-.apb{width:40px;height:40px;border-radius:10px;border:none;background:linear-gradient(135deg,var(--y),#f97316);cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform.2s,box-shadow.2s}
-.apb:hover{transform:scale(1.1);box-shadow:0 0 18px rgba(251,191,36,.35)}
+/* AUDIO */
+.ap{background:var(--s2);border:1px solid var(--br);border-radius:13px;padding:14px;display:flex;align-items:center;gap:12px;margin-top:10px;box-shadow:var(--shadow)}
+.apb{width:40px;height:40px;border-radius:10px;border:none;background:linear-gradient(135deg,var(--y),#f97316);cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform .2s;color:#fff}
+.apb:hover{transform:scale(1.1)}
 .api{flex:1;min-width:0}
 .apt{font-size:12.5px;font-weight:600;color:var(--t);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .aps{font-size:11px;color:var(--td);margin-top:2px}
-.apbar{width:100%;height:3px;background:rgba(255,255,255,.07);border-radius:2px;margin-top:7px;overflow:hidden;cursor:pointer}
-.apfill{height:100%;background:linear-gradient(90deg,var(--y),#f97316);border-radius:2px;width:0%;transition:width.4s}
+.apbar{width:100%;height:3px;background:var(--br);border-radius:2px;margin-top:7px;cursor:pointer;overflow:hidden}
+.apfill{height:100%;background:linear-gradient(90deg,var(--y),#f97316);border-radius:2px;width:0%;transition:width .3s}
 audio{display:none}
 
-/* YT */
-.ytw{margin-top:16px;border-radius:12px;overflow:hidden;border:1px solid var(--br);aspect-ratio:16/9;background:#000}
-.ytw iframe{width:100%;height:100%;border:none}
+/* YOUTUBE */
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /* MAP */
-.rack-b{display:inline-block;background:rgba(0,255,157,.09);border:1px solid rgba(0,255,157,.25);color:var(--g);font-size:1.2rem;font-weight:700;padding:7px 18px;border-radius:9px;font-family:'Space Grotesk',sans-serif;margin-bottom:16px}
+.rack-b{display:inline-block;background:var(--s2);border:1px solid var(--card-border);color:var(--g);font-size:1.2rem;font-weight:700;padding:7px 18px;border-radius:9px;font-family:'Space Grotesk',sans-serif;margin-bottom:14px;box-shadow:var(--shadow)}
 .mc2{width:100%;border-radius:14px;overflow:hidden;border:1px solid var(--br)}
 .mc2 svg{width:100%;display:block}
 
 /* FORM */
-.fg{margin-bottom:12px}
+.fg{margin-bottom:11px}
 .fl{font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--td);letter-spacing:1px;text-transform:uppercase;margin-bottom:5px;display:block}
-.fi,.fsel,.fta{width:100%;padding:12px 14px;background:var(--s1);border:1px solid var(--br);border-radius:10px;color:var(--t);font-family:'Hind Siliguri',sans-serif;font-size:13.5px;outline:none;transition:border-color.2s,box-shadow.2s}
-.fi:focus,.fsel:focus,.fta:focus{border-color:var(--g);box-shadow:0 0 0 2px rgba(0,255,157,.08)}
-.fsel option{background:var(--s2)}
-.fta{resize:vertical;min-height:80px}
-.sbtn{width:100%;padding:14px;background:linear-gradient(135deg,var(--g),var(--b));border:none;border-radius:10px;color:#000;font-weight:700;font-size:14.5px;font-family:'Hind Siliguri',sans-serif;cursor:pointer;margin-top:6px;transition:transform.2s,box-shadow.2s}
-.sbtn:hover{transform:scale(1.02);box-shadow:0 0 26px rgba(0,255,157,.28)}
+.fi,.fsel,.fta{width:100%;padding:11px 13px;background:var(--s2);border:1px solid var(--br);border-radius:10px;color:var(--t);font-family:'Hind Siliguri',sans-serif;font-size:13.5px;outline:none;transition:all .2s}
+.fi:focus,.fsel:focus,.fta:focus{border-color:var(--g);box-shadow:0 0 0 2px rgba(124,58,237,.08)}
+.fi::placeholder,.fta::placeholder{color:var(--tbr)}
+.fsel option{background:var(--s1)}
+.fta{resize:vertical;min-height:76px}
+.sbtn{width:100%;padding:13px;background:linear-gradient(135deg,var(--g),var(--b));border:none;border-radius:10px;color:#fff;font-weight:700;font-size:14.5px;font-family:'Hind Siliguri',sans-serif;cursor:pointer;margin-top:6px;transition:transform .2s,box-shadow .2s}
+[data-theme="dark"] .sbtn{color:#000}
+.sbtn:hover{transform:scale(1.02);box-shadow:0 6px 20px rgba(124,58,237,.25)}
+.sbtn:disabled{opacity:.5;cursor:not-allowed;transform:none}
 
 /* QUIZ */
-.qopt{width:100%;padding:14px 18px;margin-bottom:10px;border-radius:12px;border:1px solid var(--br);background:var(--s1);color:var(--t);font-size:14px;font-family:'Hind Siliguri',sans-serif;cursor:pointer;text-align:left;display:flex;align-items:center;gap:10px;transition:all.22s}
-.qopt:hover{border-color:var(--g);background:rgba(0,255,157,.04);transform:translateX(5px)}
-.qi{font-size:20px}
+.quiz-step{display:none}.quiz-step.active{display:block}
+.q-question{font-size:1.08rem;font-family:'Space Grotesk',sans-serif;color:var(--t);margin-bottom:16px;line-height:1.4}
+.q-hint{font-size:12px;color:var(--td);margin-bottom:12px;font-family:'JetBrains Mono',monospace}
+.q-options{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:12px}
+.q-opt{padding:11px 13px;border-radius:12px;border:1px solid var(--br);background:var(--s2);color:var(--t);font-size:13px;font-family:'Hind Siliguri',sans-serif;cursor:pointer;text-align:left;transition:all .2s}
+.q-opt:hover{border-color:var(--g);background:var(--s3)}
+.q-opt.selected{border-color:var(--g);box-shadow:0 0 0 2px var(--g)}
+.q-opt .q-em{font-size:18px;display:block;margin-bottom:3px}
+.q-progress{display:flex;gap:6px;margin-bottom:18px}
+.q-dot{width:8px;height:8px;border-radius:50%;background:var(--br);transition:background .3s}
+.q-dot.done{background:var(--g)}
+.quiz-result{text-align:center;padding:8px 0}
+.qr-title{font-family:'Space Grotesk',sans-serif;font-size:1.25rem;color:var(--g);margin-bottom:6px}
+.qr-sub{font-size:13px;color:var(--td);margin-bottom:18px;line-height:1.6}
+.qr-books{text-align:left}
+.qr-book-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--s2);border-radius:10px;margin-bottom:8px;border:1px solid var(--br);cursor:pointer;transition:all .2s}
+.qr-book-item:hover{border-color:var(--g);transform:translateX(4px)}
+.qr-book-name{font-size:13px;font-weight:700;color:var(--t)}
+.qr-book-auth{font-size:11px;color:var(--td)}
 
-/* EMPTY */
+/* DISLIKE FEEDBACK */
+.fb-box{margin-top:12px;background:var(--s2);border:1px solid rgba(239,68,68,.2);border-radius:12px;padding:13px;animation:fup .3s ease}
+.fb-label{font-size:11px;font-family:'JetBrains Mono',monospace;color:#dc2626;letter-spacing:1px;text-transform:uppercase;margin-bottom:7px}
+.fb-ta{width:100%;padding:9px 12px;background:var(--s1);border:1px solid rgba(239,68,68,.2);border-radius:8px;color:var(--t);font-family:'Hind Siliguri',sans-serif;font-size:13px;outline:none;resize:none;min-height:68px}
+.fb-ta:focus{border-color:#dc2626}
+.fb-send{width:100%;margin-top:7px;padding:10px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);border-radius:8px;color:#dc2626;font-family:'Hind Siliguri',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s}
+.fb-send:hover{background:rgba(239,68,68,.18)}
+
+/* EMPTY/LOADING */
 .emp{grid-column:1/-1;text-align:center;padding:50px 20px;color:var(--td)}
-.sp{width:32px;height:32px;border:2.5px solid rgba(255,255,255,.05);border-top-color:var(--g);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 14px}
-@keyframes spin{to{transform:rotate(360deg)}}
+.sp{width:30px;height:30px;border:2.5px solid var(--br);border-top-color:var(--g);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 12px}
 
 /* TOAST */
-#toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:var(--s2);border:1px solid var(--br);color:var(--t);padding:12px 22px;border-radius:50px;z-index:99999;font-size:13px;font-family:'Hind Siliguri',sans-serif;box-shadow:0 10px 36px rgba(0,0,0,.4);opacity:0;transition:opacity.3s;pointer-events:none;white-space:nowrap}
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--s1);border:1px solid var(--br);color:var(--t);padding:11px 22px;border-radius:50px;z-index:99999;font-size:13px;font-family:'Hind Siliguri',sans-serif;box-shadow:0 10px 36px rgba(0,0,0,.15);opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
 
 /* ANIMATIONS */
-@keyframes fdn{from{opacity:0;transform:translateY(-16px)}to{opacity:1;transform:translateY(0)}}
-@keyframes fup{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
-
-/* STAGGER CARDS */
-.card:nth-child(1){animation-delay:.04s}
-.card:nth-child(2){animation-delay:.08s}
-.card:nth-child(3){animation-delay:.12s}
-.card:nth-child(4){animation-delay:.16s}
-.card:nth-child(5){animation-delay:.20s}
-.card:nth-child(6){animation-delay:.24s}
-.card:nth-child(7){animation-delay:.28s}
-.card:nth-child(8){animation-delay:.32s}
-.card:nth-child(9){animation-delay:.36s}
-
+@keyframes fdn{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fup{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.card:nth-child(1){animation-delay:.03s}.card:nth-child(2){animation-delay:.06s}.card:nth-child(3){animation-delay:.09s}
+.card:nth-child(4){animation-delay:.12s}.card:nth-child(5){animation-delay:.15s}.card:nth-child(6){animation-delay:.18s}
+.card:nth-child(7){animation-delay:.21s}.card:nth-child(8){animation-delay:.24s}.card:nth-child(9){animation-delay:.27s}
 ::-webkit-scrollbar{width:5px}
-::-webkit-scrollbar-track{background:var(--bg)}
-::-webkit-scrollbar-thumb{background:var(--s2);border-radius:3px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--s3);border-radius:3px}
 
 @media(max-width:580px){
   .logo{letter-spacing:-1px}
-  .grid{grid-template-columns:1fr}
+  .grid,.top-grid{grid-template-columns:1fr}
   .bg2{grid-template-columns:1fr}
   .bdf{grid-column:span 1}
   .modal{width:96%}
+  .q-options{grid-template-columns:1fr}
+  .topbar{padding:12px 16px 0}
+  .bg3{grid-template-columns:1fr 1fr}
 }
 </style>
 </head>
 <body>
-<div id="cur"></div>
-<div id="cur2"></div>
-
-<div class="bg">
-  <div class="bg-grid"></div>
-  <div class="orb o1"></div>
-  <div class="orb o2"></div>
-  <div class="orb o3"></div>
-</div>
+<div id="cur"></div><div id="cur2"></div>
+<div class="bg"><div class="bg-grid"></div><div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div></div>
 
 <!-- LOADER -->
 <div id="ld">
   <div class="ld-ring">
     <svg viewBox="0 0 72 72" width="72" height="72">
-      <circle cx="36" cy="36" r="30" fill="none" stroke="rgba(0,255,157,.1)" stroke-width="5"/>
+      <circle cx="36" cy="36" r="30" fill="none" stroke="var(--br)" stroke-width="5"/>
       <circle cx="36" cy="36" r="30" fill="none" stroke="url(#lg)" stroke-width="5" stroke-dasharray="44 145" stroke-linecap="round"/>
-      <defs><linearGradient id="lg" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#00ff9d"/><stop offset="100%" stop-color="#38bdf8"/></linearGradient></defs>
+      <defs><linearGradient id="lg" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop id="lg1" offset="0%" stop-color="#7c3aed"/>
+        <stop id="lg2" offset="100%" stop-color="#06b6d4"/>
+      </linearGradient></defs>
     </svg>
     <div class="ld-ri">FI</div>
   </div>
   <div class="ld-title">Find_Index</div>
   <div class="ld-bar"><div class="ld-fill"></div></div>
-  <div class="ld-txt">INITIALIZING...</div>
+  <div class="ld-txt">LOADING v7.0...</div>
+</div>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <button class="theme-toggle" onclick="toggleTheme()">
+    <span class="toggle-icon" id="themeIcon">🌙</span>
+    <span id="themeLabel">Dark Mode</span>
+  </button>
 </div>
 
 <!-- HEADER -->
 <header>
-  <div class="hbadge"><span class="dot"></span>LIBRARY SYSTEM v2.1</div>
+  <div class="hbadge"><span class="dot"></span>LIBRARY SYSTEM v7.0</div>
   <h1 class="logo">Find_Index</h1>
-  <p class="logo-sub">Designed by <b>MiM</b> — University Library Management</p>
+  <p class="logo-sub">A small gift for VU students from <b>MN Group</b></p>
 </header>
 
 <!-- STATUS BAR -->
 <div class="sbar">
   <div class="pill"><span class="dot"></span>লাইব্রেরি খোলা</div>
-  <div class="pill">🪑 <span id="seats">280</span>/300 সিট</div>
   <div class="pill">📚 <span id="totalB">—</span> টি বই</div>
-  <div class="pill pbtn" onclick="openM('reqM')">➕ বই রিকোয়েস্ট</div>
+  <div class="pill">❤️ <span id="topLikedName">—</span></div>
+  <button class="pill pbtn" onclick="openM('reqM')">➕ বই রিকোয়েস্ট</button>
+  <button class="pill pbtn" style="background:linear-gradient(135deg,#06b6d4,#ec4899)!important" onclick="switchTab('exchange',document.querySelector('[data-tab=exchange]'))">🔄 বুক এক্সচেঞ্জ</button>
 </div>
 
 <!-- SEARCH -->
 <div class="sw">
-  <input type="text" id="search" class="sb" placeholder="🔍  বই, লেখক বা ক্যাটাগরি খুঁজুন..." oninput="filter()">
-  <span class="si">⌘</span>
-  <button class="qbtn" onclick="openM('quizM')">💡 স্মার্ট বুক সিলেকশন</button>
+  <div class="sugg-wrap">
+    <input type="text" id="search" class="sb" placeholder="🔍  বই, লেখক বা ক্যাটাগরি লিখুন..." oninput="onSearch()" onkeydown="onSearchKey(event)" autocomplete="off">
+    <span class="si-icon">⌘</span>
+  </div>
+  <button class="qbtn" onclick="openSmartQuiz()">🧠 স্মার্ট বুক ডিসিশন — প্রশ্নোত্তরে বই খুঁজুন</button>
 </div>
 
-<!-- GRID -->
+<!-- MAIN -->
 <div class="con">
-  <div class="sec-title">বইয়ের তালিকা</div>
-  <div class="grid" id="grid">
-    <div class="emp"><div class="sp"></div><p>ডেটা লোড হচ্ছে...</p></div>
+  <div class="tabs">
+    <button class="tab active" data-tab="all" onclick="switchTab('all',this)">📚 সব বই</button>
+    <button class="tab" data-tab="top" onclick="switchTab('top',this)">🏆 টপ লিস্ট</button>
+    <button class="tab" data-tab="exchange" onclick="switchTab('exchange',this)">🔄 বুক এক্সচেঞ্জ</button>
+  </div>
+
+  <!-- ALL BOOKS -->
+  <div id="tabAll">
+    <div class="sec-title">বইয়ের তালিকা</div>
+    <div class="grid" id="grid">
+      <div class="emp"><div class="sp"></div><p>ডেটা লোড হচ্ছে...</p></div>
+    </div>
+  </div>
+
+  <!-- TOP LIST -->
+  <div id="tabTop" style="display:none">
+    <div class="top-section">
+      <div class="sec-title">❤️ সবচেয়ে বেশি পছন্দের বই</div>
+      <div class="top-grid" id="topLikedGrid"><div class="emp"><p>এখনো কোনো ভোট নেই</p></div></div>
+    </div>
+    <div class="top-section">
+      <div class="sec-title">👎 সবচেয়ে বেশি অপছন্দের বই</div>
+      <div class="top-grid" id="topDislikedGrid"><div class="emp"><p>এখনো কোনো ভোট নেই</p></div></div>
+    </div>
+  </div>
+
+  <!-- BOOK EXCHANGE -->
+  <div id="tabExchange" style="display:none">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:18px">
+      <div class="sec-title" style="margin-bottom:0;flex:1">🔄 বুক এক্সচেঞ্জ বোর্ড</div>
+      <button class="pill pbtn" style="background:linear-gradient(135deg,#06b6d4,#7c3aed)!important;font-size:12px" onclick="openM('exAddM')">➕ আমার বই দিতে চাই / চাই</button>
+    </div>
+    <div class="exlist" id="exList">
+      <div class="ex-empty"><div class="ex-empty-icon">📖</div><p>এখনো কোনো এক্সচেঞ্জ পোস্ট নেই</p></div>
+    </div>
   </div>
 </div>
 
@@ -264,8 +441,7 @@ audio{display:none}
     <div class="div2"></div>
     <div class="dsl">📋 সামারি</div>
     <div class="dst" id="dS"></div>
-    <!-- Audio -->
-    <div id="auSec" style="margin-top:16px;display:none">
+    <div id="auSec" style="display:none;margin-top:14px">
       <div class="dsl" style="margin-bottom:8px">🎧 ভয়েস সামারি</div>
       <div class="ap">
         <button class="apb" id="apb" onclick="toggleAu()">▶</button>
@@ -277,11 +453,7 @@ audio{display:none}
       </div>
       <audio id="au" ontimeupdate="auTick()" onended="auEnd()"></audio>
     </div>
-    <!-- YouTube -->
-    <div id="ytSec" style="display:none">
-      <div class="div2"></div>
-      <div class="dsl">🎬 সংশ্লিষ্ট ভিডিও</div>
-      <div class="ytw"><iframe id="ytF" allowfullscreen allow="autoplay;encrypted-media"></iframe></div>
+    
     </div>
   </div>
 </div>
@@ -290,53 +462,45 @@ audio{display:none}
 <div class="modal" id="mapM">
   <div class="mh"><span class="mt">📍 লাইব্রেরি ম্যাপ</span><button class="mc" onclick="closeAll()">✕</button></div>
   <div class="mb">
-    <div style="font-size:12px;color:var(--td);font-family:'JetBrains Mono',monospace;margin-bottom:6px">আপনার র‍্যাক</div>
+    <div style="font-size:12px;color:var(--td);font-family:'JetBrains Mono',monospace;margin-bottom:5px">আপনার র‍্যাক</div>
     <div class="rack-b" id="rackLbl">—</div>
     <div class="mc2">
       <svg id="mapSVG" viewBox="0 0 460 290" xmlns="http://www.w3.org/2000/svg">
-        <rect width="460" height="290" fill="#0a1020" rx="12"/>
-        <!-- WALL -->
-        <rect x="10" y="10" width="440" height="265" fill="none" stroke="#1e293b" stroke-width="1.5" rx="10"/>
-        <!-- ENTRY -->
-        <rect x="185" y="265" width="90" height="14" rx="3" fill="#1e293b"/>
-        <text x="230" y="276" font-size="8" fill="#475569" text-anchor="middle" font-family="monospace">ENTRANCE</text>
-        <!-- ROW 1 RACKS -->
+        <rect width="460" height="290" fill="var(--s2)" rx="12"/>
+        <rect x="10" y="10" width="440" height="265" fill="none" stroke="var(--br)" stroke-width="1.5" rx="10"/>
+        <rect x="185" y="265" width="90" height="14" rx="3" fill="var(--s3)"/>
+        <text x="230" y="276" font-size="8" fill="var(--td)" text-anchor="middle" font-family="monospace">ENTRANCE</text>
         <g id="racks">
-          <g data-rack="RACK-A"><rect x="28" y="28" width="58" height="26" rx="5" fill="#0e2040" stroke="#38bdf8" stroke-width="1"/><text x="57" y="45" font-size="10" fill="#38bdf8" text-anchor="middle" font-weight="bold" font-family="monospace">A</text></g>
-          <g data-rack="RACK-B"><rect x="108" y="28" width="58" height="26" rx="5" fill="#0e2040" stroke="#38bdf8" stroke-width="1"/><text x="137" y="45" font-size="10" fill="#38bdf8" text-anchor="middle" font-weight="bold" font-family="monospace">B</text></g>
-          <g data-rack="RACK-C"><rect x="188" y="28" width="58" height="26" rx="5" fill="#0e2040" stroke="#38bdf8" stroke-width="1"/><text x="217" y="45" font-size="10" fill="#38bdf8" text-anchor="middle" font-weight="bold" font-family="monospace">C</text></g>
-          <g data-rack="RACK-D"><rect x="268" y="28" width="58" height="26" rx="5" fill="#0e2040" stroke="#38bdf8" stroke-width="1"/><text x="297" y="45" font-size="10" fill="#38bdf8" text-anchor="middle" font-weight="bold" font-family="monospace">D</text></g>
-          <g data-rack="RACK-E"><rect x="348" y="28" width="90" height="26" rx="5" fill="#0e2040" stroke="#38bdf8" stroke-width="1"/><text x="393" y="45" font-size="10" fill="#38bdf8" text-anchor="middle" font-weight="bold" font-family="monospace">E</text></g>
-          <!-- ROW 2 -->
-          <g data-rack="RACK-F"><rect x="28" y="94" width="58" height="26" rx="5" fill="#0e2040" stroke="#38bdf8" stroke-width="1"/><text x="57" y="111" font-size="10" fill="#38bdf8" text-anchor="middle" font-weight="bold" font-family="monospace">F</text></g>
-          <g data-rack="RACK-G"><rect x="108" y="94" width="58" height="26" rx="5" fill="#0e2040" stroke="#38bdf8" stroke-width="1"/><text x="137" y="111" font-size="10" fill="#38bdf8" text-anchor="middle" font-weight="bold" font-family="monospace">G</text></g>
-          <g data-rack="RACK-H"><rect x="188" y="94" width="58" height="26" rx="5" fill="#0e2040" stroke="#38bdf8" stroke-width="1"/><text x="217" y="111" font-size="10" fill="#38bdf8" text-anchor="middle" font-weight="bold" font-family="monospace">H</text></g>
-          <g data-rack="RACK-I"><rect x="268" y="94" width="58" height="26" rx="5" fill="#0e2040" stroke="#38bdf8" stroke-width="1"/><text x="297" y="111" font-size="10" fill="#38bdf8" text-anchor="middle" font-weight="bold" font-family="monospace">I</text></g>
-          <g data-rack="RACK-J"><rect x="348" y="94" width="90" height="26" rx="5" fill="#0e2040" stroke="#38bdf8" stroke-width="1"/><text x="393" y="111" font-size="10" fill="#38bdf8" text-anchor="middle" font-weight="bold" font-family="monospace">J</text></g>
-          <!-- ROW 3 -->
-          <g data-rack="RACK-K"><rect x="28" y="160" width="58" height="26" rx="5" fill="#0e2040" stroke="#38bdf8" stroke-width="1"/><text x="57" y="177" font-size="10" fill="#38bdf8" text-anchor="middle" font-weight="bold" font-family="monospace">K</text></g>
-          <g data-rack="RACK-L"><rect x="108" y="160" width="58" height="26" rx="5" fill="#0e2040" stroke="#38bdf8" stroke-width="1"/><text x="137" y="177" font-size="10" fill="#38bdf8" text-anchor="middle" font-weight="bold" font-family="monospace">L</text></g>
-          <g data-rack="RACK-M"><rect x="188" y="160" width="58" height="26" rx="5" fill="#0e2040" stroke="#38bdf8" stroke-width="1"/><text x="217" y="177" font-size="10" fill="#38bdf8" text-anchor="middle" font-weight="bold" font-family="monospace">M</text></g>
-          <g data-rack="RACK-N"><rect x="268" y="160" width="58" height="26" rx="5" fill="#0e2040" stroke="#38bdf8" stroke-width="1"/><text x="297" y="177" font-size="10" fill="#38bdf8" text-anchor="middle" font-weight="bold" font-family="monospace">N</text></g>
+          <g data-rack="RACK-A"><rect x="28" y="28" width="58" height="26" rx="5" fill="var(--s3)" stroke="var(--b)" stroke-width="1"/><text x="57" y="45" font-size="10" fill="var(--b)" text-anchor="middle" font-weight="bold" font-family="monospace">A</text></g>
+          <g data-rack="RACK-B"><rect x="108" y="28" width="58" height="26" rx="5" fill="var(--s3)" stroke="var(--b)" stroke-width="1"/><text x="137" y="45" font-size="10" fill="var(--b)" text-anchor="middle" font-weight="bold" font-family="monospace">B</text></g>
+          <g data-rack="RACK-C"><rect x="188" y="28" width="58" height="26" rx="5" fill="var(--s3)" stroke="var(--b)" stroke-width="1"/><text x="217" y="45" font-size="10" fill="var(--b)" text-anchor="middle" font-weight="bold" font-family="monospace">C</text></g>
+          <g data-rack="RACK-D"><rect x="268" y="28" width="58" height="26" rx="5" fill="var(--s3)" stroke="var(--b)" stroke-width="1"/><text x="297" y="45" font-size="10" fill="var(--b)" text-anchor="middle" font-weight="bold" font-family="monospace">D</text></g>
+          <g data-rack="RACK-E"><rect x="348" y="28" width="90" height="26" rx="5" fill="var(--s3)" stroke="var(--b)" stroke-width="1"/><text x="393" y="45" font-size="10" fill="var(--b)" text-anchor="middle" font-weight="bold" font-family="monospace">E</text></g>
+          <g data-rack="RACK-F"><rect x="28" y="94" width="58" height="26" rx="5" fill="var(--s3)" stroke="var(--b)" stroke-width="1"/><text x="57" y="111" font-size="10" fill="var(--b)" text-anchor="middle" font-weight="bold" font-family="monospace">F</text></g>
+          <g data-rack="RACK-G"><rect x="108" y="94" width="58" height="26" rx="5" fill="var(--s3)" stroke="var(--b)" stroke-width="1"/><text x="137" y="111" font-size="10" fill="var(--b)" text-anchor="middle" font-weight="bold" font-family="monospace">G</text></g>
+          <g data-rack="RACK-H"><rect x="188" y="94" width="58" height="26" rx="5" fill="var(--s3)" stroke="var(--b)" stroke-width="1"/><text x="217" y="111" font-size="10" fill="var(--b)" text-anchor="middle" font-weight="bold" font-family="monospace">H</text></g>
+          <g data-rack="RACK-I"><rect x="268" y="94" width="58" height="26" rx="5" fill="var(--s3)" stroke="var(--b)" stroke-width="1"/><text x="297" y="111" font-size="10" fill="var(--b)" text-anchor="middle" font-weight="bold" font-family="monospace">I</text></g>
+          <g data-rack="RACK-J"><rect x="348" y="94" width="90" height="26" rx="5" fill="var(--s3)" stroke="var(--b)" stroke-width="1"/><text x="393" y="111" font-size="10" fill="var(--b)" text-anchor="middle" font-weight="bold" font-family="monospace">J</text></g>
+          <g data-rack="RACK-K"><rect x="28" y="160" width="58" height="26" rx="5" fill="var(--s3)" stroke="var(--b)" stroke-width="1"/><text x="57" y="177" font-size="10" fill="var(--b)" text-anchor="middle" font-weight="bold" font-family="monospace">K</text></g>
+          <g data-rack="RACK-L"><rect x="108" y="160" width="58" height="26" rx="5" fill="var(--s3)" stroke="var(--b)" stroke-width="1"/><text x="137" y="177" font-size="10" fill="var(--b)" text-anchor="middle" font-weight="bold" font-family="monospace">L</text></g>
+          <g data-rack="RACK-M"><rect x="188" y="160" width="58" height="26" rx="5" fill="var(--s3)" stroke="var(--b)" stroke-width="1"/><text x="217" y="177" font-size="10" fill="var(--b)" text-anchor="middle" font-weight="bold" font-family="monospace">M</text></g>
+          <g data-rack="RACK-N"><rect x="268" y="160" width="58" height="26" rx="5" fill="var(--s3)" stroke="var(--b)" stroke-width="1"/><text x="297" y="177" font-size="10" fill="var(--b)" text-anchor="middle" font-weight="bold" font-family="monospace">N</text></g>
         </g>
-        <!-- READING AREA -->
-        <rect x="348" y="150" width="100" height="90" rx="7" fill="#080f1e" stroke="#1e293b" stroke-width="1"/>
-        <text x="398" y="185" font-size="8" fill="#334155" text-anchor="middle" font-family="monospace">READING</text>
-        <text x="398" y="197" font-size="8" fill="#334155" text-anchor="middle" font-family="monospace">AREA</text>
-        <circle cx="368" cy="215" r="4" fill="#1e293b" stroke="#334155" stroke-width="1"/>
-        <circle cx="388" cy="215" r="4" fill="#1e293b" stroke="#334155" stroke-width="1"/>
-        <circle cx="408" cy="215" r="4" fill="#1e293b" stroke="#334155" stroke-width="1"/>
-        <circle cx="428" cy="215" r="4" fill="#1e293b" stroke="#334155" stroke-width="1"/>
-        <!-- ARROW LAYER -->
+        <rect x="348" y="150" width="100" height="90" rx="7" fill="var(--bg)" stroke="var(--br)" stroke-width="1"/>
+        <text x="398" y="184" font-size="8" fill="var(--td)" text-anchor="middle" font-family="monospace">READING</text>
+        <text x="398" y="196" font-size="8" fill="var(--td)" text-anchor="middle" font-family="monospace">AREA</text>
+        <circle cx="368" cy="213" r="4" fill="var(--s3)" stroke="var(--br)" stroke-width="1"/>
+        <circle cx="388" cy="213" r="4" fill="var(--s3)" stroke="var(--br)" stroke-width="1"/>
+        <circle cx="408" cy="213" r="4" fill="var(--s3)" stroke="var(--br)" stroke-width="1"/>
+        <circle cx="428" cy="213" r="4" fill="var(--s3)" stroke="var(--br)" stroke-width="1"/>
         <g id="arrowLayer"></g>
-        <!-- YOU MARKER -->
         <g id="youM" style="display:none">
-          <circle id="youC" r="9" fill="rgba(0,255,157,.18)" stroke="#00ff9d" stroke-width="1.5"/>
-          <text id="youTx" font-size="7" fill="#00ff9d" text-anchor="middle" dy="2.5" font-family="monospace" font-weight="bold">YOU</text>
+          <circle id="youC" r="9" fill="rgba(0,200,100,.15)" stroke="var(--g)" stroke-width="1.5"/>
+          <text id="youTx" font-size="7" fill="var(--g)" text-anchor="middle" dy="2.5" font-family="monospace" font-weight="bold">YOU</text>
         </g>
       </svg>
     </div>
-    <p style="font-size:11px;color:var(--td);margin-top:10px">🟢 আপনার অবস্থান &nbsp;|&nbsp; 🔵 র‍্যাক &nbsp;|&nbsp; ➡️ পথ</p>
+    <p style="font-size:11px;color:var(--td);margin-top:8px">🟢 আপনার অবস্থান &nbsp;|&nbsp; 🔵 র‍্যাক &nbsp;|&nbsp; ➡️ পথ দেখাচ্ছে</p>
   </div>
 </div>
 
@@ -354,148 +518,457 @@ audio{display:none}
   </div>
 </div>
 
-<!-- QUIZ MODAL -->
-<div class="modal" id="quizM">
-  <div class="mh"><span class="mt">💡 স্মার্ট সিলেকশন</span><button class="mc" onclick="closeAll()">✕</button></div>
+<!-- BOOK EXCHANGE ADD MODAL -->
+<div class="modal" id="exAddM" style="max-width:520px">
+  <div class="mh"><span class="mt">🔄 বুক এক্সচেঞ্জ পোস্ট</span><button class="mc" onclick="closeAll()">✕</button></div>
   <div class="mb">
-    <p style="color:var(--td);font-size:13.5px;margin-bottom:18px">আজ কেমন মুড? বই সাজেস্ট করবো 👇</p>
-    <button class="qopt" onclick="applyQ('CSE')"><span class="qi">💻</span><div><b>টেকনিক্যাল পড়তে চাই</b><br><small style="color:var(--td)">CSE, Programming, Tech</small></div></button>
-    <button class="qopt" onclick="applyQ('BBA')"><span class="qi">📊</span><div><b>বিজনেস স্টাডিজ</b><br><small style="color:var(--td)">BBA, Management, Finance</small></div></button>
-    <button class="qopt" onclick="applyQ('')"><span class="qi">📚</span><div><b>সব বই দেখতে চাই</b><br><small style="color:var(--td)">পুরো সংগ্রহ</small></div></button>
+    <div class="fg">
+      <label class="fl">আপনি কী করতে চান?</label>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <button class="q-opt" id="exTypeHave" onclick="setExType('have')" style="text-align:center"><span class="q-em">📤</span>বই দিতে চাই</button>
+        <button class="q-opt" id="exTypeWant" onclick="setExType('want')" style="text-align:center"><span class="q-em">📥</span>বই নিতে চাই</button>
+      </div>
+    </div>
+    <div class="fg"><label class="fl">বইয়ের নাম</label><input class="fi" id="exBook" placeholder="বইয়ের নাম লিখুন"></div>
+    <div class="fg"><label class="fl">লেখকের নাম</label><input class="fi" id="exAuthor" placeholder="লেখকের নাম (optional)"></div>
+    <div class="fg"><label class="fl">ডিপার্টমেন্ট / কারণ</label><input class="fi" id="exDept" placeholder="যেমন: CSE 2nd year, পরীক্ষার জন্য দরকার..."></div>
+    <div class="fg"><label class="fl">সংক্ষিপ্ত বিবরণ</label><textarea class="fta" id="exSummary" placeholder="বইটি কেমন বা কেন দরকার সেটা লিখুন..."></textarea></div>
+    <div class="fg"><label class="fl">যোগাযোগ নম্বর</label><input class="fi" id="exContact" placeholder="01XXXXXXXXX" type="tel"></div>
+    <button class="sbtn" id="exSubmitBtn" onclick="submitExchange()">📤 পোস্ট করুন</button>
   </div>
 </div>
 
-<!-- TOAST -->
+<!-- EXCHANGE REQUEST MODAL (contact someone) -->
+<div class="modal" id="exReqM" style="max-width:460px">
+  <div class="mh"><span class="mt">📞 যোগাযোগ করুন</span><button class="mc" onclick="closeAll()">✕</button></div>
+  <div class="mb">
+    <div id="exReqInfo"></div>
+    <div class="div2"></div>
+    <div class="fg"><label class="fl">আপনার নাম</label><input class="fi" id="erName" placeholder="আপনার নাম"></div>
+    <div class="fg"><label class="fl">আপনার নম্বর</label><input class="fi" id="erPhone" placeholder="01XXXXXXXXX" type="tel"></div>
+    <div class="fg"><label class="fl">বার্তা</label><textarea class="fta" id="erMsg" placeholder="বইটি নিতে / দিতে আগ্রহী, যোগাযোগ করুন..."></textarea></div>
+    <button class="sbtn" onclick="submitExReq()">📬 রিকোয়েস্ট পাঠান</button>
+  </div>
+</div>
+
+<!-- SMART QUIZ MODAL -->
+<div class="modal" id="quizM" style="max-width:560px">
+  <div class="mh"><span class="mt">🧠 স্মার্ট বুক ডিসিশন</span><button class="mc" onclick="closeAll()">✕</button></div>
+  <div class="mb">
+    <div class="q-progress" id="qProgress"></div>
+    <div class="quiz-step active" id="qs1">
+      <div class="q-question">আজকে কোন ধরনের বিষয় পড়তে চাও? 🎯</div>
+      <div class="q-hint">একটি অপশন বেছে নাও</div>
+      <div class="q-options">
+        <button class="q-opt" onclick="qAnswer(1,'tech')"><span class="q-em">💻</span>টেকনিক্যাল / কোডিং</button>
+        <button class="q-opt" onclick="qAnswer(1,'business')"><span class="q-em">📊</span>বিজনেস / ম্যানেজমেন্ট</button>
+        <button class="q-opt" onclick="qAnswer(1,'concept')"><span class="q-em">🧩</span>থিওরি / কনসেপ্ট</button>
+        <button class="q-opt" onclick="qAnswer(1,'practical')"><span class="q-em">🔧</span>প্র্যাকটিক্যাল / প্রজেক্ট</button>
+      </div>
+    </div>
+    <div class="quiz-step" id="qs2">
+      <div class="q-question">তোমার অভিজ্ঞতার স্তর কেমন? 📈</div>
+      <div class="q-hint">সৎভাবে বেছে নাও</div>
+      <div class="q-options">
+        <button class="q-opt" onclick="qAnswer(2,'beginner')"><span class="q-em">🌱</span>একেবারে নতুন</button>
+        <button class="q-opt" onclick="qAnswer(2,'intermediate')"><span class="q-em">🌿</span>কিছুটা জানি</button>
+        <button class="q-opt" onclick="qAnswer(2,'advanced')"><span class="q-em">🌳</span>ভালো জানি</button>
+        <button class="q-opt" onclick="qAnswer(2,'expert')"><span class="q-em">🔥</span>এক্সপার্ট লেভেল</button>
+      </div>
+    </div>
+    <div class="quiz-step" id="qs3">
+      <div class="q-question">কতক্ষণ পড়তে চাও আজকে? ⏰</div>
+      <div class="q-hint">সময় অনুযায়ী বই সাজেস্ট করবো</div>
+      <div class="q-options">
+        <button class="q-opt" onclick="qAnswer(3,'short')"><span class="q-em">⚡</span>৩০ মিনিটের কম</button>
+        <button class="q-opt" onclick="qAnswer(3,'medium')"><span class="q-em">📖</span>১-২ ঘণ্টা</button>
+        <button class="q-opt" onclick="qAnswer(3,'long')"><span class="q-em">🌙</span>সারাদিন পড়বো</button>
+        <button class="q-opt" onclick="qAnswer(3,'reference')"><span class="q-em">🔍</span>শুধু রেফারেন্স</button>
+      </div>
+    </div>
+    <div class="quiz-step" id="qs4">
+      <div class="q-question">পড়ার উদ্দেশ্য কী? 🎓</div>
+      <div class="q-hint">লক্ষ্য অনুযায়ী সেরা বই দেবো</div>
+      <div class="q-options">
+        <button class="q-opt" onclick="qAnswer(4,'exam')"><span class="q-em">📝</span>পরীক্ষার প্রস্তুতি</button>
+        <button class="q-opt" onclick="qAnswer(4,'skill')"><span class="q-em">💡</span>নতুন স্কিল শিখতে</button>
+        <button class="q-opt" onclick="qAnswer(4,'project')"><span class="q-em">🚀</span>প্রজেক্টের জন্য</button>
+        <button class="q-opt" onclick="qAnswer(4,'interest')"><span class="q-em">😊</span>শুধু আগ্রহ থেকে</button>
+      </div>
+    </div>
+    <div class="quiz-step" id="qsResult">
+      <div class="quiz-result">
+        <div class="qr-title" id="qrTitle"></div>
+        <div class="qr-sub" id="qrSub"></div>
+        <div class="qr-books" id="qrBooks"></div>
+        <button class="sbtn" style="margin-top:14px" onclick="closeAll()">✅ ঠিক আছে!</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="toast"></div>
 
 <script>
-/* ── CURSOR ── */
-const cur=document.getElementById('cur'),cur2=document.getElementById('cur2');
-let mx=0,my=0,tx=0,ty=0;
-document.addEventListener('mousemove',e=>{
-  mx=e.clientX;my=e.clientY;
-  cur.style.left=mx+'px';cur.style.top=my+'px';
-});
-let raf;function moveCur2(){
-  tx+=(mx-tx)*.16;ty+=(my-ty)*.16;
-  cur2.style.left=tx+'px';cur2.style.top=ty+'px';
-  raf=requestAnimationFrame(moveCur2);
-}moveCur2();
+/* ══════════════════════════════════════════
+   CONFIG — এখানে URL গুলো দাও
+   Sheet columns: Title|Author|Edition|Category|Rack|Summary|AudioURL
+   Exchange Sheet columns: Type|BookName|Author|Dept|Summary|Contact|Timestamp
+   Feedback Sheet columns: BookTitle|Feedback|Timestamp
+══════════════════════════════════════════ */
+const BOOKS_URL    = "https://script.google.com/macros/s/AKfycbx_pmfFARzVVhyb7e_6JgCM3wva0AQ6iPUF5tz1pz1byuM7WPCbHaXEUTjOVw1G5Aw1/exec";   // Books Apps Script URL
+const EXCHANGE_URL = "https://script.google.com/macros/s/AKfycbyQdUouMBlKIiTjOb3g0EcDmHNbB3DzH8nNk1Tf3IHkuoXS0BS96USQ1xYTDzd9JGfOsw/exec";   // Exchange Apps Script URL
+const FEEDBACK_URL = "https://script.google.com/macros/s/AKfycbzy5SBo_bZJp4uPttreaYztD4OFTD1EwxfutyAGvh0TCV66Ihjl9QoItYf-erC1r6yyKQ/exec";   // Feedback Apps Script URL
 
-/* ── CARD MOUSE GLOW ── */
-document.addEventListener('mousemove',e=>{
-  const card=e.target.closest('.card');
-  if(!card)return;
-  const r=card.getBoundingClientRect();
-  card.style.setProperty('--mx',((e.clientX-r.left)/r.width*100)+'%');
-  card.style.setProperty('--my',((e.clientY-r.top)/r.height*100)+'%');
-});
-
-/* ══════════════════════════════
-   GOOGLE SHEET CONFIG
-   ══════════════════════════════
-   👉 নিচের sheetURL এ তোমার
-      Google Apps Script URL দাও।
-   ══════════════════════════════ */
-const sheetURL = "https://script.google.com/macros/s/AKfycbwEdGeq5ArZlG213NPA9uc0JhVBu-0WFVRMTiEUAhJMdVIcNz-Aekc4BT3-LmsZY8kTWw/exec";
-/* ─── শিট কলাম অর্ডার (Apps Script থেকে JSON আসার format):
-   { Title, Author, Edition, Category, Rack, Summary, AudioURL, YouTubeURL }
-─────────────────────────────────── */
-
-/* FALLBACK SAMPLE */
-const sample=[
-  {Title:"Introduction to Algorithms",Author:"Cormen, Leiserson, Rivest",Edition:"3rd",Category:"CSE",Rack:"RACK-A",Summary:"অ্যালগরিদম ডিজাইন ও অ্যানালাইসিসের সেরা রেফারেন্স বই। ডেটা স্ট্রাকচার, গ্রাফ থিওরি ও ডাইনামিক প্রোগ্রামিং নিয়ে বিস্তারিত আলোচনা।",AudioURL:"",YouTubeURL:"https://www.youtube.com/embed/HtSuA80QTyo"},
-  {Title:"Clean Code",Author:"Robert C. Martin",Edition:"1st",Category:"CSE",Rack:"RACK-B",Summary:"পেশাদার কোড লেখার সোনালি নিয়ম। রিফ্যাক্টরিং, নামকরণ ও টেস্টিং নিয়ে বাস্তবমুখী গাইড।",AudioURL:"",YouTubeURL:"https://www.youtube.com/embed/7EmboKQH8lM"},
-  {Title:"Principles of Marketing",Author:"Philip Kotler",Edition:"16th",Category:"BBA",Rack:"RACK-F",Summary:"মার্কেটিং-এর মূলনীতি, ডিজিটাল ট্রেন্ড ও গ্লোবাল স্ট্র্যাটেজি নিয়ে বিস্তারিত।",AudioURL:"",YouTubeURL:"https://www.youtube.com/embed/VkjZ2-S9b3o"},
-  {Title:"Operating System Concepts",Author:"Silberschatz & Galvin",Edition:"10th",Category:"CSE",Rack:"RACK-C",Summary:"OS এর মূল ধারণা — প্রসেস, মেমোরি, ফাইল সিস্টেম ও সিকিউরিটি নিয়ে সম্পূর্ণ আলোচনা।",AudioURL:"",YouTubeURL:"https://www.youtube.com/embed/9GDX-IyZ_C8"},
-  {Title:"Financial Management",Author:"Prasanna Chandra",Edition:"9th",Category:"BBA",Rack:"RACK-G",Summary:"কর্পোরেট ফিন্যান্স, ইনভেস্টমেন্ট অ্যানালাইসিস ও বাজেটিং-এর উপর আদর্শ গাইড।",AudioURL:"",YouTubeURL:""},
-  {Title:"Database System Concepts",Author:"Silberschatz & Korth",Edition:"7th",Category:"CSE",Rack:"RACK-D",Summary:"SQL, NoSQL, ট্রানজেকশন ও ডেটা মডেলিং নিয়ে সম্পূর্ণ রেফারেন্স।",AudioURL:"",YouTubeURL:"https://www.youtube.com/embed/HXV3zeQKqGY"},
+/* ══ DATA ══ */
+const SAMPLE = [
+  {Title:"Introduction to Algorithms",Author:"Cormen, Leiserson, Rivest",Edition:"3rd",Category:"CSE",Rack:"RACK-A",Summary:"অ্যালগরিদম ডিজাইন ও অ্যানালাইসিসের সেরা রেফারেন্স বই। ডেটা স্ট্রাকচার, গ্রাফ থিওরি ও ডাইনামিক প্রোগ্রামিং নিয়ে বিস্তারিত।",AudioURL:""},
+  {Title:"Clean Code",Author:"Robert C. Martin",Edition:"1st",Category:"CSE",Rack:"RACK-B",Summary:"পেশাদার কোড লেখার সোনালি নিয়ম। রিফ্যাক্টরিং, নামকরণ ও টেস্টিং নিয়ে বাস্তবমুখী গাইড।",AudioURL:""},
+  {Title:"Principles of Marketing",Author:"Philip Kotler",Edition:"16th",Category:"BBA",Rack:"RACK-F",Summary:"মার্কেটিং-এর মূলনীতি, ডিজিটাল ট্রেন্ড ও গ্লোবাল স্ট্র্যাটেজি নিয়ে বিস্তারিত আলোচনা।",AudioURL:""},
+  {Title:"Operating System Concepts",Author:"Silberschatz & Galvin",Edition:"10th",Category:"CSE",Rack:"RACK-C",Summary:"OS এর মূল ধারণা — প্রসেস, মেমোরি, ফাইল সিস্টেম ও সিকিউরিটি নিয়ে সম্পূর্ণ আলোচনা।",AudioURL:""},
+  {Title:"Financial Management",Author:"Prasanna Chandra",Edition:"9th",Category:"BBA",Rack:"RACK-G",Summary:"কর্পোরেট ফিন্যান্স, ইনভেস্টমেন্ট অ্যানালাইসিস ও বাজেটিং-এর উপর আদর্শ গাইড।",AudioURL:""},
+  {Title:"Database System Concepts",Author:"Silberschatz & Korth",Edition:"7th",Category:"CSE",Rack:"RACK-D",Summary:"SQL, NoSQL, ট্রানজেকশন ও ডেটা মডেলিং নিয়ে সম্পূর্ণ রেফারেন্স।",AudioURL:""},
 ];
 
-let books=[];
+let books = [];
+let exchanges = [];
+let exType = 'have';
+let curExBook = null;
 
+/* ══ THEME ══ */
+const html = document.documentElement;
+let dark = false;
+function toggleTheme(){
+  dark = !dark;
+  html.setAttribute('data-theme', dark?'dark':'light');
+  document.getElementById('themeIcon').textContent = dark?'☀️':'🌙';
+  document.getElementById('themeLabel').textContent = dark?'Light Mode':'Dark Mode';
+  document.getElementById('lg1').setAttribute('stop-color', dark?'#00ff9d':'#7c3aed');
+  document.getElementById('lg2').setAttribute('stop-color', dark?'#38bdf8':'#06b6d4');
+}
+
+/* ══ CURSOR ══ */
+const cur=document.getElementById('cur'),cur2=document.getElementById('cur2');
+let mx=0,my=0,tx=0,ty=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cur.style.left=mx+'px';cur.style.top=my+'px';});
+(function loop(){tx+=(mx-tx)*.16;ty+=(my-ty)*.16;cur2.style.left=tx+'px';cur2.style.top=ty+'px';requestAnimationFrame(loop);})();
+document.addEventListener('mouseover',e=>{if(e.target.closest('button,a,.pill,.card,.q-opt,.qr-book-item,.ex-card,.top-card')){cur.style.width='18px';cur.style.height='18px';}});
+document.addEventListener('mouseout',e=>{if(e.target.closest('button,a,.pill,.card,.q-opt,.qr-book-item,.ex-card,.top-card')){cur.style.width='8px';cur.style.height='8px';}});
+
+/* ══ CARD GLOW ══ */
+document.addEventListener('mousemove',e=>{
+  const c=e.target.closest('.card');if(!c)return;
+  const r=c.getBoundingClientRect();
+  c.style.setProperty('--mx',((e.clientX-r.left)/r.width*100)+'%');
+  c.style.setProperty('--my',((e.clientY-r.top)/r.height*100)+'%');
+});
+
+/* ══ VOTE STORAGE ══ */
+function getVotes(){try{return JSON.parse(localStorage.getItem('fi_votes')||'{}');}catch{return {};}}
+function saveVotes(v){try{localStorage.setItem('fi_votes',JSON.stringify(v));}catch{}}
+function getVoteCounts(){try{return JSON.parse(localStorage.getItem('fi_vcounts')||'{}');}catch{return {};}}
+function saveVoteCounts(v){try{localStorage.setItem('fi_vcounts',JSON.stringify(v));}catch{}}
+
+/* ══ YT HELPERS ══ */
+
+
+
+
+/* ══ LOAD BOOKS (fast fetch + cache) ══ */
 async function loadBooks(){
+  // try cache first for instant render
   try{
-    if(!sheetURL) throw new Error('no url');
-    const res=await fetch(sheetURL,{method:'GET',mode:'cors',credentials:'omit'});
-    if(!res.ok) throw new Error('bad res');
-    const txt=await res.text();
-    books=JSON.parse(txt);
-  }catch(e){
-    books=sample;
-  }
+    const cached=sessionStorage.getItem('fi_books');
+    if(cached){books=JSON.parse(cached);renderBooks();updateStatus();}
+  }catch{}
+  // then fetch fresh
+  try{
+    if(!BOOKS_URL)throw new Error('no url');
+    const ctrl=new AbortController();
+    const tid=setTimeout(()=>ctrl.abort(),5000);
+    const res=await fetch(BOOKS_URL,{signal:ctrl.signal,cache:'no-store'});
+    clearTimeout(tid);
+    if(!res.ok)throw new Error('bad');
+    const fresh=await res.json();
+    books=fresh;
+    try{sessionStorage.setItem('fi_books',JSON.stringify(books));}catch{}
+  }catch{if(!books.length)books=SAMPLE;}
+  renderBooks();updateStatus();
+}
+
+/* ══ LOAD EXCHANGES ══ */
+function loadExchangesLocal(){
+  try{const s=localStorage.getItem('fi_exchanges');if(s)exchanges=JSON.parse(s);}catch{}
+  renderExchanges();
+}
+async function loadExchanges(){
+  loadExchangesLocal();
+  if(!EXCHANGE_URL){renderExchanges();return;}
+  try{
+    const ctrl=new AbortController();
+    setTimeout(()=>ctrl.abort(),4000);
+    const res=await fetch(EXCHANGE_URL,{signal:ctrl.signal,cache:'no-store'});
+    if(!res.ok)throw new Error('bad');
+    const fresh=await res.json();
+    // merge: remote first, then local-only
+    const remoteKeys=new Set(fresh.map(e=>e.BookName+'_'+e.Contact+'_'+e.Timestamp));
+    const localOnly=exchanges.filter(e=>!remoteKeys.has(e.BookName+'_'+e.Contact+'_'+e.Timestamp));
+    exchanges=[...fresh,...localOnly];
+    try{localStorage.setItem('fi_exchanges',JSON.stringify(exchanges));}catch{}
+  }catch{}
+  renderExchanges();
+}
+
+function updateStatus(){
   document.getElementById('totalB').textContent=books.length;
-  render(books);
+  const top=getTopLiked();
+  document.getElementById('topLikedName').textContent=top?top.substring(0,18)+'…':'সর্বোচ্চ পছন্দ';
 }
 
-function tagCls(cat){
-  if(!cat)return'to';
-  const c=cat.toLowerCase();
-  if(c.includes('cse')||c.includes('cs'))return'tc';
-  if(c.includes('bba')||c.includes('bus'))return'tb';
-  return'to';
-}
+function tagCls(cat){const c=(cat||'').toLowerCase();if(c.includes('cse'))return'tc';if(c.includes('bba')||c.includes('bus'))return'tb';return'to';}
 
-function render(list){
+/* ══ RENDER BOOKS ══ */
+function renderBooks(){
   const g=document.getElementById('grid');
-  if(!list.length){g.innerHTML='<div class="emp"><p>কোনো বই পাওয়া যায়নি 😔</p></div>';return;}
-  const frag=document.createDocumentFragment();
-  list.forEach((b,i)=>{
+  if(!books.length){g.innerHTML='<div class="emp"><p>কোনো বই পাওয়া যায়নি 😔</p></div>';return;}
+  const vc=getVoteCounts(),uv=getVotes();
+  const f=document.createDocumentFragment();
+  books.forEach((b,i)=>{
+    const key=b.Title;
+    const lk=vc[key]?.like||0,dk=vc[key]?.dislike||0,total=lk+dk;
+    const lpct=total?Math.round(lk/total*100):50;
+    const myVote=uv[key]||null;
+
     const d=document.createElement('div');
-    d.className='card';
-    d.style.animationDelay=(i*.055)+'s';
+    d.className='card';d.style.animationDelay=(i*.045)+'s';
     d.dataset.title=(b.Title||'').toLowerCase();
     d.dataset.author=(b.Author||'').toLowerCase();
     d.dataset.cat=(b.Category||'').toLowerCase();
-    const tc=tagCls(b.Category);
-    const bj=JSON.stringify(b).replace(/'/g,"&apos;");
+    // CLEAN CARD: title + author visible, details collapsed
     d.innerHTML=`
-      <span class="tag ${tc}">${b.Category||'General'}</span>
-      <h3>${b.Title||'Unknown'}</h3>
-      <div class="cm">✍️ <span>${b.Author||'—'}</span></div>
-      <div class="cm">📌 <span>Edition: ${b.Edition||'—'}</span></div>
-      <div class="cm">📍 <span>Rack: ${b.Rack||'—'}</span></div>
-      <div class="div"></div>
-      <div class="bg2">
-        <button class="btn bdf" onclick='showDet(${bj})'>📖 বিস্তারিত ও সামারি</button>
+      <span class="tag ${tagCls(b.Category)}">${b.Category||'General'}</span>
+      <div class="card-top">
+        <div class="card-title">${b.Title||'Unknown'}</div>
+        <div class="card-author">✍️ ${b.Author||'—'}</div>
+      </div>
+      <div class="card-details" id="cd_${i}">
+        <div class="cm" style="margin-top:8px">📌 <span>Edition: ${b.Edition||'—'}</span></div>
+        <div class="cm">📍 <span>Rack: ${b.Rack||'—'}</span></div>
+      </div>
+      <div class="cdiv"></div>
+      <div class="vote-row">
+        <div class="vote-counts"><span class="vc vc-like">❤️ ${lk}</span><span class="vc vc-dislike">👎 ${dk}</span></div>
+        <div class="vote-progress"><div class="vp-fill" style="width:${lpct}%"></div></div>
+      </div>
+      <div class="bg3">
+        <button class="btn btn-like${myVote==='like'?' voted':''}" id="like_${i}" onclick='vote(${JSON.stringify(b)},${i},"like")'>❤️ পছন্দ</button>
+        <button class="btn btn-dislike${myVote==='dislike'?' voted':''}" id="dislike_${i}" onclick='vote(${JSON.stringify(b)},${i},"dislike")'>👎 অপছন্দ</button>
         <button class="btn bm" onclick="showMap('${b.Rack||''}')">📍 ম্যাপ</button>
-        <button class="btn ba" onclick='playAudio(${bj})'>🔊 অডিও</button>
+      </div>
+      <div class="bg2">
+        <button class="btn bdf" onclick='showDet(${JSON.stringify(b)})'>📖 বিস্তারিত ও সামারি</button>
+        <button class="btn ba" onclick='playAudio(${JSON.stringify(b)})'>🔊 অডিও</button>
+      </div>
+      <div class="fb-box" id="fb_${i}" style="display:none">
+        <div class="fb-label">💬 কেন অপছন্দ করলে?</div>
+        <textarea class="fb-ta" id="fbt_${i}" placeholder="তোমার মতামত লেখো..."></textarea>
+        <button class="fb-send" onclick='sendFeedback(${JSON.stringify(b)},${i})'>📤 পাঠাও</button>
       </div>`;
-    frag.appendChild(d);
+    // expand details on card hover
+    d.addEventListener('mouseenter',()=>document.getElementById(`cd_${i}`)?.classList.add('show'));
+    d.addEventListener('mouseleave',()=>document.getElementById(`cd_${i}`)?.classList.remove('show'));
+    f.appendChild(d);
   });
-  g.innerHTML='';
-  g.appendChild(frag);
+  g.innerHTML='';g.appendChild(f);
 }
 
-/* ── FILTER ── */
-let ft;
-function filter(){
-  clearTimeout(ft);
-  ft=setTimeout(()=>{
+/* ══ SMART SEARCH ══ */
+let searchTimer;
+function onSearch(){
+  clearTimeout(searchTimer);
+  searchTimer=setTimeout(()=>{
     const q=document.getElementById('search').value.toLowerCase().trim();
     document.querySelectorAll('.card').forEach(c=>{
-      c.style.display=(c.dataset.title.includes(q)||c.dataset.author.includes(q)||c.dataset.cat.includes(q))?'':'none';
+      const show=!q||c.dataset.title.includes(q)||c.dataset.author.includes(q)||c.dataset.cat.includes(q);
+      c.style.display=show?'':'none';
     });
-  },120);
+  },80);
+}
+function onSearchKey(e){
+  if(e.key==='Escape'){document.getElementById('search').value='';document.querySelectorAll('.card').forEach(c=>c.style.display='');}
 }
 
-/* ── MODALS ── */
-function openM(id){
-  document.getElementById('ov').classList.add('on');
-  document.getElementById(id).classList.add('on');
+/* ══ VOTE ══ */
+function vote(book,idx,type){
+  const key=book.Title,uv=getVotes(),vc=getVoteCounts();
+  const prev=uv[key]||null;
+  if(!vc[key])vc[key]={like:0,dislike:0};
+  if(prev===type){uv[key]=null;vc[key][type]=Math.max(0,vc[key][type]-1);}
+  else{if(prev)vc[key][prev]=Math.max(0,vc[key][prev]-1);uv[key]=type;vc[key][type]++;}
+  saveVotes(uv);saveVoteCounts(vc);
+  const lk=vc[key].like,dk=vc[key].dislike,total=lk+dk,lpct=total?Math.round(lk/total*100):50;
+  const card=document.getElementById(`like_${idx}`)?.closest('.card');
+  if(card){
+    card.querySelectorAll('.vc')[0].textContent=`❤️ ${lk}`;
+    card.querySelectorAll('.vc')[1].textContent=`👎 ${dk}`;
+    card.querySelector('.vp-fill').style.width=lpct+'%';
+    document.getElementById(`like_${idx}`).classList.toggle('voted',uv[key]==='like');
+    document.getElementById(`dislike_${idx}`).classList.toggle('voted',uv[key]==='dislike');
+    const fb=document.getElementById(`fb_${idx}`);
+    fb.style.display=uv[key]==='dislike'?'block':'none';
+  }
+  renderTopList();
+  const top=getTopLiked();
+  document.getElementById('topLikedName').textContent=top?top.substring(0,18)+'…':'সর্বোচ্চ পছন্দ';
+  toast(type==='like'?'❤️ পছন্দ করা হয়েছে!':'👎 অপছন্দ জানানো হয়েছে');
 }
+
+async function sendFeedback(book,idx){
+  const txt=document.getElementById(`fbt_${idx}`).value.trim();
+  const payload={bookTitle:book.Title,feedback:txt||'(কোনো মন্তব্য নেই)',timestamp:new Date().toLocaleString('bn-BD')};
+  if(FEEDBACK_URL){try{await fetch(FEEDBACK_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});}catch{}}
+  document.getElementById(`fb_${idx}`).style.display='none';
+  toast('✅ ফিডব্যাক পাঠানো হয়েছে! ধন্যবাদ 🙏');
+}
+
+/* ══ TOP LIST ══ */
+function getTopLiked(){const vc=getVoteCounts();const s=Object.entries(vc).sort((a,b)=>(b[1].like||0)-(a[1].like||0));return s[0]?s[0][0]:null;}
+function renderTopList(){
+  const vc=getVoteCounts();
+  const liked=Object.entries(vc).filter(([,v])=>v.like>0).sort((a,b)=>b[1].like-a[1].like).slice(0,5);
+  const disliked=Object.entries(vc).filter(([,v])=>v.dislike>0).sort((a,b)=>b[1].dislike-a[1].dislike).slice(0,5);
+  const medals=['🥇','🥈','🥉','4️⃣','5️⃣'];
+  renderTopGrid('topLikedGrid',liked,'like',medals);
+  renderTopGrid('topDislikedGrid',disliked,'dislike',medals);
+}
+function renderTopGrid(id,list,type,medals){
+  const g=document.getElementById(id);
+  if(!list.length){g.innerHTML='<div class="emp"><p>এখনো কোনো ভোট নেই</p></div>';return;}
+  g.innerHTML=list.map(([title,vc],i)=>{
+    const b=books.find(x=>x.Title===title)||{};
+    const cnt=type==='like'?vc.like:vc.dislike;
+    return`<div class="top-card" onclick='showDet(${JSON.stringify(b)})'>
+      <div class="top-rank">${medals[i]}</div>
+      <div class="top-info"><div class="top-title">${title}</div><div class="top-count">${b.Author||'—'} · ${b.Category||''}</div></div>
+      <div class="top-like-badge ${type==='like'?'like-badge':'dislike-badge'}">${type==='like'?'❤️':'👎'} ${cnt}</div>
+    </div>`;
+  }).join('');
+}
+
+/* ══ EXCHANGE ══ */
+function setExType(t){
+  exType=t;
+  document.getElementById('exTypeHave').classList.toggle('selected',t==='have');
+  document.getElementById('exTypeWant').classList.toggle('selected',t==='want');
+}
+setExType('have');
+
+async function submitExchange(){
+  const book=document.getElementById('exBook').value.trim();
+  const contact=document.getElementById('exContact').value.trim();
+  if(!book||!contact){toast('বইয়ের নাম ও নম্বর দিন ⚠️');return;}
+  const btn=document.getElementById('exSubmitBtn');
+  btn.disabled=true;btn.textContent='পাঠানো হচ্ছে...';
+  const payload={
+    Type:exType==='have'?'দিতে চাই':'নিতে চাই',
+    BookName:book,
+    Author:document.getElementById('exAuthor').value.trim(),
+    Dept:document.getElementById('exDept').value.trim(),
+    Summary:document.getElementById('exSummary').value.trim(),
+    Contact:contact,
+    Timestamp:new Date().toLocaleString('bn-BD')
+  };
+  // add to local list instantly + persist
+  exchanges.unshift(payload);
+  try{localStorage.setItem('fi_exchanges',JSON.stringify(exchanges));}catch{}
+  renderExchanges();
+  if(EXCHANGE_URL){
+    try{await fetch(EXCHANGE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});}catch{}
+  }
+  toast('✅ পোস্ট করা হয়েছে!');
+  ['exBook','exAuthor','exDept','exSummary','exContact'].forEach(id=>document.getElementById(id).value='');
+  btn.disabled=false;btn.textContent='📤 পোস্ট করুন';
+  closeAll();
+  switchTab('exchange',document.querySelector('[data-tab=exchange]'));
+}
+
+function renderExchanges(){
+  const g=document.getElementById('exList');
+  if(!exchanges.length){
+    g.innerHTML='<div class="ex-empty"><div class="ex-empty-icon">📖</div><p>এখনো কোনো এক্সচেঞ্জ পোস্ট নেই</p><p style="font-size:12px;color:var(--tbr);margin-top:6px">প্রথম পোস্ট করো 👆</p></div>';
+    return;
+  }
+  g.innerHTML=exchanges.map((ex,i)=>`
+    <div class="ex-card">
+      <div class="ex-card-head">
+        <div class="ex-title">${ex.BookName||'—'}</div>
+        <span class="ex-badge ${ex.Type==='দিতে চাই'?'ex-badge-have':'ex-badge-want'}">${ex.Type==='দিতে চাই'?'📤 দিতে চাই':'📥 নিতে চাই'}</span>
+      </div>
+      <div class="ex-meta">
+        ${ex.Author?`<span class="ex-m">✍️ <b>${ex.Author}</b></span>`:''}
+        ${ex.Dept?`<span class="ex-m">🏛️ <b>${ex.Dept}</b></span>`:''}
+      </div>
+      ${ex.Summary?`<div class="ex-summary">${ex.Summary}</div>`:''}
+      <div class="ex-footer">
+        <span class="ex-contact">📞 ${ex.Contact}</span>
+        <button class="ex-req-btn" onclick='openExReq(${JSON.stringify(ex)})'>💬 আগ্রহী আছি</button>
+      </div>
+    </div>`).join('');
+}
+
+function openExReq(ex){
+  curExBook=ex;
+  document.getElementById('exReqInfo').innerHTML=`
+    <div style="background:var(--s2);border-radius:10px;padding:12px 14px;border:1px solid var(--br)">
+      <div style="font-family:'Space Grotesk',sans-serif;font-size:1rem;font-weight:800;color:var(--t);margin-bottom:4px">${ex.BookName}</div>
+      <div style="font-size:12px;color:var(--td)">${ex.Type} · ${ex.Dept||''}</div>
+    </div>`;
+  openM('exReqM');
+}
+
+async function submitExReq(){
+  const name=document.getElementById('erName').value.trim();
+  const phone=document.getElementById('erPhone').value.trim();
+  if(!name||!phone){toast('নাম ও নম্বর দিন ⚠️');return;}
+  const payload={
+    Type:'আগ্রহী',
+    BookName:curExBook?.BookName||'',
+    Author:name,
+    Contact:phone,
+    Summary:document.getElementById('erMsg').value.trim(),
+    Dept:'যোগাযোগ রিকোয়েস্ট',
+    Timestamp:new Date().toLocaleString('bn-BD')
+  };
+  if(EXCHANGE_URL){try{await fetch(EXCHANGE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});}catch{}}
+  toast('✅ রিকোয়েস্ট পাঠানো হয়েছে!');
+  ['erName','erPhone','erMsg'].forEach(id=>document.getElementById(id).value='');
+  closeAll();
+}
+
+/* ══ TAB SWITCH ══ */
+function switchTab(tab,el){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  if(el)el.classList.add('active');
+  document.getElementById('tabAll').style.display=tab==='all'?'':'none';
+  document.getElementById('tabTop').style.display=tab==='top'?'':'none';
+  document.getElementById('tabExchange').style.display=tab==='exchange'?'':'none';
+  if(tab==='top')renderTopList();
+  if(tab==='exchange'){loadExchangesLocal();loadExchanges();}
+}
+
+/* ══ MODALS ══ */
+function openM(id){document.getElementById('ov').classList.add('on');document.getElementById(id).classList.add('on');}
 function closeAll(){
   document.getElementById('ov').classList.remove('on');
   document.querySelectorAll('.modal').forEach(m=>m.classList.remove('on'));
-  const a=document.getElementById('au');
-  if(a){a.pause();a.src='';}
+  const a=document.getElementById('au');if(a){a.pause();a.src='';}
   document.getElementById('apb').textContent='▶';
   document.getElementById('apf').style.width='0%';
-  const yt=document.getElementById('ytF');
-  if(yt) yt.src='';
+
 }
 
-/* ── DETAIL ── */
+/* ══ DETAIL ══ */
+
 function showDet(b){
   document.getElementById('dT').textContent=b.Title||'—';
   document.getElementById('dA').textContent=b.Author||'—';
@@ -504,165 +977,114 @@ function showDet(b){
   document.getElementById('dR').textContent=b.Rack||'—';
   document.getElementById('dS').textContent=b.Summary||'সামারি যোগ করা হয়নি।';
   document.getElementById('apTitle').textContent=b.Title||'—';
-  const au=document.getElementById('au');
-  const auSec=document.getElementById('auSec');
-  if(b.AudioURL){au.src=b.AudioURL;auSec.style.display='block';}
-  else{au.src='';auSec.style.display='none';}
-  const ytSec=document.getElementById('ytSec');
-  const ytF=document.getElementById('ytF');
-  if(b.YouTubeURL){ytF.src=b.YouTubeURL+'?rel=0&modestbranding=1';ytSec.style.display='block';}
-  else{ytF.src='';ytSec.style.display='none';}
+  const au=document.getElementById('au'),auSec=document.getElementById('auSec');
+  if(b.AudioURL){au.src=b.AudioURL;auSec.style.display='block';}else{au.src='';auSec.style.display='none';}
+
   openM('detM');
 }
 
-/* ── AUDIO ── */
-function playAudio(b){
-  if(!b.AudioURL){toast('এই বইয়ের অডিও নেই 😔');return;}
-  showDet(b);
-  setTimeout(()=>{document.getElementById('au').play();document.getElementById('apb').textContent='⏸';},250);
-}
-function toggleAu(){
-  const a=document.getElementById('au');
-  if(!a.src||a.src===location.href){toast('অডিও পাওয়া যায়নি');return;}
-  if(a.paused){a.play();document.getElementById('apb').textContent='⏸';}
-  else{a.pause();document.getElementById('apb').textContent='▶';}
-}
-function auTick(){
-  const a=document.getElementById('au');
-  if(a.duration) document.getElementById('apf').style.width=(a.currentTime/a.duration*100)+'%';
-}
+
+/* ══ AUDIO ══ */
+function playAudio(b){if(!b.AudioURL){toast('এই বইয়ের অডিও নেই 😔');return;}showDet(b);setTimeout(()=>{document.getElementById('au').play();document.getElementById('apb').textContent='⏸';},200);}
+function toggleAu(){const a=document.getElementById('au');if(!a.src||a.src===location.href){toast('অডিও পাওয়া যায়নি');return;}if(a.paused){a.play();document.getElementById('apb').textContent='⏸';}else{a.pause();document.getElementById('apb').textContent='▶';}}
+function auTick(){const a=document.getElementById('au');if(a.duration)document.getElementById('apf').style.width=(a.currentTime/a.duration*100)+'%';}
 function auEnd(){document.getElementById('apb').textContent='▶';document.getElementById('apf').style.width='0%';}
-function seekAu(e){
-  const a=document.getElementById('au');
-  if(!a.duration)return;
-  const r=e.currentTarget.getBoundingClientRect();
-  a.currentTime=((e.clientX-r.left)/r.width)*a.duration;
-}
+function seekAu(e){const a=document.getElementById('au');if(!a.duration)return;const r=e.currentTarget.getBoundingClientRect();a.currentTime=((e.clientX-r.left)/r.width)*a.duration;}
 
-/* ── MAP ── */
-const RP={
-  'RACK-A':{x:57,y:41},'RACK-B':{x:137,y:41},'RACK-C':{x:217,y:41},'RACK-D':{x:297,y:41},'RACK-E':{x:393,y:41},
-  'RACK-F':{x:57,y:107},'RACK-G':{x:137,y:107},'RACK-H':{x:217,y:107},'RACK-I':{x:297,y:107},'RACK-J':{x:393,y:107},
-  'RACK-K':{x:57,y:173},'RACK-L':{x:137,y:173},'RACK-M':{x:217,y:173},'RACK-N':{x:297,y:173},
-};
+/* ══ MAP ══ */
+const RP={'RACK-A':{x:57,y:41},'RACK-B':{x:137,y:41},'RACK-C':{x:217,y:41},'RACK-D':{x:297,y:41},'RACK-E':{x:393,y:41},'RACK-F':{x:57,y:107},'RACK-G':{x:137,y:107},'RACK-H':{x:217,y:107},'RACK-I':{x:297,y:107},'RACK-J':{x:393,y:107},'RACK-K':{x:57,y:173},'RACK-L':{x:137,y:173},'RACK-M':{x:217,y:173},'RACK-N':{x:297,y:173}};
 const YOU={x:230,y:272};
-
 function showMap(rack){
   document.getElementById('rackLbl').textContent=rack||'—';
-  const al=document.getElementById('arrowLayer');
-  const ym=document.getElementById('youM');
-  al.innerHTML='';
-  // reset all racks
-  document.querySelectorAll('#racks rect').forEach(r=>{r.setAttribute('fill','#0e2040');r.setAttribute('stroke','#38bdf8');r.setAttribute('stroke-width','1');});
+  const al=document.getElementById('arrowLayer');al.innerHTML='';
+  document.querySelectorAll('#racks rect').forEach(r=>{r.setAttribute('fill','var(--s3)');r.setAttribute('stroke','var(--b)');r.setAttribute('stroke-width','1');});
   const pos=RP[rack];
   if(pos){
-    // highlight rack
-    document.querySelectorAll(`#racks [data-rack="${rack}"] rect`).forEach(r=>{
-      r.setAttribute('fill','rgba(0,255,157,.15)');r.setAttribute('stroke','#00ff9d');r.setAttribute('stroke-width','1.8');
-    });
-    // dashed path
+    document.querySelectorAll(`#racks [data-rack="${rack}"] rect`).forEach(r=>{r.setAttribute('fill','rgba(124,58,237,.15)');r.setAttribute('stroke','var(--g)');r.setAttribute('stroke-width','2');});
     const sx=YOU.x,sy=YOU.y-8,ex=pos.x,ey=pos.y+18;
-    const cp=`${sx},${(sy+ey)/2}`;
     const path=document.createElementNS('http://www.w3.org/2000/svg','path');
-    path.setAttribute('d',`M${sx},${sy} Q${cp} ${ex},${ey}`);
-    path.setAttribute('fill','none');path.setAttribute('stroke','#00ff9d');
-    path.setAttribute('stroke-width','1.8');path.setAttribute('stroke-dasharray','5 4');
-    path.setAttribute('opacity','.65');
-    // animated dash
-    path.innerHTML='<animate attributeName="stroke-dashoffset" from="100" to="0" dur="1s" repeatCount="indefinite"/>';
-    al.appendChild(path);
-    // arrowhead
+    path.setAttribute('d',`M${sx},${sy} Q${sx},${(sy+ey)/2} ${ex},${ey}`);
+    path.setAttribute('fill','none');path.setAttribute('stroke','var(--g)');path.setAttribute('stroke-width','1.8');path.setAttribute('stroke-dasharray','5 4');path.setAttribute('opacity','.65');
+    const anim=document.createElementNS('http://www.w3.org/2000/svg','animate');
+    anim.setAttribute('attributeName','stroke-dashoffset');anim.setAttribute('from','18');anim.setAttribute('to','0');anim.setAttribute('dur','0.8s');anim.setAttribute('repeatCount','indefinite');
+    path.appendChild(anim);al.appendChild(path);
     const ah=document.createElementNS('http://www.w3.org/2000/svg','polygon');
-    ah.setAttribute('points',`${ex},${ey-8} ${ex-5},${ey-16} ${ex+5},${ey-16}`);
-    ah.setAttribute('fill','#00ff9d');
-    al.appendChild(ah);
-    // YOU
-    document.getElementById('youC').setAttribute('cx',YOU.x);
-    document.getElementById('youC').setAttribute('cy',YOU.y-8);
-    document.getElementById('youTx').setAttribute('x',YOU.x);
-    document.getElementById('youTx').setAttribute('y',YOU.y-8);
-    ym.style.display='block';
-  }else{ym.style.display='none';}
+    ah.setAttribute('points',`${ex},${ey-8} ${ex-5},${ey-16} ${ex+5},${ey-16}`);ah.setAttribute('fill','var(--g)');al.appendChild(ah);
+    document.getElementById('youC').setAttribute('cx',YOU.x);document.getElementById('youC').setAttribute('cy',YOU.y-8);
+    document.getElementById('youTx').setAttribute('x',YOU.x);document.getElementById('youTx').setAttribute('y',YOU.y-8);
+    document.getElementById('youM').style.display='block';
+  }else{document.getElementById('youM').style.display='none';}
   openM('mapM');
 }
 
-/* ── QUIZ ── */
-function applyQ(cat){
-  document.getElementById('search').value=cat;
-  filter();closeAll();
+/* ══ SMART QUIZ ══ */
+const quizAns={};
+function openSmartQuiz(){
+  Object.keys(quizAns).forEach(k=>delete quizAns[k]);
+  document.querySelectorAll('.quiz-step').forEach(s=>s.classList.remove('active'));
+  document.getElementById('qs1').classList.add('active');
+  document.querySelectorAll('.q-opt').forEach(o=>o.classList.remove('selected'));
+  buildProgress(1);openM('quizM');
+}
+function buildProgress(step){
+  const p=document.getElementById('qProgress');
+  p.innerHTML=Array.from({length:4},(_,i)=>`<div class="q-dot${i<step-1?' done':''}"></div>`).join('');
+}
+function qAnswer(step,val){
+  quizAns[step]=val;
+  event.currentTarget.classList.add('selected');
+  setTimeout(()=>{
+    document.getElementById(`qs${step}`).classList.remove('active');
+    if(step<4){buildProgress(step+1);document.getElementById(`qs${step+1}`).classList.add('active');}
+    else{buildProgress(5);showQuizResult();}
+  },280);
+}
+function showQuizResult(){
+  document.getElementById('qsResult').classList.add('active');
+  const a=quizAns;
+  const scored=books.map(b=>{
+    let s=0;const c=(b.Category||'').toLowerCase();
+    if(a[1]==='tech'&&c.includes('cse'))s+=3;
+    if(a[1]==='business'&&c.includes('bba'))s+=3;
+    if(a[1]==='concept')s+=1;
+    if(a[1]==='practical'&&c.includes('cse'))s+=2;
+    if(a[2]==='beginner')s+=1;if(a[2]==='advanced'||a[2]==='expert')s+=2;
+    if(a[3]==='short')s+=(b.Edition==='1st'?2:1);if(a[3]==='long')s+=2;if(a[3]==='reference')s+=2;
+    if(a[4]==='exam')s+=2;if(a[4]==='skill'&&c.includes('cse'))s+=2;if(a[4]==='project'&&c.includes('cse'))s+=3;if(a[4]==='interest')s+=1;
+    const vc=getVoteCounts();s+=(vc[b.Title]?.like||0)*.5;
+    return{book:b,score:s};
+  }).sort((a,b)=>b.score-a.score).slice(0,4);
+  const mood={tech:'💻 টেক গুরু',business:'📊 বিজনেস মাইন্ড',concept:'🧩 থিওরি লাভার',practical:'🔧 প্র্যাকটিক্যাল বিল্ডার'};
+  document.getElementById('qrTitle').textContent=`তোমার মুড: ${mood[a[1]]||'📚 বই প্রেমী'}`;
+  document.getElementById('qrSub').textContent='তোমার উত্তরের ভিত্তিতে এই বইগুলো সেরা হতে পারে 👇';
+  document.getElementById('qrBooks').innerHTML=scored.map(({book:b})=>`
+    <div class="qr-book-item" onclick='closeAll();showDet(${JSON.stringify(b)})'>
+      <span style="font-size:18px">${(b.Category||'').includes('CSE')?'💻':'📊'}</span>
+      <div><div class="qr-book-name">${b.Title}</div><div class="qr-book-auth">${b.Author||'—'} · ${b.Rack||''}</div></div>
+    </div>`).join('');
 }
 
-/* ── REQUEST ── */
+/* ══ REQUEST ══ */
 function submitReq(){
-  const n=document.getElementById('rName').value.trim();
-  const b=document.getElementById('rBook').value.trim();
+  const n=document.getElementById('rName').value.trim(),b=document.getElementById('rBook').value.trim();
   if(!n||!b){toast('নাম এবং বইয়ের নাম দিন ⚠️');return;}
   toast('✅ রিকোয়েস্ট পাঠানো হয়েছে!');
+  document.getElementById('rName').value='';document.getElementById('rBook').value='';document.getElementById('rNote').value='';
   closeAll();
 }
 
-/* ── TOAST ── */
-let toastTimer;
-function toast(msg){
-  const t=document.getElementById('toast');
-  t.textContent=msg;t.style.opacity='1';
-  clearTimeout(toastTimer);
-  toastTimer=setTimeout(()=>t.style.opacity='0',2800);
-}
+/* ══ TOAST ══ */
+let tt;
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.style.opacity='1';clearTimeout(tt);tt=setTimeout(()=>t.style.opacity='0',2800);}
 
-/* ── INIT ── */
+/* ══ INIT ══ */
 window.addEventListener('load',()=>{
   setTimeout(()=>{
     const ld=document.getElementById('ld');
-    ld.style.transition='opacity .55s';ld.style.opacity='0';
-    setTimeout(()=>{ld.style.display='none';loadBooks();},560);
-  },2300);
+    ld.style.opacity='0';
+    setTimeout(()=>{ld.style.display='none';loadBooks();},500);
+  },2000);
 });
 </script>
-
-<!--
-════════════════════════════════════════════════════════════
-  📋 GOOGLE SHEET → APPS SCRIPT সেটআপ গাইড
-════════════════════════════════════════════════════════════
-
-  STEP 1 ► Google Sheet বানাও এই কলাম দিয়ে (Row 1 = Header):
-  ┌───────┬────────┬─────────┬──────────┬──────┬─────────┬──────────┬────────────┐
-  │ Title │ Author │ Edition │ Category │ Rack │ Summary │ AudioURL │ YouTubeURL │
-  └───────┴────────┴─────────┴──────────┴──────┴─────────┴──────────┴────────────┘
-
-  STEP 2 ► Sheet খুলে উপরে:
-           Extensions → Apps Script → নতুন প্রজেক্ট খোলো
-
-  STEP 3 ► নিচের কোডটা Apps Script এ পেস্ট করো:
-
-  ─────────────────────────────────────────
-  function doGet(e) {
-    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-    var data  = sheet.getDataRange().getValues();
-    var keys  = data[0]; // প্রথম row = header
-    var result = [];
-    for (var i = 1; i < data.length; i++) {
-      var row = {};
-      keys.forEach(function(k, j){ row[k] = data[i][j]; });
-      result.push(row);
-    }
-    return ContentService
-      .createTextOutput(JSON.stringify(result))
-      .setMimeType(ContentService.MimeType.JSON);
-  }
-  ─────────────────────────────────────────
-
-  STEP 4 ► Deploy করো:
-           Deploy → New Deployment
-           Type: Web App
-           Execute as: Me
-           Who has access: Anyone
-           → Deploy চাপো → URL কপি করো
-
-  STEP 5 ► উপরে এই ফাইলে:
-           const sheetURL = "এখানে তোমার URL দাও";
-
-════════════════════════════════════════════════════════════
--->
 </body>
 </html>
