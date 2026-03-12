@@ -104,10 +104,17 @@ header{position:relative;z-index:10;text-align:center;padding:28px 20px 44px;dis
 
 /* GRID */
 .con{max-width:1240px;margin:auto;padding:0 18px 60px;position:relative;z-index:10}
-.tabs{display:flex;gap:8px;margin-bottom:22px;flex-wrap:wrap}
+.tabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
 .tab{padding:8px 18px;border-radius:50px;border:1px solid var(--br);background:transparent;color:var(--td);font-family:'Hind Siliguri',sans-serif;font-size:12.5px;cursor:pointer;transition:all .22s;font-weight:600}
 .tab.active,.tab:hover{background:var(--g);color:#fff;border-color:var(--g)}
 [data-theme="dark"] .tab.active,[data-theme="dark"] .tab:hover{color:#000}
+
+.dept-sel-wrap{position:relative;flex:1;max-width:240px}
+.dept-sel-wrap::after{content:'▾';position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--td);pointer-events:none;font-size:13px}
+.dept-select{width:100%;padding:10px 36px 10px 16px;background:var(--s1);border:1px solid var(--br);border-radius:50px;color:var(--t);font-family:'Hind Siliguri',sans-serif;font-size:13px;cursor:pointer;outline:none;appearance:none;-webkit-appearance:none;transition:all .22s;box-shadow:var(--shadow)}
+.dept-select:focus{border-color:var(--g);box-shadow:0 0 0 3px rgba(124,58,237,.08)}
+.dept-select option{background:var(--s1);color:var(--t)}
+
 .sec-title{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--td);letter-spacing:2px;text-transform:uppercase;margin-bottom:18px;display:flex;align-items:center;gap:10px}
 .sec-title::after{content:'';flex:1;height:1px;background:var(--br)}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(295px,1fr));gap:16px}
@@ -375,6 +382,14 @@ audio{display:none}
   <div class="pill">❤️ <span id="topLikedName">—</span></div>
   <button class="pill pbtn" onclick="openM('reqM')">➕ বই রিকোয়েস্ট</button>
   <button class="pill pbtn" style="background:linear-gradient(135deg,#06b6d4,#ec4899)!important" onclick="switchTab('exchange',document.querySelector('[data-tab=exchange]'))">🔄 বুক এক্সচেঞ্জ</button>
+  <div class="dept-sel-wrap">
+    <select class="dept-select" id="deptSelect" onchange="filterDept(this.value)">
+      <option value="all">📚 সব ডিপার্টমেন্ট</option>
+      <option value="CSE">💻 CSE</option>
+      <option value="BBA">📊 BBA</option>
+      <option value="Other">📖 অন্যান্য</option>
+    </select>
+  </div>
 </div>
 
 <!-- SEARCH -->
@@ -396,7 +411,7 @@ audio{display:none}
 
   <!-- ALL BOOKS -->
   <div id="tabAll">
-    <div class="sec-title">বইয়ের তালিকা</div>
+
     <div class="grid" id="grid">
       <div class="emp"><div class="sp"></div><p>ডেটা লোড হচ্ছে...</p></div>
     </div>
@@ -616,9 +631,9 @@ audio{display:none}
    Exchange Sheet columns: Type|BookName|Author|Dept|Summary|Contact|Timestamp
    Feedback Sheet columns: BookTitle|Feedback|Timestamp
 ══════════════════════════════════════════ */
-const BOOKS_URL    = "https://script.google.com/macros/s/AKfycbx_pmfFARzVVhyb7e_6JgCM3wva0AQ6iPUF5tz1pz1byuM7WPCbHaXEUTjOVw1G5Aw1/exec";   // Books Apps Script URL
-const EXCHANGE_URL = "https://script.google.com/macros/s/AKfycbyQdUouMBlKIiTjOb3g0EcDmHNbB3DzH8nNk1Tf3IHkuoXS0BS96USQ1xYTDzd9JGfOsw/exec";   // Exchange Apps Script URL
-const FEEDBACK_URL = "https://script.google.com/macros/s/AKfycbzy5SBo_bZJp4uPttreaYztD4OFTD1EwxfutyAGvh0TCV66Ihjl9QoItYf-erC1r6yyKQ/exec";   // Feedback Apps Script URL
+const BOOKS_URL    = "https://script.google.com/macros/s/AKfycbz-hplVHGZoZTcRjyB_thpCrQD1YjioW-SAE3l2u8vXnb7wEJnykrU1s7RsU9U1ERfT3w/exec";   // Books Apps Script URL
+const EXCHANGE_URL = "https://script.google.com/macros/s/AKfycbz-hplVHGZoZTcRjyB_thpCrQD1YjioW-SAE3l2u8vXnb7wEJnykrU1s7RsU9U1ERfT3w/exec";   // Exchange Apps Script URL
+const FEEDBACK_URL = "https://script.google.com/macros/s/AKfycbz-hplVHGZoZTcRjyB_thpCrQD1YjioW-SAE3l2u8vXnb7wEJnykrU1s7RsU9U1ERfT3w/exec";   // Feedback Apps Script URL
 
 /* ══ DATA ══ */
 const SAMPLE = [];
@@ -676,7 +691,7 @@ async function loadBooks(){
     const url=BOOKS_URL+(BOOKS_URL.includes('?')?'&':'?')+'sheet=Books';
     const ctrl=new AbortController();
     const tid=setTimeout(()=>ctrl.abort(),8000);
-    const res=await fetch(url,{signal:ctrl.signal,redirect:'follow'});
+    const res=await fetch(url,{signal:ctrl.signal,redirect:'follow',mode:'cors',credentials:'omit'});
     clearTimeout(tid);
     const text=await res.text();
     const fresh=JSON.parse(text);
@@ -722,13 +737,30 @@ function updateStatus(){
 
 function tagCls(cat){const c=(cat||'').toLowerCase();if(c.includes('cse'))return'tc';if(c.includes('bba')||c.includes('bus'))return'tb';return'to';}
 
+/* ══ SHUFFLE ══ */
+function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+let displayBooks=[];
+let curDept='all';
+
 /* ══ RENDER BOOKS ══ */
 function renderBooks(){
+  // shuffle on every fresh load — different order for every user/session
+  displayBooks=shuffle(books);
+  applyDeptFilter();
+}
+function applyDeptFilter(){
   const g=document.getElementById('grid');
-  if(!books.length){g.innerHTML='<div class="emp"><p>কোনো বই পাওয়া যায়নি 😔</p></div>';return;}
+  const filtered=curDept==='all'?displayBooks:displayBooks.filter(b=>{
+    const c=(b.Category||'').toLowerCase();
+    if(curDept==='CSE')return c.includes('cse');
+    if(curDept==='BBA')return c.includes('bba')||c.includes('bus');
+    if(curDept==='Other')return!c.includes('cse')&&!c.includes('bba')&&!c.includes('bus');
+    return true;
+  });
+  if(!filtered.length){g.innerHTML='<div class="emp"><p>এই ডিপার্টমেন্টে কোনো বই নেই 😔</p></div>';return;}
   const vc=getVoteCounts(),uv=getVotes();
   const f=document.createDocumentFragment();
-  books.forEach((b,i)=>{
+  filtered.forEach((b,i)=>{
     const key=b.Title;
     const lk=vc[key]?.like||0,dk=vc[key]?.dislike||0,total=lk+dk;
     const lpct=total?Math.round(lk/total*100):50;
@@ -777,16 +809,70 @@ function renderBooks(){
   g.innerHTML='';g.appendChild(f);
 }
 
+/* ══ DEPT FILTER ══ */
+function filterDept(dept){
+  curDept=dept;
+  document.getElementById('search').value='';
+  applyDeptFilter();
+}
 /* ══ SMART SEARCH ══ */
 let searchTimer;
 function onSearch(){
   clearTimeout(searchTimer);
   searchTimer=setTimeout(()=>{
     const q=document.getElementById('search').value.toLowerCase().trim();
-    document.querySelectorAll('.card').forEach(c=>{
-      const show=!q||c.dataset.title.includes(q)||c.dataset.author.includes(q)||c.dataset.cat.includes(q);
-      c.style.display=show?'':'none';
+    if(!q){applyDeptFilter();return;}
+    // search across ALL books ignoring dept filter
+    const g=document.getElementById('grid');
+    const matched=displayBooks.filter(b=>(b.Title||'').toLowerCase().includes(q)||(b.Author||'').toLowerCase().includes(q)||(b.Category||'').toLowerCase().includes(q));
+    if(!matched.length){g.innerHTML='<div class="emp"><p>কোনো বই পাওয়া যায়নি 😔</p></div>';return;}
+    // re-render only matched
+    const vc=getVoteCounts(),uv=getVotes();
+    const f=document.createDocumentFragment();
+    matched.forEach((b,i)=>{
+      const key=b.Title;
+      const lk=vc[key]?.like||0,dk=vc[key]?.dislike||0,total=lk+dk;
+      const lpct=total?Math.round(lk/total*100):50;
+      const myVote=uv[key]||null;
+      const d=document.createElement('div');
+      d.className='card';d.style.animationDelay=(i*.045)+'s';
+      d.dataset.title=(b.Title||'').toLowerCase();
+      d.dataset.author=(b.Author||'').toLowerCase();
+      d.dataset.cat=(b.Category||'').toLowerCase();
+      d.innerHTML=`
+      <span class="tag ${tagCls(b.Category)}">${b.Category||'General'}</span>
+      <div class="card-top">
+        <div class="card-title">${b.Title||'Unknown'}</div>
+        <div class="card-author">✍️ ${b.Author||'—'}</div>
+      </div>
+      <div class="card-details" id="sd_${i}">
+        <div class="cm" style="margin-top:8px">📌 <span>Edition: ${b.Edition||'—'}</span></div>
+        <div class="cm">📍 <span>Rack: ${b.Rack||'—'}</span></div>
+      </div>
+      <div class="cdiv"></div>
+      <div class="vote-row">
+        <div class="vote-counts"><span class="vc vc-like">❤️ ${lk}</span><span class="vc vc-dislike">👎 ${dk}</span></div>
+        <div class="vote-progress"><div class="vp-fill" style="width:${lpct}%"></div></div>
+      </div>
+      <div class="bg3">
+        <button class="btn btn-like${myVote==='like'?' voted':''}" id="slike_${i}" onclick='vote(${JSON.stringify(b)},${i},"like")'>❤️ পছন্দ</button>
+        <button class="btn btn-dislike${myVote==='dislike'?' voted':''}" id="sdislike_${i}" onclick='vote(${JSON.stringify(b)},${i},"dislike")'>👎 অপছন্দ</button>
+        <button class="btn bm" onclick="showMap('${b.Rack||''}')">📍 ম্যাপ</button>
+      </div>
+      <div class="bg2">
+        <button class="btn bdf" onclick='showDet(${JSON.stringify(b)})'>📖 বিস্তারিত ও সামারি</button>
+        <button class="btn ba" onclick='playAudio(${JSON.stringify(b)})'>🔊 অডিও</button>
+      </div>
+      <div class="fb-box" id="sfb_${i}" style="display:none">
+        <div class="fb-label">💬 কেন অপছন্দ করলে?</div>
+        <textarea class="fb-ta" id="sfbt_${i}" placeholder="তোমার মতামত লেখো..."></textarea>
+        <button class="fb-send" onclick='sendFeedback(${JSON.stringify(b)},${i})'>📤 পাঠাও</button>
+      </div>`;
+      d.addEventListener('mouseenter',()=>document.getElementById(`sd_${i}`)?.classList.add('show'));
+      d.addEventListener('mouseleave',()=>document.getElementById(`sd_${i}`)?.classList.remove('show'));
+      f.appendChild(d);
     });
+    g.innerHTML='';g.appendChild(f);
   },80);
 }
 function onSearchKey(e){
