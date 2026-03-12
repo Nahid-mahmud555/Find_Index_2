@@ -627,13 +627,14 @@ audio{display:none}
 <script>
 /* ══════════════════════════════════════════
    CONFIG — এখানে URL গুলো দাও
-   Sheet columns: Title|Author|Edition|Category|Rack|Summary|AudioURL
+   Books Sheet columns: Title|Author|Edition|Category|Rack|Summary|AudioURL
    Exchange Sheet columns: Type|BookName|Author|Dept|Summary|Contact|Timestamp
    Feedback Sheet columns: BookTitle|Feedback|Timestamp
+   Votes Sheet columns: BookTitle|Likes|Dislikes|Timestamp
 ══════════════════════════════════════════ */
-const BOOKS_URL    = "https://script.google.com/macros/s/AKfycbz-hplVHGZoZTcRjyB_thpCrQD1YjioW-SAE3l2u8vXnb7wEJnykrU1s7RsU9U1ERfT3w/exec";   // Books Apps Script URL
-const EXCHANGE_URL = "https://script.google.com/macros/s/AKfycbz-hplVHGZoZTcRjyB_thpCrQD1YjioW-SAE3l2u8vXnb7wEJnykrU1s7RsU9U1ERfT3w/exec";   // Exchange Apps Script URL
-const FEEDBACK_URL = "https://script.google.com/macros/s/AKfycbz-hplVHGZoZTcRjyB_thpCrQD1YjioW-SAE3l2u8vXnb7wEJnykrU1s7RsU9U1ERfT3w/exec";   // Feedback Apps Script URL
+const BOOKS_URL    = "https://script.google.com/macros/s/AKfycbw-v-Wl_O2jg-bpEck5ebviYbxhw6-wcOCm7QrRp_UWTSma027hf5GSOZArhekOLurzFA/exec";   // Books Apps Script URL
+const EXCHANGE_URL = "https://script.google.com/macros/s/AKfycbw-v-Wl_O2jg-bpEck5ebviYbxhw6-wcOCm7QrRp_UWTSma027hf5GSOZArhekOLurzFA/exec";   // Exchange Apps Script URL
+const FEEDBACK_URL = "https://script.google.com/macros/s/AKfycbw-v-Wl_O2jg-bpEck5ebviYbxhw6-wcOCm7QrRp_UWTSma027hf5GSOZArhekOLurzFA/exec";   // Feedback Apps Script URL
 
 /* ══ DATA ══ */
 const SAMPLE = [];
@@ -671,11 +672,42 @@ document.addEventListener('mousemove',e=>{
   c.style.setProperty('--my',((e.clientY-r.top)/r.height*100)+'%');
 });
 
-/* ══ VOTE STORAGE ══ */
+/* ══ VOTE STORAGE — Sheet based (global) + localStorage (instant UI) ══ */
+let globalVoteCounts={};  // loaded from Sheet — shared across all devices
 function getVotes(){try{return JSON.parse(localStorage.getItem('fi_votes')||'{}');}catch{return {};}}
 function saveVotes(v){try{localStorage.setItem('fi_votes',JSON.stringify(v));}catch{}}
-function getVoteCounts(){try{return JSON.parse(localStorage.getItem('fi_vcounts')||'{}');}catch{return {};}}
-function saveVoteCounts(v){try{localStorage.setItem('fi_vcounts',JSON.stringify(v));}catch{}}
+function getVoteCounts(){return globalVoteCounts;}
+function saveVoteCounts(v){globalVoteCounts=v;try{localStorage.setItem('fi_vcounts',JSON.stringify(v));}catch{}}
+
+async function loadVoteCounts(){
+  // load from local first for instant render
+  try{const s=localStorage.getItem('fi_vcounts');if(s)globalVoteCounts=JSON.parse(s);}catch{}
+  // then fetch from sheet
+  if(!BOOKS_URL)return;
+  try{
+    const url=BOOKS_URL+(BOOKS_URL.includes('?')?'&':'?')+'sheet=Votes';
+    const ctrl=new AbortController();
+    setTimeout(()=>ctrl.abort(),5000);
+    const res=await fetch(url,{signal:ctrl.signal,redirect:'follow',mode:'cors',credentials:'omit'});
+    const text=await res.text();
+    const rows=JSON.parse(text);
+    if(!Array.isArray(rows))return;
+    const counts={};
+    rows.forEach(r=>{
+      if(r.BookTitle)counts[r.BookTitle]={like:parseInt(r.Likes)||0,dislike:parseInt(r.Dislikes)||0};
+    });
+    globalVoteCounts=counts;
+    try{localStorage.setItem('fi_vcounts',JSON.stringify(counts));}catch{}
+  }catch(err){console.warn('Votes fetch failed:',err);}
+}
+
+async function pushVoteToSheet(bookTitle,likes,dislikes){
+  if(!BOOKS_URL)return;
+  try{
+    const payload={Type:'vote',BookTitle:bookTitle,Likes:likes,Dislikes:dislikes,Timestamp:new Date().toLocaleString('bn-BD')};
+    await fetch(BOOKS_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+  }catch{}
+}
 
 /* ══ YT HELPERS ══ */
 
@@ -703,29 +735,22 @@ async function loadBooks(){
     // only use sample if fetch completely failed
     if(!books.length)books=SAMPLE;
   }
+  await loadVoteCounts();
   renderBooks();updateStatus();
 }
 
 /* ══ LOAD EXCHANGES ══ */
-function loadExchangesLocal(){
-  try{const s=localStorage.getItem('fi_exchanges');if(s)exchanges=JSON.parse(s);}catch{}
-  renderExchanges();
-}
 async function loadExchanges(){
-  loadExchangesLocal();
   if(!EXCHANGE_URL){renderExchanges();return;}
   try{
+    const url=EXCHANGE_URL+(EXCHANGE_URL.includes('?')?'&':'?')+'sheet=Exchange';
     const ctrl=new AbortController();
-    setTimeout(()=>ctrl.abort(),4000);
-    const res=await fetch(EXCHANGE_URL,{signal:ctrl.signal,cache:'no-store'});
-    if(!res.ok)throw new Error('bad');
-    const fresh=await res.json();
-    // merge: remote first, then local-only
-    const remoteKeys=new Set(fresh.map(e=>e.BookName+'_'+e.Contact+'_'+e.Timestamp));
-    const localOnly=exchanges.filter(e=>!remoteKeys.has(e.BookName+'_'+e.Contact+'_'+e.Timestamp));
-    exchanges=[...fresh,...localOnly];
-    try{localStorage.setItem('fi_exchanges',JSON.stringify(exchanges));}catch{}
-  }catch{}
+    setTimeout(()=>ctrl.abort(),6000);
+    const res=await fetch(url,{signal:ctrl.signal,redirect:'follow',mode:'cors',credentials:'omit'});
+    const text=await res.text();
+    const fresh=JSON.parse(text);
+    if(Array.isArray(fresh))exchanges=fresh;
+  }catch(err){console.warn('Exchange fetch failed:',err);}
   renderExchanges();
 }
 
@@ -887,6 +912,8 @@ function vote(book,idx,type){
   if(prev===type){uv[key]=null;vc[key][type]=Math.max(0,vc[key][type]-1);}
   else{if(prev)vc[key][prev]=Math.max(0,vc[key][prev]-1);uv[key]=type;vc[key][type]++;}
   saveVotes(uv);saveVoteCounts(vc);
+  // push to sheet so all devices see updated counts
+  pushVoteToSheet(key,vc[key].like,vc[key].dislike);
   const lk=vc[key].like,dk=vc[key].dislike,total=lk+dk,lpct=total?Math.round(lk/total*100):50;
   const card=document.getElementById(`like_${idx}`)?.closest('.card');
   if(card){
@@ -959,9 +986,8 @@ async function submitExchange(){
     Contact:contact,
     Timestamp:new Date().toLocaleString('bn-BD')
   };
-  // add to local list instantly + persist
+  // show instantly in UI
   exchanges.unshift(payload);
-  try{localStorage.setItem('fi_exchanges',JSON.stringify(exchanges));}catch{}
   renderExchanges();
   if(EXCHANGE_URL){
     try{await fetch(EXCHANGE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});}catch{}
@@ -1034,7 +1060,7 @@ function switchTab(tab,el){
   document.getElementById('tabTop').style.display=tab==='top'?'':'none';
   document.getElementById('tabExchange').style.display=tab==='exchange'?'':'none';
   if(tab==='top')renderTopList();
-  if(tab==='exchange'){loadExchangesLocal();loadExchanges();}
+  if(tab==='exchange')loadExchanges();
 }
 
 /* ══ MODALS ══ */
