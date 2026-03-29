@@ -915,11 +915,11 @@
         let quizStep = 1;
         let quizAnswers = {};
 
-        function startQuiz() {
+        window.startQuiz = () => {
             quizStep = 1;
             quizAnswers = {};
             renderQuiz();
-        }
+        };
 
         function renderQuiz() {
             const content = document.getElementById('quiz-content');
@@ -1007,6 +1007,32 @@
                 `;
             } else if (quizStep === 4) {
                 content.innerHTML = `
+                    <div class="space-y-8">
+                        <div class="flex gap-2.5">
+                            <div class="flex-1 h-2 rounded-full bg-brand-primary"></div>
+                            <div class="flex-1 h-2 rounded-full bg-brand-primary"></div>
+                            <div class="flex-1 h-2 rounded-full bg-brand-primary"></div>
+                            <div class="flex-1 h-2 rounded-full bg-brand-primary"></div>
+                        </div>
+                        <h3 class="text-2xl font-display font-bold mb-8 leading-tight">What's your main goal? 🎯</h3>
+                        <div class="grid grid-cols-1 gap-4">
+                            <button onclick="handleQuizAnswer(4, 'exam')" class="p-6 rounded-3xl glass-premium hover:border-brand-primary transition-all text-left flex items-center gap-4 group">
+                                <span class="text-2xl group-hover:scale-110 transition-transform">📝</span>
+                                <span class="font-bold">Exam Preparation</span>
+                            </button>
+                            <button onclick="handleQuizAnswer(4, 'career')" class="p-6 rounded-3xl glass-premium hover:border-brand-primary transition-all text-left flex items-center gap-4 group">
+                                <span class="text-2xl group-hover:scale-110 transition-transform">💼</span>
+                                <span class="font-bold">Career Growth</span>
+                            </button>
+                            <button onclick="handleQuizAnswer(4, 'hobby')" class="p-6 rounded-3xl glass-premium hover:border-brand-primary transition-all text-left flex items-center gap-4 group">
+                                <span class="text-2xl group-hover:scale-110 transition-transform">🎨</span>
+                                <span class="font-bold">General Knowledge</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } else if (quizStep === 5) {
+                content.innerHTML = `
                     <div class="text-center py-10">
                         <div class="w-16 h-16 border-4 border-brand-primary/20 border-t-brand-primary rounded-full animate-spin mx-auto mb-8"></div>
                         <h3 class="text-2xl font-display font-bold mb-4">Finding the perfect match...</h3>
@@ -1014,10 +1040,10 @@
                     </div>
                 `;
                 setTimeout(() => {
-                    quizStep = 5;
+                    quizStep = 6;
                     renderQuiz();
                 }, 1500);
-            } else if (quizStep === 5) {
+            } else if (quizStep === 6) {
                 const recs = getQuizRecommendations();
                 content.innerHTML = `
                     <div class="text-center">
@@ -1040,14 +1066,6 @@
                     </div>
                 `;
                 lucide.createIcons();
-            } else {
-                content.innerHTML = `
-                    <div class="text-center py-20">
-                        <div class="w-12 h-12 border-4 border-brand-primary/20 border-t-brand-primary rounded-full animate-spin mx-auto mb-6"></div>
-                        <p class="text-slate-500 font-medium mb-6">Analyzing your preferences...</p>
-                        <button onclick="handleQuizAnswer(${quizStep}, 'skip')" class="text-brand-primary font-bold hover:underline">Skip to next step</button>
-                    </div>
-                `;
             }
         }
 
@@ -1056,13 +1074,6 @@
             if (quizStep < 4) {
                 quizStep++;
                 renderQuiz();
-                // Simulate processing
-                setTimeout(() => {
-                    if (quizStep < 5) {
-                        quizStep = 5;
-                        renderQuiz();
-                    }
-                }, 800);
             } else {
                 quizStep = 5;
                 renderQuiz();
@@ -1073,9 +1084,27 @@
             return allBooks.map(b => {
                 let s = 0;
                 const c = (b.Category || '').toLowerCase();
-                if (quizAnswers[1] === 'tech' && c.includes('cse')) s += 3;
-                if (quizAnswers[1] === 'business' && c.includes('bba')) s += 3;
-                s += (voteCounts[b.Title]?.like || 0) * 0.5;
+                const t = (b.Title || '').toLowerCase();
+                const a = (b.Author || '').toLowerCase();
+                const sum = (b.Summary || '').toLowerCase();
+
+                // Step 1: Interest
+                if (quizAnswers[1] === 'tech' && (c.includes('cse') || sum.includes('tech') || sum.includes('program'))) s += 5;
+                if (quizAnswers[1] === 'business' && (c.includes('bba') || c.includes('bus') || sum.includes('business'))) s += 5;
+                if (quizAnswers[1] === 'concept' && (sum.includes('theory') || sum.includes('concept'))) s += 5;
+                if (quizAnswers[1] === 'practical' && (sum.includes('practical') || sum.includes('guide') || sum.includes('how to'))) s += 5;
+
+                // Step 2: Level (Simulated by keywords)
+                if (quizAnswers[2] === 'beginner' && (sum.includes('introduction') || sum.includes('basic') || sum.includes('beginner'))) s += 3;
+                if (quizAnswers[2] === 'advanced' && (sum.includes('advanced') || sum.includes('expert') || sum.includes('deep'))) s += 3;
+
+                // Step 4: Goal
+                if (quizAnswers[4] === 'exam' && (sum.includes('exam') || sum.includes('prep') || sum.includes('study'))) s += 4;
+                if (quizAnswers[4] === 'career' && (sum.includes('career') || sum.includes('job') || sum.includes('professional'))) s += 4;
+
+                // Popularity bonus
+                s += (voteCounts[b.Title]?.like || 0) * 0.2;
+
                 return { book: b, score: s };
             }).sort((a, b) => b.score - a.score).slice(0, 4);
         }
