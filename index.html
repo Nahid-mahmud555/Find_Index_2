@@ -12,12 +12,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
     <!-- CDNs -->
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
@@ -81,20 +77,6 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-8px); }
-        }
-
-        .animate-float { animation: float 4s ease-in-out infinite; }
-
-        /* GPU Acceleration */
-        .gpu {
-            transform: translateZ(0);
-            backface-visibility: hidden;
-            perspective: 1000px;
-        }
-
         /* Skeleton Loading Animation */
         @keyframes shimmer {
             0% { background-position: -200% 0; }
@@ -108,6 +90,26 @@
         .dark .skeleton {
             background: linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%);
             background-size: 200% 100%;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(2, 6, 23, 0.4);
+            backdrop-filter: blur(8px);
+            z-index: 100;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-content {
+            width: 100%;
+            max-width: 32rem;
+            max-height: 90vh;
+            overflow-y: auto;
         }
     </style>
 
@@ -133,795 +135,859 @@
     </script>
 </head>
 <body class="bg-bg-light dark:bg-bg-dark text-slate-900 dark:text-slate-100 overflow-x-hidden custom-scrollbar">
-    <div id="root"></div>
+    
+    <!-- Background Decorations -->
+    <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+        <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-brand-primary/5 blur-[120px] rounded-full"></div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-brand-secondary/5 blur-[120px] rounded-full"></div>
+        <div class="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:32px_32px]"></div>
+    </div>
 
-    <script type="text/babel">
-        const { useState, useEffect, useMemo, useRef, useCallback, memo } = React;
-        const { motion, AnimatePresence } = window.Motion || { motion: { div: 'div' }, AnimatePresence: ({ children }) => children };
+    <!-- Navigation -->
+    <nav class="relative z-50 flex justify-between items-center px-6 py-6 max-w-7xl mx-auto">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-brand-primary flex items-center justify-center shadow-lg shadow-brand-primary/30">
+                <i data-lucide="library" class="text-white w-5 h-5"></i>
+            </div>
+            <span class="font-display font-bold text-xl tracking-tight">Find_Index</span>
+        </div>
+        <button id="theme-toggle" class="glass-premium p-3 rounded-2xl hover:scale-110 transition-transform">
+            <i data-lucide="moon" id="theme-icon" class="text-brand-primary w-5 h-5"></i>
+        </button>
+    </nav>
 
+    <!-- Hero Section -->
+    <header class="relative z-10 max-w-4xl mx-auto px-6 pt-12 pb-16 text-center">
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-brand-primary/10 border border-brand-primary/20 mb-8">
+            <span class="w-2 h-2 rounded-full bg-brand-primary animate-ping"></span>
+            <span class="text-[10px] font-mono font-bold tracking-widest uppercase text-brand-primary">Smart Library v8.0</span>
+        </div>
+        <h1 class="text-6xl md:text-8xl font-display font-extrabold tracking-tighter mb-6 text-gradient">Find_Index</h1>
+        <p class="text-slate-500 dark:text-slate-400 text-lg max-w-2xl mx-auto leading-relaxed">
+            A small gift for VU students from <span class="font-bold text-brand-primary">MN Group</span>. 
+            Discover, exchange, and explore books with ease.
+        </p>
+    </header>
+
+    <!-- Search & Actions -->
+    <section class="relative z-10 max-w-6xl mx-auto px-6 mb-16">
+        <div class="flex flex-wrap justify-center gap-4 mb-10">
+            <div class="glass-premium px-6 py-3 rounded-2xl flex items-center gap-3 text-sm font-bold">
+                <i data-lucide="trending-up" class="text-brand-accent w-4 h-4"></i>
+                <span id="book-count">Loading...</span>
+            </div>
+            <button onclick="openModal('request-modal')" class="bg-brand-primary text-white px-8 py-3 rounded-2xl text-sm font-bold hover:scale-105 transition-transform shadow-xl shadow-brand-primary/25 flex items-center gap-2">
+                <i data-lucide="plus" class="w-4 h-4"></i> Request Book
+            </button>
+            <button onclick="switchTab('exchange')" class="bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-8 py-3 rounded-2xl text-sm font-bold hover:scale-105 transition-transform shadow-xl flex items-center gap-2">
+                <i data-lucide="repeat" class="w-4 h-4"></i> Exchange Board
+            </button>
+        </div>
+
+        <div class="max-w-3xl mx-auto relative group">
+            <div class="absolute inset-0 bg-brand-primary/10 blur-3xl group-focus-within:bg-brand-primary/20 transition-all rounded-[2rem]"></div>
+            <div class="relative glass-premium rounded-[2rem] p-2 flex items-center gap-4">
+                <div class="pl-6 text-slate-400"><i data-lucide="search" class="w-6 h-6"></i></div>
+                <input 
+                    type="text"
+                    id="search-input"
+                    placeholder="Search by title, author, or category..."
+                    class="flex-1 bg-transparent border-none outline-none py-4 text-lg font-sans placeholder:text-slate-400"
+                />
+                <button onclick="openModal('quiz-modal')" class="hidden md:flex items-center gap-2 px-6 py-3 rounded-2xl bg-brand-primary/10 text-brand-primary hover:bg-brand-primary hover:text-white transition-all text-sm font-bold">
+                    <i data-lucide="brain" class="w-4 h-4"></i> Smart Decision
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="relative z-10 max-w-7xl mx-auto px-6 pb-32">
+        <!-- Tabs & Filters -->
+        <div class="flex items-center justify-between mb-10 overflow-x-auto pb-4 no-scrollbar gap-8">
+            <div class="flex gap-3">
+                <button onclick="switchTab('all')" id="tab-all" class="tab-btn flex items-center gap-2 px-8 py-3 rounded-2xl text-sm font-bold transition-all whitespace-nowrap bg-brand-primary text-white shadow-2xl shadow-brand-primary/30">
+                    <i data-lucide="layout-grid" class="w-4 h-4"></i> All Books
+                </button>
+                <button onclick="switchTab('top')" id="tab-top" class="tab-btn flex items-center gap-2 px-8 py-3 rounded-2xl text-sm font-bold transition-all whitespace-nowrap glass-premium text-slate-500 hover:bg-white dark:hover:bg-slate-800">
+                    <i data-lucide="trophy" class="w-4 h-4"></i> Top Rated
+                </button>
+                <button onclick="switchTab('exchange')" id="tab-exchange" class="tab-btn flex items-center gap-2 px-8 py-3 rounded-2xl text-sm font-bold transition-all whitespace-nowrap glass-premium text-slate-500 hover:bg-white dark:hover:bg-slate-800">
+                    <i data-lucide="repeat" class="w-4 h-4"></i> Exchange
+                </button>
+            </div>
+
+            <select 
+                id="dept-filter"
+                class="glass-premium px-6 py-3 rounded-2xl text-sm font-bold outline-none cursor-pointer hover:border-brand-primary transition-colors min-w-[200px]"
+            >
+                <option value="all">All Departments</option>
+                <option value="CSE">CSE Department</option>
+                <option value="BBA">BBA Department</option>
+                <option value="Other">Other Subjects</option>
+            </select>
+        </div>
+
+        <!-- Book List Container -->
+        <div id="book-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+            <!-- Skeleton items will be here initially -->
+        </div>
+
+        <!-- Top Rated Section (Hidden by default) -->
+        <div id="top-rated-section" class="hidden max-w-4xl mx-auto">
+            <div class="flex items-center gap-4 mb-10">
+                <div class="p-3 rounded-2xl bg-brand-accent/10 text-brand-accent"><i data-lucide="trophy" class="w-7 h-7"></i></div>
+                <h2 class="text-3xl font-display font-bold">Most Loved Books</h2>
+            </div>
+            <div id="top-rated-list" class="space-y-6"></div>
+        </div>
+
+        <!-- Exchange Board Section (Hidden by default) -->
+        <div id="exchange-section" class="hidden space-y-10">
+            <div class="flex justify-between items-center">
+                <h2 class="text-3xl font-display font-bold">Community Exchange</h2>
+                <button onclick="openModal('exchange-modal')" class="bg-brand-primary text-white px-8 py-3 rounded-2xl text-sm font-bold shadow-xl shadow-brand-primary/20 flex items-center gap-2">
+                    <i data-lucide="plus" class="w-4 h-4"></i> Create Post
+                </button>
+            </div>
+            <div id="exchange-list" class="grid grid-cols-1 md:grid-cols-2 gap-8"></div>
+        </div>
+    </main>
+
+    <!-- Modals -->
+    <div id="detail-modal" class="modal-overlay" onclick="closeModalOnOverlay(event)">
+        <div class="modal-content glass-premium rounded-[2.5rem] p-8 relative shadow-2xl border border-white/20 dark:border-white/10">
+            <button onclick="closeModal('detail-modal')" class="absolute top-6 right-6 w-10 h-10 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-white/10 rounded-full transition-all text-slate-400">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            <div id="detail-content"></div>
+        </div>
+    </div>
+
+    <div id="map-modal" class="modal-overlay" onclick="closeModalOnOverlay(event)">
+        <div class="modal-content glass-premium rounded-[2.5rem] p-8 relative shadow-2xl">
+            <button onclick="closeModal('map-modal')" class="absolute top-6 right-6 w-10 h-10 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-white/10 rounded-full transition-all text-slate-400">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            <h3 class="text-xl font-display font-bold mb-6">Library Map</h3>
+            <div id="map-content"></div>
+        </div>
+    </div>
+
+    <div id="request-modal" class="modal-overlay" onclick="closeModalOnOverlay(event)">
+        <div class="modal-content glass-premium rounded-[2.5rem] p-8 relative shadow-2xl">
+            <button onclick="closeModal('request-modal')" class="absolute top-6 right-6 w-10 h-10 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-white/10 rounded-full transition-all text-slate-400">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            <h3 class="text-xl font-display font-bold mb-6">Request a Book</h3>
+            <form id="request-form" class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider">Your Name</label>
+                        <input type="text" name="name" required class="w-full px-6 py-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-white/5 focus:border-brand-primary outline-none transition-all" placeholder="Full Name" />
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider">Contact Number</label>
+                        <input type="tel" name="number" required class="w-full px-6 py-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-white/5 focus:border-brand-primary outline-none transition-all" placeholder="017XXXXXXXX" />
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <label class="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider">Book Name</label>
+                    <input type="text" name="bookName" required class="w-full px-6 py-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-white/5 focus:border-brand-primary outline-none transition-all" placeholder="Which book do you need?" />
+                </div>
+                <div class="grid grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider">Department</label>
+                        <input type="text" name="dept" required class="w-full px-6 py-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-white/5 focus:border-brand-primary outline-none transition-all" placeholder="CSE, BBA, etc." />
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider">Semester</label>
+                        <input type="text" name="semester" required class="w-full px-6 py-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-white/5 focus:border-brand-primary outline-none transition-all" placeholder="1st, 2nd, etc." />
+                    </div>
+                </div>
+                <button type="submit" class="w-full py-5 rounded-2xl bg-brand-primary text-white font-bold shadow-2xl shadow-brand-primary/30 flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-[0.98] transition-all">
+                    <i data-lucide="send" class="w-5 h-5"></i> Submit Request
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div id="exchange-modal" class="modal-overlay" onclick="closeModalOnOverlay(event)">
+        <div class="modal-content glass-premium rounded-[2.5rem] p-8 relative shadow-2xl">
+            <button onclick="closeModal('exchange-modal')" class="absolute top-6 right-6 w-10 h-10 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-white/10 rounded-full transition-all text-slate-400">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            <h3 class="text-xl font-display font-bold mb-6">Exchange Board</h3>
+            <form id="exchange-form" class="space-y-6">
+                <div class="flex p-1.5 rounded-2xl bg-slate-100 dark:bg-slate-800/50">
+                    <button type="button" onclick="setExType('দিতে চাই')" id="ex-type-give" class="ex-type-btn flex-1 py-3 rounded-xl text-sm font-bold transition-all bg-white dark:bg-slate-700 shadow-sm text-brand-primary">দিতে চাই</button>
+                    <button type="button" onclick="setExType('নিতে চাই')" id="ex-type-take" class="ex-type-btn flex-1 py-3 rounded-xl text-sm font-bold transition-all text-slate-500">নিতে চাই</button>
+                </div>
+                <input type="hidden" name="type" id="ex-type-input" value="দিতে চাই">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider">Book Name</label>
+                        <input type="text" name="bookName" required class="w-full px-6 py-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-white/5 focus:border-brand-primary outline-none transition-all" placeholder="Enter book title" />
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider">Author</label>
+                        <input type="text" name="author" class="w-full px-6 py-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-white/5 focus:border-brand-primary outline-none transition-all" placeholder="Author name" />
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <label class="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider">Department / Subject</label>
+                    <input type="text" name="dept" class="w-full px-6 py-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-white/5 focus:border-brand-primary outline-none transition-all" placeholder="e.g. CSE, BBA, Math" />
+                </div>
+                <div class="space-y-2">
+                    <label class="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider">Summary / Condition</label>
+                    <textarea name="summary" class="w-full p-6 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-white/5 focus:border-brand-primary outline-none transition-all min-h-[100px]" placeholder="Briefly describe the book or your requirement..."></textarea>
+                </div>
+                <div class="space-y-2">
+                    <label class="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider">Contact Number</label>
+                    <input type="tel" name="contact" required class="w-full px-6 py-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-white/5 focus:border-brand-primary outline-none transition-all" placeholder="017XXXXXXXX" />
+                </div>
+                <button type="submit" class="w-full py-5 rounded-2xl bg-brand-primary text-white font-bold shadow-2xl shadow-brand-primary/30 flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-[0.98] transition-all">
+                    <i data-lucide="plus-circle" class="w-5 h-5"></i> Create Post
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div id="quiz-modal" class="modal-overlay" onclick="closeModalOnOverlay(event)">
+        <div class="modal-content glass-premium rounded-[2.5rem] p-8 relative shadow-2xl">
+            <button onclick="closeModal('quiz-modal')" class="absolute top-6 right-6 w-10 h-10 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-white/10 rounded-full transition-all text-slate-400">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            <h3 class="text-xl font-display font-bold mb-6">Smart Book Decision</h3>
+            <div id="quiz-content"></div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="relative z-10 py-20 border-t border-slate-200 dark:border-white/5 text-center">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="flex items-center justify-center gap-3 mb-8">
+                <div class="w-10 h-10 rounded-xl bg-brand-primary text-white flex items-center justify-center font-display font-bold text-xl">FI</div>
+                <span class="font-display font-bold text-2xl tracking-tight">Find_Index</span>
+            </div>
+            <p class="text-sm text-slate-500 max-w-md mx-auto mb-10 leading-relaxed">Empowering students with knowledge through a modern, accessible library experience.</p>
+            <div class="flex justify-center gap-8 mb-12">
+                <a href="#" class="flex items-center gap-2 text-slate-400 hover:text-brand-primary transition-colors font-bold text-sm"><i data-lucide="info" class="w-4 h-4"></i> About</a>
+                <a href="#" class="flex items-center gap-2 text-slate-400 hover:text-brand-primary transition-colors font-bold text-sm"><i data-lucide="phone" class="w-4 h-4"></i> Contact</a>
+                <a href="#" class="flex items-center gap-2 text-slate-400 hover:text-brand-primary transition-colors font-bold text-sm"><i data-lucide="user" class="w-4 h-4"></i> Profile</a>
+            </div>
+            <div class="pt-10 border-t border-slate-100 dark:border-white/5">
+                <p class="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-[0.3em]">© 2026 MN Group · Built for Excellence</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Main Script -->
+    <script type="module">
         // --- Supabase Configuration ---
-        const SUPABASE_URL = "https://edtsidlxnwysazyzkahu.supabase.co"; 
-        const SUPABASE_ANON_KEY = "sb_publishable_dFVu4MM0z_7qbkypUx-goQ_MCixc5qn";
+        // AI Studio Settings থেকে VITE_SUPABASE_URL এবং VITE_SUPABASE_ANON_KEY সেট করবি
+        const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || "https://edtsidlxnwysazyzkahu.supabase.co"; 
+        const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || "sb_publishable_dFVu4MM0z_7qbkypUx-goQ_MCixc5qn";
 
         let supabase = null;
-        try {
-            if (SUPABASE_URL && SUPABASE_URL.startsWith("http")) {
-                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            }
-        } catch (e) {
-            console.error("Supabase Init Error:", e);
+        if (SUPABASE_URL && SUPABASE_URL.startsWith('http')) {
+            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        } else {
+            console.error("Supabase URL is missing or invalid. Please set VITE_SUPABASE_URL in your environment.");
+            // ইউজারকে একটা মেসেজ দেখানো যেতে পারে
+            window.addEventListener('DOMContentLoaded', () => {
+                const container = document.getElementById('book-list');
+                if (container) {
+                    container.innerHTML = `
+                        <div class="col-span-full text-center py-20 bg-red-50 dark:bg-red-900/20 rounded-3xl">
+                            <p class="text-red-500 font-bold">Supabase Configuration Missing!</p>
+                            <p class="text-sm text-slate-500 mt-2">Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your settings.</p>
+                        </div>
+                    `;
+                }
+            });
         }
 
-        // --- Optimized Icon Component ---
-        // Using a debounced global update to prevent multiple createIcons calls
-        let iconTimeout;
-        const updateIcons = () => {
-            clearTimeout(iconTimeout);
-            iconTimeout = setTimeout(() => {
-                if (window.lucide) window.lucide.createIcons();
-            }, 50);
-        };
+        // --- State ---
+        let allBooks = JSON.parse(localStorage.getItem('fi_books') || '[]');
+        let voteCounts = {};
+        let myVotes = JSON.parse(localStorage.getItem('fi_votes') || '{}');
+        let currentTab = 'all';
+        let currentDept = 'all';
+        let searchQuery = '';
+        let exchanges = [];
 
-        const Icon = memo(({ name, size = 20, className = "" }) => {
-            useEffect(() => {
-                updateIcons();
-            }, [name]);
-            return <i data-lucide={name} className={`${className} shrink-0`} style={{ width: size, height: size }}></i>;
+        // --- Initialization ---
+        window.addEventListener('DOMContentLoaded', () => {
+            initTheme();
+            renderSkeletons();
+            fetchData();
+            setupEventListeners();
+            lucide.createIcons();
         });
 
-        const Badge = memo(({ children, className = "" }) => (
-            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-mono font-bold tracking-wider uppercase border ${className}`}>
-                {children}
-            </span>
-        ));
+        function initTheme() {
+            const isDark = localStorage.getItem('theme') === 'dark' || 
+                          (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            document.documentElement.classList.toggle('dark', isDark);
+            updateThemeIcon(isDark);
+        }
 
-        const Modal = memo(({ isOpen, onClose, title, children }) => {
-            useEffect(() => {
-                if (isOpen) document.body.style.overflow = 'hidden';
-                else document.body.style.overflow = '';
-                return () => { document.body.style.overflow = ''; };
-            }, [isOpen]);
+        function updateThemeIcon(isDark) {
+            const icon = document.getElementById('theme-icon');
+            if (isDark) {
+                icon.setAttribute('data-lucide', 'sun');
+                icon.classList.replace('text-brand-primary', 'text-yellow-400');
+            } else {
+                icon.setAttribute('data-lucide', 'moon');
+                icon.classList.replace('text-yellow-400', 'text-brand-primary');
+            }
+            lucide.createIcons();
+        }
 
-            return (
-                <AnimatePresence>
-                    {isOpen && (
-                        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-                            <motion.div 
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                exit={{ opacity: 0 }}
-                                onClick={onClose}
-                                className="fixed inset-0 bg-slate-950/40 backdrop-blur-md"
-                            />
-                            <motion.div 
-                                initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                                animate={{ opacity: 1, scale: 1, y: 0 }}
-                                exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                                transition={{ type: 'spring', damping: 25, stiffness: 400 }}
-                                className="relative w-full max-w-lg glass-premium rounded-[2.5rem] overflow-hidden shadow-2xl flex flex-col max-h-[90vh] border border-white/20 dark:border-white/10 gpu"
-                            >
-                                <div className="p-8 pb-4 flex items-center justify-between shrink-0">
-                                    <h3 className="text-xl font-display font-bold text-slate-900 dark:text-white">{title}</h3>
-                                    <button 
-                                        onClick={onClose} 
-                                        className="w-10 h-10 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-white/10 rounded-full transition-all text-slate-400 hover:text-slate-900 dark:hover:text-white"
-                                    >
-                                        <Icon name="x" size={20} />
-                                    </button>
-                                </div>
-                                <div className="p-8 pt-4 overflow-y-auto flex-1 custom-scrollbar">
-                                    {children}
-                                </div>
-                            </motion.div>
-                        </div>
-                    )}
-                </AnimatePresence>
-            );
-        });
-
-        const BookCard = memo(({ book, counts, myVote, onVote, onDetail, onMap }) => {
-            const total = counts.like + counts.dislike;
-            const likePct = total ? Math.round((counts.like / total) * 100) : 50;
-            const isCSE = (book.Category || '').toLowerCase().includes('cse');
-            const isBBA = (book.Category || '').toLowerCase().includes('bba') || (book.Category || '').toLowerCase().includes('bus');
-
-            return (
-                <motion.div 
-                    layout="position"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="card-hover glass-premium rounded-[2rem] p-8 flex flex-col gap-6 group gpu"
-                >
-                    <div className="flex justify-between items-start">
-                        <Badge className={
-                            isCSE ? "bg-indigo-500/10 text-indigo-500 border-indigo-500/20" :
-                            isBBA ? "bg-cyan-500/10 text-cyan-500 border-cyan-500/20" :
-                            "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
-                        }>
-                            {book.Category || 'General'}
-                        </Badge>
-                        <button 
-                            onClick={() => onMap(book.Rack)}
-                            className="p-2.5 hover:bg-brand-primary/10 rounded-xl transition-colors text-slate-400 hover:text-brand-primary"
-                        >
-                            <Icon name="map" size={18} />
-                        </button>
-                    </div>
-
-                    <div className="flex-1">
-                        <h3 className="text-xl font-display font-bold leading-tight mb-2 group-hover:text-brand-primary transition-colors line-clamp-2">
-                            {book.Title}
-                        </h3>
-                        <p className="text-sm text-slate-500 dark:text-slate-400 font-medium truncate">✍️ {book.Author || 'Unknown Author'}</p>
-                    </div>
-
-                    <div className="space-y-4">
-                        <div className="space-y-2">
-                            <div className="flex justify-between text-[10px] font-mono font-bold uppercase tracking-wider">
-                                <span className="text-brand-accent">Likes: {counts.like}</span>
-                                <span className="text-red-500">Dislikes: {counts.dislike}</span>
-                            </div>
-                            <div className="h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                                <motion.div 
-                                    initial={{ width: 0 }}
-                                    animate={{ width: `${likePct}%` }}
-                                    transition={{ duration: 0.8, ease: "easeOut" }}
-                                    className="h-full bg-gradient-to-r from-brand-accent to-brand-secondary"
-                                />
-                            </div>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-3">
-                            <button 
-                                onClick={() => onVote(book.Title, 'like')}
-                                className={`flex items-center justify-center gap-2 py-3 rounded-2xl text-xs font-bold transition-all border ${
-                                    myVote === 'like' 
-                                        ? "bg-brand-accent/10 border-brand-accent text-brand-accent shadow-lg shadow-brand-accent/20" 
-                                        : "border-slate-200 dark:border-white/5 hover:bg-brand-accent/5 hover:border-brand-accent/30 text-slate-500"
-                                }`}
-                            >
-                                <Icon name="thumbs-up" size={14} /> Like
-                            </button>
-                            <button 
-                                onClick={() => onVote(book.Title, 'dislike')}
-                                className={`flex items-center justify-center gap-2 py-3 rounded-2xl text-xs font-bold transition-all border ${
-                                    myVote === 'dislike' 
-                                        ? "bg-red-500/10 border-red-500 text-red-500 shadow-lg shadow-red-500/20" 
-                                        : "border-slate-200 dark:border-white/5 hover:bg-red-500/5 hover:border-red-500/30 text-slate-500"
-                                }`}
-                            >
-                                <Icon name="thumbs-down" size={14} /> Dislike
-                            </button>
-                        </div>
-
-                        <button 
-                            onClick={() => onDetail(book)}
-                            className="w-full py-4 rounded-2xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-brand-primary hover:text-white dark:hover:bg-brand-primary transition-all text-sm font-bold flex items-center justify-center gap-2"
-                        >
-                            <Icon name="book-open" size={18} /> View Details
-                        </button>
-                    </div>
-                </motion.div>
-            );
-        });
-
-        function App() {
-            const [isDarkMode, setIsDarkMode] = useState(() => {
-                return localStorage.getItem('theme') === 'dark' || 
-                    (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        function setupEventListeners() {
+            document.getElementById('theme-toggle').addEventListener('click', () => {
+                const isDark = document.documentElement.classList.toggle('dark');
+                localStorage.setItem('theme', isDark ? 'dark' : 'light');
+                updateThemeIcon(isDark);
             });
 
-            const [books, setBooks] = useState(() => JSON.parse(localStorage.getItem('fi_books') || '[]'));
-            const [exchanges, setExchanges] = useState([]);
-            const [voteCounts, setVoteCounts] = useState({});
-            const [myVotes, setMyVotes] = useState(() => JSON.parse(localStorage.getItem('fi_votes') || '{}'));
-            const [loading, setLoading] = useState(true);
-            const [searchQuery, setSearchQuery] = useState('');
-            const [activeTab, setActiveTab] = useState('all');
-            const [selectedDept, setSelectedDept] = useState('all');
-            
-            const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-            const [selectedBook, setSelectedBook] = useState(null);
-            const [isMapModalOpen, setIsMapModalOpen] = useState(false);
-            const [selectedRack, setSelectedRack] = useState('');
-            const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
-            const [isExchangeModalOpen, setIsExchangeModalOpen] = useState(false);
-            const [isQuizModalOpen, setIsQuizModalOpen] = useState(false);
-            
-            const [exForm, setExForm] = useState({ type: 'দিতে চাই', bookName: '', author: '', dept: '', summary: '', contact: '' });
-            const [reqForm, setReqForm] = useState({ name: '', number: '', bookName: '', dept: '', semester: '' });
-            const [isSubmittingEx, setIsSubmittingEx] = useState(false);
-            const [isSubmittingReq, setIsSubmittingReq] = useState(false);
-            const [quizStep, setQuizStep] = useState(1);
-            const [quizAnswers, setQuizAnswers] = useState({});
+            document.getElementById('search-input').addEventListener('input', (e) => {
+                searchQuery = e.target.value;
+                displayBooks();
+            });
 
-            // --- Optimized Handlers ---
-            const toggleTheme = useCallback(() => setIsDarkMode(prev => !prev), []);
+            document.getElementById('dept-filter').addEventListener('change', (e) => {
+                currentDept = e.target.value;
+                displayBooks();
+            });
 
-            const handleVote = useCallback(async (bookTitle, type) => {
-                const prevVote = myVotes[bookTitle];
-                const newVotes = { ...myVotes };
-                const newCounts = { ...voteCounts };
-                if (!newCounts[bookTitle]) newCounts[bookTitle] = { like: 0, dislike: 0 };
-                
-                if (prevVote === type) {
-                    newVotes[bookTitle] = null;
-                    newCounts[bookTitle][type] = Math.max(0, newCounts[bookTitle][type] - 1);
-                } else {
-                    if (prevVote) newCounts[bookTitle][prevVote] = Math.max(0, newCounts[bookTitle][prevVote] - 1);
-                    newVotes[bookTitle] = type;
-                    newCounts[bookTitle][type]++;
+            document.getElementById('request-form').addEventListener('submit', handleRequestSubmit);
+            document.getElementById('exchange-form').addEventListener('submit', handleExchangeSubmit);
+        }
+
+        // --- Data Fetching ---
+        async function fetchData() {
+            if (!supabase) return;
+            try {
+                const [booksRes, votesRes, exRes] = await Promise.all([
+                    supabase.from('books').select('*'),
+                    supabase.from('votes').select('*'),
+                    supabase.from('exchanges').select('*').order('created_at', { ascending: false })
+                ]);
+
+                if (booksRes.data) {
+                    allBooks = booksRes.data.map(b => ({
+                        Title: b.title, Author: b.author, Edition: b.edition,
+                        Category: b.category, Rack: b.rack, Summary: b.summary
+                    }));
+                    localStorage.setItem('fi_books', JSON.stringify(allBooks));
                 }
-                
-                setMyVotes(newVotes);
-                setVoteCounts(newCounts);
-                localStorage.setItem('fi_votes', JSON.stringify(newVotes));
 
-                if (supabase) {
-                    try {
-                        await supabase.from('votes').upsert({ 
-                            book_title: bookTitle, 
-                            likes: newCounts[bookTitle].like, 
-                            dislikes: newCounts[bookTitle].dislike 
-                        }, { onConflict: 'book_title' });
-                    } catch (err) { console.error('Vote sync failed:', err); }
+                if (votesRes.data) {
+                    votesRes.data.forEach(v => {
+                        voteCounts[v.book_title] = { like: v.likes || 0, dislike: v.dislikes || 0 };
+                    });
                 }
-            }, [myVotes, voteCounts]);
 
-            const handleDetail = useCallback((book) => {
-                setSelectedBook(book);
-                setIsDetailModalOpen(true);
-            }, []);
+                if (exRes.data) {
+                    exchanges = exRes.data.map(e => ({
+                        Type: e.type, bookName: e.book_name, author: e.author,
+                        dept: e.dept, summary: e.summary, contact: e.contact
+                    }));
+                }
 
-            const handleMap = useCallback((rack) => {
-                setSelectedRack(rack || '');
-                setIsMapModalOpen(true);
-            }, []);
+                displayBooks();
+                updateBookCount();
+            } catch (err) {
+                console.error('Fetch error:', err);
+                displayBooks(); // Render from cache if available
+            }
+        }
 
-            // --- Data Fetching ---
-            useEffect(() => {
-                document.documentElement.classList.toggle('dark', isDarkMode);
-                localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
-            }, [isDarkMode]);
+        function updateBookCount() {
+            document.getElementById('book-count').textContent = `${allBooks.length} Books Available`;
+        }
 
-            useEffect(() => {
-                const fetchData = async () => {
-                    if (!supabase) {
-                        setLoading(false);
-                        return;
-                    }
-                    try {
-                        const [booksRes, votesRes, exRes] = await Promise.all([
-                            supabase.from('books').select('*'),
-                            supabase.from('votes').select('*'),
-                            supabase.from('exchanges').select('*').order('created_at', { ascending: false })
-                        ]);
+        // --- Rendering ---
+        function renderSkeletons() {
+            const container = document.getElementById('book-list');
+            container.innerHTML = Array.from({ length: 8 }).map(() => `
+                <div class="glass-premium rounded-[2rem] p-8 h-80 skeleton"></div>
+            `).join('');
+        }
 
-                        if (booksRes.data) {
-                            const mapped = booksRes.data.map(b => ({
-                                Title: b.title, Author: b.author, Edition: b.edition,
-                                Category: b.category, Rack: b.rack, Summary: b.summary
-                            }));
-                            setBooks(mapped);
-                            localStorage.setItem('fi_books', JSON.stringify(mapped));
-                        }
+        function displayBooks() {
+            const container = document.getElementById('book-list');
+            const topSection = document.getElementById('top-rated-section');
+            const exchangeSection = document.getElementById('exchange-section');
 
-                        if (votesRes.data) {
-                            const counts = {};
-                            votesRes.data.forEach(v => {
-                                counts[v.book_title] = { like: v.likes || 0, dislike: v.dislikes || 0 };
-                            });
-                            setVoteCounts(counts);
-                        }
+            // Hide all sections first
+            container.classList.add('hidden');
+            topSection.classList.add('hidden');
+            exchangeSection.classList.add('hidden');
 
-                        if (exRes.data) {
-                            const mappedEx = exRes.data.map(e => ({
-                                Type: e.type, bookName: e.book_name, author: e.author,
-                                dept: e.dept, summary: e.summary, contact: e.contact
-                            }));
-                            setExchanges(mappedEx);
-                        }
-                    } catch (err) {
-                        console.error('Fetch error:', err);
-                    } finally {
-                        setLoading(false);
-                    }
-                };
-
-                fetchData();
-            }, []);
-
-            // --- Memoized Logic ---
-            const filteredBooks = useMemo(() => {
-                let result = books;
-                if (selectedDept !== 'all') {
-                    result = result.filter(b => {
+            if (currentTab === 'all') {
+                container.classList.remove('hidden');
+                let filtered = allBooks;
+                
+                if (currentDept !== 'all') {
+                    filtered = filtered.filter(b => {
                         const cat = (b.Category || '').toLowerCase();
-                        if (selectedDept === 'CSE') return cat.includes('cse');
-                        if (selectedDept === 'BBA') return cat.includes('bba') || cat.includes('bus');
-                        if (selectedDept === 'Other') return !cat.includes('cse') && !cat.includes('bba') && !cat.includes('bus');
+                        if (currentDept === 'CSE') return cat.includes('cse');
+                        if (currentDept === 'BBA') return cat.includes('bba') || cat.includes('bus');
+                        if (currentDept === 'Other') return !cat.includes('cse') && !cat.includes('bba') && !cat.includes('bus');
                         return true;
                     });
                 }
+
                 if (searchQuery.trim()) {
                     const q = searchQuery.toLowerCase();
-                    result = result.filter(b => 
+                    filtered = filtered.filter(b => 
                         (b.Title || '').toLowerCase().includes(q) || 
                         (b.Author || '').toLowerCase().includes(q) || 
                         (b.Category || '').toLowerCase().includes(q)
                     );
                 }
-                return result;
-            }, [books, selectedDept, searchQuery]);
 
-            const topLikedBooks = useMemo(() => {
-                return Object.entries(voteCounts)
-                    .filter(([, v]) => v.like > 0)
-                    .sort((a, b) => b[1].like - a[1].like)
-                    .slice(0, 5)
-                    .map(([title]) => books.find(b => b.Title === title))
-                    .filter(Boolean);
-            }, [books, voteCounts]);
-
-            const handleExchangeSubmit = async (e) => {
-                e.preventDefault();
-                if (!supabase) return alert('Supabase not configured');
-                setIsSubmittingEx(true);
-                try {
-                    const { error } = await supabase.from('exchanges').insert([{
-                        type: exForm.type, book_name: exForm.bookName, author: exForm.author,
-                        dept: exForm.dept, summary: exForm.summary, contact: exForm.contact
-                    }]);
-                    if (error) throw error;
-                    setExchanges(prev => [{ ...exForm, Type: exForm.type }, ...prev]);
-                    setExForm({ type: 'দিতে চাই', bookName: '', author: '', dept: '', summary: '', contact: '' });
-                    setIsExchangeModalOpen(false);
-                } catch (err) { console.error(err); } finally { setIsSubmittingEx(false); }
-            };
-
-            const handleRequestSubmit = async (e) => {
-                e.preventDefault();
-                if (!supabase) return alert('Supabase not configured');
-                setIsSubmittingReq(true);
-                try {
-                    const { error } = await supabase.from('requests').insert([{
-                        name: reqForm.name, number: reqForm.number, book_name: reqForm.bookName,
-                        dept: reqForm.dept, semester: reqForm.semester
-                    }]);
-                    if (error) throw error;
-                    setIsRequestModalOpen(false);
-                    setReqForm({ name: '', number: '', bookName: '', dept: '', semester: '' });
-                    alert('Request submitted!');
-                } catch (err) { console.error(err); } finally { setIsSubmittingReq(false); }
-            };
-
-            const handleQuizAnswer = (step, val) => {
-                setQuizAnswers(prev => ({ ...prev, [step]: val }));
-                if (step < 4) setQuizStep(step + 1);
-                else setQuizStep(5);
-            };
-
-            const getQuizRecommendations = () => {
-                const a = quizAnswers;
-                return books.map(b => {
-                    let s = 0;
-                    const c = (b.Category || '').toLowerCase();
-                    if (a[1] === 'tech' && c.includes('cse')) s += 3;
-                    if (a[1] === 'business' && c.includes('bba')) s += 3;
-                    if (a[2] === 'beginner') s += 1;
-                    if (a[2] === 'advanced') s += 2;
-                    s += (voteCounts[b.Title]?.like || 0) * 0.5;
-                    return { book: b, score: s };
-                }).sort((a, b) => b.score - a.score).slice(0, 4);
-            };
-
-            return (
-                <div className="min-h-screen selection:bg-brand-primary selection:text-white">
-                    {/* Background */}
-                    <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-                        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-brand-primary/5 blur-[120px] rounded-full animate-pulse" />
-                        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-brand-secondary/5 blur-[120px] rounded-full animate-pulse delay-1000" />
-                        <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:32px_32px]" />
-                    </div>
-
-                    {/* Nav */}
-                    <nav className="relative z-50 flex justify-between items-center px-6 py-6 max-w-7xl mx-auto">
-                        <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-xl bg-brand-primary flex items-center justify-center shadow-lg shadow-brand-primary/30">
-                                <Icon name="library" size={22} className="text-white" />
-                            </div>
-                            <span className="font-display font-bold text-xl tracking-tight">Find_Index</span>
-                        </motion.div>
-                        <motion.button initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} onClick={toggleTheme} className="glass-premium p-3 rounded-2xl hover:scale-110 transition-transform">
-                            {isDarkMode ? <Icon name="sun" size={20} className="text-yellow-400" /> : <Icon name="moon" size={20} className="text-brand-primary" />}
-                        </motion.button>
-                    </nav>
-
-                    {/* Hero */}
-                    <header className="relative z-10 max-w-4xl mx-auto px-6 pt-12 pb-16 text-center">
-                        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-brand-primary/10 border border-brand-primary/20 mb-8">
-                            <span className="w-2 h-2 rounded-full bg-brand-primary animate-ping" />
-                            <span className="text-[10px] font-mono font-bold tracking-widest uppercase text-brand-primary">Smart Library v8.0</span>
-                        </motion.div>
-                        <motion.h1 initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="text-6xl md:text-8xl font-display font-extrabold tracking-tighter mb-6 text-gradient">Find_Index</motion.h1>
-                        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="text-slate-500 dark:text-slate-400 text-lg max-w-2xl mx-auto leading-relaxed">
-                            A small gift for VU students from <span className="font-bold text-brand-primary">MN Group</span>. 
-                            Discover, exchange, and explore books with ease.
-                        </motion.p>
-                    </header>
-
-                    {/* Search & Actions */}
-                    <section className="relative z-10 max-w-6xl mx-auto px-6 mb-16">
-                        <div className="flex flex-wrap justify-center gap-4 mb-10">
-                            <div className="glass-premium px-6 py-3 rounded-2xl flex items-center gap-3 text-sm font-bold">
-                                <Icon name="trending-up" size={18} className="text-brand-accent" />
-                                <span>{books.length} Books Available</span>
-                            </div>
-                            <button onClick={() => setIsRequestModalOpen(true)} className="bg-brand-primary text-white px-8 py-3 rounded-2xl text-sm font-bold hover:scale-105 transition-transform shadow-xl shadow-brand-primary/25 flex items-center gap-2">
-                                <Icon name="plus" size={18} /> Request Book
-                            </button>
-                            <button onClick={() => setActiveTab('exchange')} className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-8 py-3 rounded-2xl text-sm font-bold hover:scale-105 transition-transform shadow-xl flex items-center gap-2">
-                                <Icon name="repeat" size={18} /> Exchange Board
-                            </button>
+                if (filtered.length === 0) {
+                    container.innerHTML = `
+                        <div class="col-span-full py-32 text-center">
+                            <div class="text-7xl mb-6">🔍</div>
+                            <h3 class="text-2xl font-bold mb-2">No books found</h3>
+                            <p class="text-slate-500">Try adjusting your search or filters</p>
                         </div>
+                    `;
+                    return;
+                }
 
-                        <div className="max-w-3xl mx-auto relative group">
-                            <div className="absolute inset-0 bg-brand-primary/10 blur-3xl group-focus-within:bg-brand-primary/20 transition-all rounded-[2rem]" />
-                            <div className="relative glass-premium rounded-[2rem] p-2 flex items-center gap-4">
-                                <div className="pl-6 text-slate-400"><Icon name="search" size={24} /></div>
-                                <input 
-                                    type="text"
-                                    placeholder="Search by title, author, or category..."
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="flex-1 bg-transparent border-none outline-none py-4 text-lg font-sans placeholder:text-slate-400"
-                                />
-                                <button onClick={() => setIsQuizModalOpen(true)} className="hidden md:flex items-center gap-2 px-6 py-3 rounded-2xl bg-brand-primary/10 text-brand-primary hover:bg-brand-primary hover:text-white transition-all text-sm font-bold">
-                                    <Icon name="brain" size={18} /> Smart Decision
-                                </button>
-                            </div>
-                        </div>
-                    </section>
+                container.innerHTML = filtered.map((book, i) => renderBookCard(book, i)).join('');
+            } else if (currentTab === 'top') {
+                topSection.classList.remove('hidden');
+                renderTopRated();
+            } else if (currentTab === 'exchange') {
+                exchangeSection.classList.remove('hidden');
+                renderExchanges();
+            }
 
-                    {/* Main Content */}
-                    <main className="relative z-10 max-w-7xl mx-auto px-6 pb-32">
-                        <div className="flex items-center justify-between mb-10 overflow-x-auto pb-4 no-scrollbar gap-8">
-                            <div className="flex gap-3">
-                                {[
-                                    { id: 'all', label: 'All Books', icon: 'layout-grid' },
-                                    { id: 'top', label: 'Top Rated', icon: 'trophy' },
-                                    { id: 'exchange', label: 'Exchange', icon: 'repeat' },
-                                ].map(tab => (
-                                    <button
-                                        key={tab.id}
-                                        onClick={() => setActiveTab(tab.id)}
-                                        className={`flex items-center gap-2 px-8 py-3 rounded-2xl text-sm font-bold transition-all whitespace-nowrap ${
-                                            activeTab === tab.id 
-                                                ? "bg-brand-primary text-white shadow-2xl shadow-brand-primary/30" 
-                                                : "glass-premium text-slate-500 hover:bg-white dark:hover:bg-slate-800"
-                                        }`}
-                                    >
-                                        <Icon name={tab.icon} size={18} /> {tab.label}
-                                    </button>
-                                ))}
-                            </div>
-
-                            <select 
-                                value={selectedDept}
-                                onChange={(e) => setSelectedDept(e.target.value)}
-                                className="glass-premium px-6 py-3 rounded-2xl text-sm font-bold outline-none cursor-pointer hover:border-brand-primary transition-colors min-w-[200px]"
-                            >
-                                <option value="all">All Departments</option>
-                                <option value="CSE">CSE Department</option>
-                                <option value="BBA">BBA Department</option>
-                                <option value="Other">Other Subjects</option>
-                            </select>
-                        </div>
-
-                        <AnimatePresence mode="wait">
-                            {activeTab === 'all' && (
-                                <motion.div key="all-books" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                                    {loading && books.length === 0 ? (
-                                        Array.from({ length: 8 }).map((_, i) => (
-                                            <div key={i} className="glass-premium rounded-[2rem] p-8 h-80 skeleton" />
-                                        ))
-                                    ) : filteredBooks.length > 0 ? (
-                                        filteredBooks.map((book, i) => (
-                                            <BookCard 
-                                                key={book.Title + i}
-                                                book={book}
-                                                counts={voteCounts[book.Title] || { like: 0, dislike: 0 }}
-                                                myVote={myVotes[book.Title]}
-                                                onVote={handleVote}
-                                                onDetail={handleDetail}
-                                                onMap={handleMap}
-                                            />
-                                        ))
-                                    ) : (
-                                        <div className="col-span-full py-32 text-center">
-                                            <div className="text-7xl mb-6">🔍</div>
-                                            <h3 className="text-2xl font-bold mb-2">No books found</h3>
-                                            <p className="text-slate-500">Try adjusting your search or filters</p>
-                                        </div>
-                                    )}
-                                </motion.div>
-                            )}
-
-                            {activeTab === 'top' && (
-                                <motion.div key="top-rated" initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.98 }} className="max-w-4xl mx-auto">
-                                    <div className="flex items-center gap-4 mb-10">
-                                        <div className="p-3 rounded-2xl bg-brand-accent/10 text-brand-accent"><Icon name="trophy" size={28} /></div>
-                                        <h2 className="text-3xl font-display font-bold">Most Loved Books</h2>
-                                    </div>
-                                    <div className="space-y-6">
-                                        {topLikedBooks.map((book, i) => (
-                                            <motion.div 
-                                                key={book.Title}
-                                                initial={{ opacity: 0, x: -20 }}
-                                                animate={{ opacity: 1, x: 0 }}
-                                                transition={{ delay: i * 0.05 }}
-                                                className="glass-premium p-6 rounded-[2rem] flex items-center gap-6 hover:border-brand-accent/30 transition-all cursor-pointer group gpu"
-                                                onClick={() => handleDetail(book)}
-                                            >
-                                                <div className="w-14 h-14 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center font-display font-extrabold text-2xl text-brand-primary">#{i + 1}</div>
-                                                <div className="flex-1">
-                                                    <h4 className="text-xl font-bold group-hover:text-brand-primary transition-colors">{book.Title}</h4>
-                                                    <p className="text-sm text-slate-500 font-medium">{book.Author}</p>
-                                                </div>
-                                                <div className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-brand-accent/10 text-brand-accent font-mono font-bold">
-                                                    <Icon name="thumbs-up" size={18} /> {voteCounts[book.Title]?.like}
-                                                </div>
-                                            </motion.div>
-                                        ))}
-                                    </div>
-                                </motion.div>
-                            )}
-
-                            {activeTab === 'exchange' && (
-                                <motion.div key="exchange-board" initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} className="space-y-10">
-                                    <div className="flex justify-between items-center">
-                                        <h2 className="text-3xl font-display font-bold">Community Exchange</h2>
-                                        <button onClick={() => setIsExchangeModalOpen(true)} className="bg-brand-primary text-white px-8 py-3 rounded-2xl text-sm font-bold shadow-xl shadow-brand-primary/20 flex items-center gap-2">
-                                            <Icon name="plus" size={18} /> Create Post
-                                        </button>
-                                    </div>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                        {exchanges.length > 0 ? (
-                                            exchanges.map((ex, i) => (
-                                                <motion.div key={i} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }} className="glass-premium rounded-[2.5rem] p-10 relative overflow-hidden group border-t-4 border-t-brand-secondary gpu">
-                                                    <div className="absolute top-8 right-8">
-                                                        <Badge className={ex.Type === 'দিতে চাই' ? "bg-brand-accent/10 text-brand-accent border-brand-accent/20" : "bg-brand-primary/10 text-brand-primary border-brand-primary/20"}>{ex.Type === 'দিতে চাই' ? 'Available' : 'Wanted'}</Badge>
-                                                    </div>
-                                                    <h4 className="text-2xl font-display font-bold mb-4 pr-24">{ex.bookName}</h4>
-                                                    <div className="flex flex-wrap gap-4 mb-6">
-                                                        {ex.author && <span className="text-sm text-slate-500 font-medium">✍️ {ex.author}</span>}
-                                                        {ex.dept && <span className="text-sm text-slate-500 font-medium">🏛️ {ex.dept}</span>}
-                                                    </div>
-                                                    <p className="text-slate-600 dark:text-slate-400 mb-8 line-clamp-3 leading-relaxed">{ex.summary}</p>
-                                                    <div className="flex items-center justify-between pt-6 border-t border-slate-100 dark:border-white/5">
-                                                        <div className="flex items-center gap-3 text-brand-primary font-mono font-bold"><Icon name="phone" size={18} /> {ex.contact}</div>
-                                                        <button className="px-6 py-3 rounded-2xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-bold hover:bg-brand-primary hover:text-white transition-all">Contact</button>
-                                                    </div>
-                                                </motion.div>
-                                            ))
-                                        ) : (
-                                            <div className="col-span-full py-32 text-center glass-premium rounded-[2rem]">
-                                                <div className="text-7xl mb-6">🔄</div>
-                                                <h3 className="text-2xl font-bold mb-2">No exchange posts yet</h3>
-                                                <p className="text-slate-500">Be the first to share a book!</p>
-                                            </div>
-                                        )}
-                                    </div>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
-                    </main>
-
-                    {/* Modals */}
-                    <Modal isOpen={isDetailModalOpen} onClose={() => setIsDetailModalOpen(false)} title="Book Details">
-                        {selectedBook && (
-                            <div className="space-y-10">
-                                <div className="text-center">
-                                    <div className="w-24 h-24 bg-brand-primary/10 rounded-3xl flex items-center justify-center mx-auto mb-6 text-brand-primary"><Icon name="book" size={40} /></div>
-                                    <h2 className="text-3xl font-display font-bold mb-3 leading-tight text-slate-900 dark:text-white">{selectedBook.Title}</h2>
-                                    <p className="text-brand-primary font-mono font-bold uppercase tracking-widest text-xs">{selectedBook.Author}</p>
-                                </div>
-                                <div className="grid grid-cols-2 gap-4">
-                                    {[
-                                        { label: 'Edition', value: selectedBook.Edition, icon: 'layers' },
-                                        { label: 'Category', value: selectedBook.Category, icon: 'tag' },
-                                        { label: 'Rack No', value: selectedBook.Rack, icon: 'hash' },
-                                        { label: 'Status', value: 'Available', icon: 'check-circle' },
-                                    ].map(item => (
-                                        <div key={item.label} className="p-5 rounded-3xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-white/5 group hover:border-brand-primary/30 transition-all">
-                                            <div className="flex items-center gap-3 mb-2 text-slate-400"><Icon name={item.icon} size={14} /><p className="text-[10px] font-mono font-bold uppercase tracking-wider">{item.label}</p></div>
-                                            <p className="text-sm font-bold text-slate-700 dark:text-slate-200">{item.value || '—'}</p>
-                                        </div>
-                                    ))}
-                                </div>
-                                <div className="relative">
-                                    <div className="absolute -left-4 top-0 bottom-0 w-1 bg-brand-primary/20 rounded-full" />
-                                    <h4 className="text-xs font-mono font-bold text-slate-400 uppercase mb-4 flex items-center gap-2"><Icon name="align-left" size={14} /> Description</h4>
-                                    <p className="text-base leading-relaxed text-slate-600 dark:text-slate-300 font-medium">{selectedBook.Summary || 'This book is a valuable resource for students and researchers alike.'}</p>
-                                </div>
-                                <button onClick={() => setIsDetailModalOpen(false)} className="w-full py-5 rounded-[2rem] bg-brand-primary text-white font-bold shadow-xl shadow-brand-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all">Close Details</button>
-                            </div>
-                        )}
-                    </Modal>
-
-                    <Modal isOpen={isMapModalOpen} onClose={() => setIsMapModalOpen(false)} title="Library Map">
-                        <div className="space-y-6">
-                            <div className="flex items-center justify-between p-4 rounded-2xl bg-brand-primary/5 border border-brand-primary/10">
-                                <span className="text-sm font-medium text-slate-500">Target Rack:</span>
-                                <span className="px-6 py-2 rounded-xl bg-brand-primary text-white font-bold shadow-lg shadow-brand-primary/20">{selectedRack || '—'}</span>
-                            </div>
-                            <div className="aspect-[4/3] bg-slate-100 dark:bg-slate-800/50 rounded-3xl border border-slate-200 dark:border-white/5 flex flex-col items-center justify-center p-12 text-center">
-                                <Icon name="map" size={64} className="text-brand-primary/30 mb-6" />
-                                <p className="text-sm text-slate-500 font-medium">Map visualization loading... Rack {selectedRack} has been highlighted in the physical library.</p>
-                            </div>
-                        </div>
-                    </Modal>
-
-                    <Modal isOpen={isRequestModalOpen} onClose={() => setIsRequestModalOpen(false)} title="Request a Book">
-                        <form className="space-y-6" onSubmit={handleRequestSubmit}>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider">Your Name</label>
-                                    <div className="relative">
-                                        <Icon name="user" size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" />
-                                        <input type="text" required value={reqForm.name} onChange={(e) => setReqForm({ ...reqForm, name: e.target.value })} className="w-full pl-14 pr-6 py-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-white/5 focus:border-brand-primary outline-none transition-all" placeholder="Full Name" />
-                                    </div>
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider">Contact Number</label>
-                                    <div className="relative">
-                                        <Icon name="phone" size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" />
-                                        <input type="tel" required value={reqForm.number} onChange={(e) => setReqForm({ ...reqForm, number: e.target.value })} className="w-full pl-14 pr-6 py-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-white/5 focus:border-brand-primary outline-none transition-all" placeholder="017XXXXXXXX" />
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider">Book Name</label>
-                                <div className="relative">
-                                    <Icon name="book" size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" />
-                                    <input type="text" required value={reqForm.bookName} onChange={(e) => setReqForm({ ...reqForm, bookName: e.target.value })} className="w-full pl-14 pr-6 py-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-white/5 focus:border-brand-primary outline-none transition-all" placeholder="Which book do you need?" />
-                                </div>
-                            </div>
-                            <div className="grid grid-cols-2 gap-6">
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider">Department</label>
-                                    <input type="text" required value={reqForm.dept} onChange={(e) => setReqForm({ ...reqForm, dept: e.target.value })} className="w-full px-6 py-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-white/5 focus:border-brand-primary outline-none transition-all" placeholder="CSE, BBA, etc." />
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider">Semester</label>
-                                    <input type="text" required value={reqForm.semester} onChange={(e) => setReqForm({ ...reqForm, semester: e.target.value })} className="w-full px-6 py-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-white/5 focus:border-brand-primary outline-none transition-all" placeholder="1st, 2nd, etc." />
-                                </div>
-                            </div>
-                            <button disabled={isSubmittingReq} className="w-full py-5 rounded-2xl bg-brand-primary text-white font-bold shadow-2xl shadow-brand-primary/30 flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed">
-                                {isSubmittingReq ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Icon name="send" size={20} />}
-                                {isSubmittingReq ? 'Submitting...' : 'Submit Request'}
-                            </button>
-                        </form>
-                    </Modal>
-
-                    <Modal isOpen={isExchangeModalOpen} onClose={() => setIsExchangeModalOpen(false)} title="Exchange Board">
-                        <form className="space-y-6" onSubmit={handleExchangeSubmit}>
-                            <div className="flex p-1.5 rounded-2xl bg-slate-100 dark:bg-slate-800/50">
-                                {['দিতে চাই', 'নিতে চাই'].map(t => (
-                                    <button key={t} type="button" onClick={() => setExForm({ ...exForm, type: t })} className={`flex-1 py-3 rounded-xl text-sm font-bold transition-all ${exForm.type === t ? "bg-white dark:bg-slate-700 shadow-sm text-brand-primary" : "text-slate-500"}`}>{t}</button>
-                                ))}
-                            </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider">Book Name</label>
-                                    <input type="text" required value={exForm.bookName} onChange={(e) => setExForm({ ...exForm, bookName: e.target.value })} className="w-full px-6 py-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-white/5 focus:border-brand-primary outline-none transition-all" placeholder="Enter book title" />
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider">Author</label>
-                                    <input type="text" value={exForm.author} onChange={(e) => setExForm({ ...exForm, author: e.target.value })} className="w-full px-6 py-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-white/5 focus:border-brand-primary outline-none transition-all" placeholder="Author name" />
-                                </div>
-                            </div>
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider">Department / Subject</label>
-                                <input type="text" value={exForm.dept} onChange={(e) => setExForm({ ...exForm, dept: e.target.value })} className="w-full px-6 py-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-white/5 focus:border-brand-primary outline-none transition-all" placeholder="e.g. CSE, BBA, Math" />
-                            </div>
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider">Summary / Condition</label>
-                                <textarea value={exForm.summary} onChange={(e) => setExForm({ ...exForm, summary: e.target.value })} className="w-full p-6 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-white/5 focus:border-brand-primary outline-none transition-all min-h-[100px]" placeholder="Briefly describe the book or your requirement..." />
-                            </div>
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider">Contact Number</label>
-                                <div className="relative">
-                                    <Icon name="phone" size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" />
-                                    <input type="tel" required value={exForm.contact} onChange={(e) => setExForm({ ...exForm, contact: e.target.value })} className="w-full pl-14 pr-6 py-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-white/5 focus:border-brand-primary outline-none transition-all" placeholder="017XXXXXXXX" />
-                                </div>
-                            </div>
-                            <button disabled={isSubmittingEx} className="w-full py-5 rounded-2xl bg-brand-primary text-white font-bold shadow-2xl shadow-brand-primary/30 flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50">
-                                {isSubmittingEx ? <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" /> : <Icon name="plus-circle" size={20} />}
-                                {isSubmittingEx ? 'Posting...' : 'Create Post'}
-                            </button>
-                        </form>
-                    </Modal>
-
-                    <Modal isOpen={isQuizModalOpen} onClose={() => { setIsQuizModalOpen(false); setQuizStep(1); }} title="Smart Book Decision">
-                        <div className="space-y-8">
-                            <div className="flex gap-2.5">
-                                {[1, 2, 3, 4].map(s => (
-                                    <div key={s} className={`flex-1 h-2 rounded-full transition-all duration-500 ${s <= quizStep ? "bg-brand-primary" : "bg-slate-100 dark:bg-slate-800"}`} />
-                                ))}
-                            </div>
-                            {quizStep === 1 && (
-                                <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
-                                    <h3 className="text-2xl font-display font-bold mb-8 leading-tight">What would you like to learn today? 🎯</h3>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        {[
-                                            { id: 'tech', label: 'Technical', icon: '💻' },
-                                            { id: 'business', label: 'Business', icon: '📊' },
-                                            { id: 'concept', label: 'Theory', icon: '🧩' },
-                                            { id: 'practical', label: 'Practical', icon: '🔧' },
-                                        ].map(opt => (
-                                            <button key={opt.id} onClick={() => handleQuizAnswer(1, opt.id)} className="p-6 rounded-3xl glass-premium hover:border-brand-primary transition-all text-left group">
-                                                <span className="text-3xl block mb-3 group-hover:scale-110 transition-transform">{opt.icon}</span>
-                                                <span className="font-bold text-sm">{opt.label}</span>
-                                            </button>
-                                        ))}
-                                    </div>
-                                </motion.div>
-                            )}
-                            {quizStep === 5 && (
-                                <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="text-center">
-                                    <div className="w-20 h-20 rounded-[2rem] bg-brand-primary/10 text-brand-primary flex items-center justify-center mx-auto mb-6"><Icon name="brain" size={40} /></div>
-                                    <h3 className="text-2xl font-display font-bold mb-3">Top Recommendations!</h3>
-                                    <p className="text-slate-500 mb-8 font-medium">Based on your interests, we think you'll love these:</p>
-                                    <div className="space-y-4 text-left">
-                                        {getQuizRecommendations().map(({ book }, i) => (
-                                            <div key={i} onClick={() => { handleDetail(book); setIsQuizModalOpen(false); }} className="p-5 rounded-2xl glass-premium hover:border-brand-primary transition-all cursor-pointer flex items-center gap-5 group">
-                                                <div className="w-12 h-12 rounded-xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center group-hover:bg-brand-primary transition-colors"><Icon name="book-open" size={20} className="text-brand-primary group-hover:text-white" /></div>
-                                                <div className="flex-1">
-                                                    <h4 className="font-bold text-sm group-hover:text-brand-primary transition-colors">{book.Title}</h4>
-                                                    <p className="text-[10px] text-slate-400 font-mono font-bold uppercase">{book.Author}</p>
-                                                </div>
-                                                <Icon name="chevron-right" size={18} className="text-slate-300 group-hover:text-brand-primary" />
-                                            </div>
-                                        ))}
-                                    </div>
-                                    <button onClick={() => { setIsQuizModalOpen(false); setQuizStep(1); }} className="w-full mt-10 py-4 rounded-2xl bg-slate-100 dark:bg-slate-800 font-bold hover:bg-brand-primary hover:text-white transition-all">Start Over</button>
-                                </motion.div>
-                            )}
-                            {quizStep > 1 && quizStep < 5 && (
-                                <div className="text-center py-20">
-                                    <div className="w-12 h-12 border-4 border-brand-primary/20 border-t-brand-primary rounded-full animate-spin mx-auto mb-6" />
-                                    <p className="text-slate-500 font-medium mb-6">Analyzing your preferences...</p>
-                                    <button onClick={() => setQuizStep(quizStep + 1)} className="text-brand-primary font-bold hover:underline">Skip to next step</button>
-                                </div>
-                            )}
-                        </div>
-                    </Modal>
-
-                    {/* Footer */}
-                    <footer className="relative z-10 py-20 border-t border-slate-200 dark:border-white/5 text-center">
-                        <div className="max-w-7xl mx-auto px-6">
-                            <div className="flex items-center justify-center gap-3 mb-8">
-                                <div className="w-10 h-10 rounded-xl bg-brand-primary text-white flex items-center justify-center font-display font-bold text-xl">FI</div>
-                                <span className="font-display font-bold text-2xl tracking-tight">Find_Index</span>
-                            </div>
-                            <p className="text-sm text-slate-500 max-w-md mx-auto mb-10 leading-relaxed">Empowering students with knowledge through a modern, accessible library experience.</p>
-                            <div className="flex justify-center gap-8 mb-12">
-                                {[{ icon: 'info', label: 'About' }, { icon: 'phone', label: 'Contact' }, { icon: 'user', label: 'Profile' }].map(link => (
-                                    <a key={link.label} href="#" className="flex items-center gap-2 text-slate-400 hover:text-brand-primary transition-colors font-bold text-sm"><Icon name={link.icon} size={18} /> {link.label}</a>
-                                ))}
-                            </div>
-                            <div className="pt-10 border-t border-slate-100 dark:border-white/5">
-                                <p className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-[0.3em]">© 2026 MN Group · Built for Excellence</p>
-                            </div>
-                        </div>
-                    </footer>
-                </div>
-            );
+            lucide.createIcons();
         }
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
+        function renderBookCard(book, index) {
+            const counts = voteCounts[book.Title] || { like: 0, dislike: 0 };
+            const myVote = myVotes[book.Title];
+            const total = counts.like + counts.dislike;
+            const likePct = total ? Math.round((counts.like / total) * 100) : 50;
+            const isCSE = (book.Category || '').toLowerCase().includes('cse');
+            const isBBA = (book.Category || '').toLowerCase().includes('bba') || (book.Category || '').toLowerCase().includes('bus');
+
+            const badgeClass = isCSE ? "bg-indigo-500/10 text-indigo-500 border-indigo-500/20" :
+                              isBBA ? "bg-cyan-500/10 text-cyan-500 border-cyan-500/20" :
+                              "bg-emerald-500/10 text-emerald-500 border-emerald-500/20";
+
+            return `
+                <div class="card-hover glass-premium rounded-[2rem] p-8 flex flex-col gap-6 group">
+                    <div class="flex justify-between items-start">
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-mono font-bold tracking-wider uppercase border ${badgeClass}">
+                            ${book.Category || 'General'}
+                        </span>
+                        <button onclick="handleMapClick('${book.Rack}')" class="p-2.5 hover:bg-brand-primary/10 rounded-xl transition-colors text-slate-400 hover:text-brand-primary">
+                            <i data-lucide="map" class="w-4.5 h-4.5"></i>
+                        </button>
+                    </div>
+
+                    <div class="flex-1">
+                        <h3 class="text-xl font-display font-bold leading-tight mb-2 group-hover:text-brand-primary transition-colors line-clamp-2">
+                            ${book.Title}
+                        </h3>
+                        <p class="text-sm text-slate-500 dark:text-slate-400 font-medium truncate">✍️ ${book.Author || 'Unknown Author'}</p>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-[10px] font-mono font-bold uppercase tracking-wider">
+                                <span class="text-brand-accent">Likes: ${counts.like}</span>
+                                <span class="text-red-500">Dislikes: ${counts.dislike}</span>
+                            </div>
+                            <div class="h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                                <div class="h-full bg-gradient-to-r from-brand-accent to-brand-secondary" style="width: ${likePct}%"></div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <button onclick="handleVoteClick('${book.Title}', 'like')" class="flex items-center justify-center gap-2 py-3 rounded-2xl text-xs font-bold transition-all border ${myVote === 'like' ? 'bg-brand-accent/10 border-brand-accent text-brand-accent' : 'border-slate-200 dark:border-white/5 text-slate-500'}">
+                                <i data-lucide="thumbs-up" class="w-3.5 h-3.5"></i> Like
+                            </button>
+                            <button onclick="handleVoteClick('${book.Title}', 'dislike')" class="flex items-center justify-center gap-2 py-3 rounded-2xl text-xs font-bold transition-all border ${myVote === 'dislike' ? 'bg-red-500/10 border-red-500 text-red-500' : 'border-slate-200 dark:border-white/5 text-slate-500'}">
+                                <i data-lucide="thumbs-down" class="w-3.5 h-3.5"></i> Dislike
+                            </button>
+                        </div>
+
+                        <button onclick="handleDetailClick('${book.Title}')" class="w-full py-4 rounded-2xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-brand-primary hover:text-white dark:hover:bg-brand-primary transition-all text-sm font-bold flex items-center justify-center gap-2">
+                            <i data-lucide="book-open" class="w-4.5 h-4.5"></i> View Details
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderTopRated() {
+            const list = document.getElementById('top-rated-list');
+            const topBooks = Object.entries(voteCounts)
+                .filter(([, v]) => v.like > 0)
+                .sort((a, b) => b[1].like - a[1].like)
+                .slice(0, 5)
+                .map(([title]) => allBooks.find(b => b.Title === title))
+                .filter(Boolean);
+
+            if (topBooks.length === 0) {
+                list.innerHTML = '<p class="text-center py-10 text-slate-500">No rated books yet.</p>';
+                return;
+            }
+
+            list.innerHTML = topBooks.map((book, i) => `
+                <div onclick="handleDetailClick('${book.Title}')" class="glass-premium p-6 rounded-[2rem] flex items-center gap-6 hover:border-brand-accent/30 transition-all cursor-pointer group">
+                    <div class="w-14 h-14 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center font-display font-extrabold text-2xl text-brand-primary">#${i + 1}</div>
+                    <div class="flex-1">
+                        <h4 class="text-xl font-bold group-hover:text-brand-primary transition-colors">${book.Title}</h4>
+                        <p class="text-sm text-slate-500 font-medium">${book.Author}</p>
+                    </div>
+                    <div class="flex items-center gap-2 px-6 py-3 rounded-2xl bg-brand-accent/10 text-brand-accent font-mono font-bold">
+                        <i data-lucide="thumbs-up" class="w-4.5 h-4.5"></i> ${voteCounts[book.Title]?.like}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderExchanges() {
+            const list = document.getElementById('exchange-list');
+            if (exchanges.length === 0) {
+                list.innerHTML = `
+                    <div class="col-span-full py-32 text-center glass-premium rounded-[2rem]">
+                        <div class="text-7xl mb-6">🔄</div>
+                        <h3 class="text-2xl font-bold mb-2">No exchange posts yet</h3>
+                        <p class="text-slate-500">Be the first to share a book!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            list.innerHTML = exchanges.map(ex => `
+                <div class="glass-premium rounded-[2.5rem] p-10 relative overflow-hidden group border-t-4 border-t-brand-secondary">
+                    <div class="absolute top-8 right-8">
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-mono font-bold tracking-wider uppercase border ${ex.Type === 'দিতে চাই' ? 'bg-brand-accent/10 text-brand-accent border-brand-accent/20' : 'bg-brand-primary/10 text-brand-primary border-brand-primary/20'}">
+                            ${ex.Type === 'দিতে চাই' ? 'Available' : 'Wanted'}
+                        </span>
+                    </div>
+                    <h4 class="text-2xl font-display font-bold mb-4 pr-24">${ex.bookName}</h4>
+                    <div class="flex flex-wrap gap-4 mb-6">
+                        ${ex.author ? `<span class="text-sm text-slate-500 font-medium">✍️ ${ex.author}</span>` : ''}
+                        ${ex.dept ? `<span class="text-sm text-slate-500 font-medium">🏛️ ${ex.dept}</span>` : ''}
+                    </div>
+                    <p class="text-slate-600 dark:text-slate-400 mb-8 line-clamp-3 leading-relaxed">${ex.summary}</p>
+                    <div class="flex items-center justify-between pt-6 border-t border-slate-100 dark:border-white/5">
+                        <div class="flex items-center gap-3 text-brand-primary font-mono font-bold"><i data-lucide="phone" class="w-4.5 h-4.5"></i> ${ex.contact}</div>
+                        <button class="px-6 py-3 rounded-2xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-bold hover:bg-brand-primary hover:text-white transition-all">Contact</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // --- Event Handlers ---
+        window.switchTab = (tab) => {
+            currentTab = tab;
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('bg-brand-primary', 'text-white', 'shadow-2xl', 'shadow-brand-primary/30');
+                btn.classList.add('glass-premium', 'text-slate-500');
+            });
+            const activeBtn = document.getElementById(`tab-${tab}`);
+            activeBtn.classList.add('bg-brand-primary', 'text-white', 'shadow-2xl', 'shadow-brand-primary/30');
+            activeBtn.classList.remove('glass-premium', 'text-slate-500');
+            displayBooks();
+        };
+
+        window.handleVoteClick = async (bookTitle, type) => {
+            if (!supabase) return;
+            const prevVote = myVotes[bookTitle];
+            if (!voteCounts[bookTitle]) voteCounts[bookTitle] = { like: 0, dislike: 0 };
+            
+            if (prevVote === type) {
+                myVotes[bookTitle] = null;
+                voteCounts[bookTitle][type] = Math.max(0, voteCounts[bookTitle][type] - 1);
+            } else {
+                if (prevVote) voteCounts[bookTitle][prevVote] = Math.max(0, voteCounts[bookTitle][prevVote] - 1);
+                myVotes[bookTitle] = type;
+                voteCounts[bookTitle][type]++;
+            }
+            
+            localStorage.setItem('fi_votes', JSON.stringify(myVotes));
+            displayBooks();
+
+            try {
+                await supabase.from('votes').upsert({ 
+                    book_title: bookTitle, 
+                    likes: voteCounts[bookTitle].like, 
+                    dislikes: voteCounts[bookTitle].dislike 
+                }, { onConflict: 'book_title' });
+            } catch (err) { console.error('Vote sync failed:', err); }
+        };
+
+        window.handleDetailClick = (title) => {
+            const book = allBooks.find(b => b.Title === title);
+            if (!book) return;
+            const content = document.getElementById('detail-content');
+            content.innerHTML = `
+                <div class="space-y-10">
+                    <div class="text-center">
+                        <div class="w-24 h-24 bg-brand-primary/10 rounded-3xl flex items-center justify-center mx-auto mb-6 text-brand-primary"><i data-lucide="book" class="w-10 h-10"></i></div>
+                        <h2 class="text-3xl font-display font-bold mb-3 leading-tight text-slate-900 dark:text-white">${book.Title}</h2>
+                        <p class="text-brand-primary font-mono font-bold uppercase tracking-widest text-xs">${book.Author}</p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="p-5 rounded-3xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-white/5">
+                            <p class="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 mb-2">Edition</p>
+                            <p class="text-sm font-bold text-slate-700 dark:text-slate-200">${book.Edition || '—'}</p>
+                        </div>
+                        <div class="p-5 rounded-3xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-white/5">
+                            <p class="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 mb-2">Category</p>
+                            <p class="text-sm font-bold text-slate-700 dark:text-slate-200">${book.Category || '—'}</p>
+                        </div>
+                        <div class="p-5 rounded-3xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-white/5">
+                            <p class="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 mb-2">Rack No</p>
+                            <p class="text-sm font-bold text-slate-700 dark:text-slate-200">${book.Rack || '—'}</p>
+                        </div>
+                        <div class="p-5 rounded-3xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-white/5">
+                            <p class="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 mb-2">Status</p>
+                            <p class="text-sm font-bold text-slate-700 dark:text-slate-200">Available</p>
+                        </div>
+                    </div>
+                    <div class="relative">
+                        <div class="absolute -left-4 top-0 bottom-0 w-1 bg-brand-primary/20 rounded-full"></div>
+                        <h4 class="text-xs font-mono font-bold text-slate-400 uppercase mb-4 flex items-center gap-2"><i data-lucide="align-left" class="w-3.5 h-3.5"></i> Description</h4>
+                        <p class="text-base leading-relaxed text-slate-600 dark:text-slate-300 font-medium">${book.Summary || 'This book is a valuable resource for students and researchers alike.'}</p>
+                    </div>
+                    <button onclick="closeModal('detail-modal')" class="w-full py-5 rounded-[2rem] bg-brand-primary text-white font-bold shadow-xl shadow-brand-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all">Close Details</button>
+                </div>
+            `;
+            openModal('detail-modal');
+            lucide.createIcons();
+        };
+
+        window.handleMapClick = (rack) => {
+            const content = document.getElementById('map-content');
+            content.innerHTML = `
+                <div class="space-y-6">
+                    <div class="flex items-center justify-between p-4 rounded-2xl bg-brand-primary/5 border border-brand-primary/10">
+                        <span class="text-sm font-medium text-slate-500">Target Rack:</span>
+                        <span class="px-6 py-2 rounded-xl bg-brand-primary text-white font-bold shadow-lg shadow-brand-primary/20">${rack || '—'}</span>
+                    </div>
+                    <div class="aspect-[4/3] bg-slate-100 dark:bg-slate-800/50 rounded-3xl border border-slate-200 dark:border-white/5 flex flex-col items-center justify-center p-12 text-center">
+                        <i data-lucide="map" class="w-16 h-16 text-brand-primary/30 mb-6"></i>
+                        <p class="text-sm text-slate-500 font-medium">Map visualization loading... Rack ${rack} has been highlighted in the physical library.</p>
+                    </div>
+                </div>
+            `;
+            openModal('map-modal');
+            lucide.createIcons();
+        };
+
+        async function handleRequestSubmit(e) {
+            e.preventDefault();
+            if (!supabase) return;
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+            const btn = e.target.querySelector('button[type="submit"]');
+            btn.disabled = true;
+            btn.innerHTML = '<div class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> Submitting...';
+
+            try {
+                const { error } = await supabase.from('requests').insert([{
+                    name: data.name, number: data.number, book_name: data.bookName,
+                    dept: data.dept, semester: data.semester
+                }]);
+                if (error) throw error;
+                alert('Request submitted successfully!');
+                closeModal('request-modal');
+                e.target.reset();
+            } catch (err) {
+                console.error(err);
+                alert('Failed to submit request.');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i data-lucide="send" class="w-5 h-5"></i> Submit Request';
+                lucide.createIcons();
+            }
+        }
+
+        async function handleExchangeSubmit(e) {
+            e.preventDefault();
+            if (!supabase) return;
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+            const btn = e.target.querySelector('button[type="submit"]');
+            btn.disabled = true;
+            btn.innerHTML = '<div class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> Posting...';
+
+            try {
+                const { error } = await supabase.from('exchanges').insert([{
+                    type: data.type, book_name: data.bookName, author: data.author,
+                    dept: data.dept, summary: data.summary, contact: data.contact
+                }]);
+                if (error) throw error;
+                exchanges.unshift({ ...data });
+                displayBooks();
+                closeModal('exchange-modal');
+                e.target.reset();
+            } catch (err) {
+                console.error(err);
+                alert('Failed to create post.');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i data-lucide="plus-circle" class="w-5 h-5"></i> Create Post';
+                lucide.createIcons();
+            }
+        }
+
+        // --- Modal Helpers ---
+        window.openModal = (id) => {
+            document.getElementById(id).classList.add('active');
+            document.body.style.overflow = 'hidden';
+            if (id === 'quiz-modal') startQuiz();
+        };
+
+        window.closeModal = (id) => {
+            document.getElementById(id).classList.remove('active');
+            document.body.style.overflow = '';
+        };
+
+        window.closeModalOnOverlay = (e) => {
+            if (e.target.classList.contains('modal-overlay')) {
+                closeModal(e.target.id);
+            }
+        };
+
+        window.setExType = (type) => {
+            document.getElementById('ex-type-input').value = type;
+            const giveBtn = document.getElementById('ex-type-give');
+            const takeBtn = document.getElementById('ex-type-take');
+            if (type === 'দিতে চাই') {
+                giveBtn.classList.add('bg-white', 'dark:bg-slate-700', 'shadow-sm', 'text-brand-primary');
+                giveBtn.classList.remove('text-slate-500');
+                takeBtn.classList.remove('bg-white', 'dark:bg-slate-700', 'shadow-sm', 'text-brand-primary');
+                takeBtn.classList.add('text-slate-500');
+            } else {
+                takeBtn.classList.add('bg-white', 'dark:bg-slate-700', 'shadow-sm', 'text-brand-primary');
+                takeBtn.classList.remove('text-slate-500');
+                giveBtn.classList.remove('bg-white', 'dark:bg-slate-700', 'shadow-sm', 'text-brand-primary');
+                giveBtn.classList.add('text-slate-500');
+            }
+        };
+
+        // --- Quiz Logic ---
+        let quizStep = 1;
+        let quizAnswers = {};
+
+        function startQuiz() {
+            quizStep = 1;
+            quizAnswers = {};
+            renderQuiz();
+        }
+
+        function renderQuiz() {
+            const content = document.getElementById('quiz-content');
+            if (quizStep === 1) {
+                content.innerHTML = `
+                    <div class="space-y-8">
+                        <div class="flex gap-2.5">
+                            <div class="flex-1 h-2 rounded-full bg-brand-primary"></div>
+                            <div class="flex-1 h-2 rounded-full bg-slate-100 dark:bg-slate-800"></div>
+                            <div class="flex-1 h-2 rounded-full bg-slate-100 dark:bg-slate-800"></div>
+                            <div class="flex-1 h-2 rounded-full bg-slate-100 dark:bg-slate-800"></div>
+                        </div>
+                        <h3 class="text-2xl font-display font-bold mb-8 leading-tight">What would you like to learn today? 🎯</h3>
+                        <div class="grid grid-cols-2 gap-4">
+                            <button onclick="handleQuizAnswer(1, 'tech')" class="p-6 rounded-3xl glass-premium hover:border-brand-primary transition-all text-left group">
+                                <span class="text-3xl block mb-3 group-hover:scale-110 transition-transform">💻</span>
+                                <span class="font-bold text-sm">Technical</span>
+                            </button>
+                            <button onclick="handleQuizAnswer(1, 'business')" class="p-6 rounded-3xl glass-premium hover:border-brand-primary transition-all text-left group">
+                                <span class="text-3xl block mb-3 group-hover:scale-110 transition-transform">📊</span>
+                                <span class="font-bold text-sm">Business</span>
+                            </button>
+                            <button onclick="handleQuizAnswer(1, 'concept')" class="p-6 rounded-3xl glass-premium hover:border-brand-primary transition-all text-left group">
+                                <span class="text-3xl block mb-3 group-hover:scale-110 transition-transform">🧩</span>
+                                <span class="font-bold text-sm">Theory</span>
+                            </button>
+                            <button onclick="handleQuizAnswer(1, 'practical')" class="p-6 rounded-3xl glass-premium hover:border-brand-primary transition-all text-left group">
+                                <span class="text-3xl block mb-3 group-hover:scale-110 transition-transform">🔧</span>
+                                <span class="font-bold text-sm">Practical</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } else if (quizStep === 5) {
+                const recs = getQuizRecommendations();
+                content.innerHTML = `
+                    <div class="text-center">
+                        <div class="w-20 h-20 rounded-[2rem] bg-brand-primary/10 text-brand-primary flex items-center justify-center mx-auto mb-6"><i data-lucide="brain" class="w-10 h-10"></i></div>
+                        <h3 class="text-2xl font-display font-bold mb-3">Top Recommendations!</h3>
+                        <p class="text-slate-500 mb-8 font-medium">Based on your interests, we think you'll love these:</p>
+                        <div class="space-y-4 text-left">
+                            ${recs.map(r => `
+                                <div onclick="handleDetailClick('${r.book.Title}'); closeModal('quiz-modal');" class="p-5 rounded-2xl glass-premium hover:border-brand-primary transition-all cursor-pointer flex items-center gap-5 group">
+                                    <div class="w-12 h-12 rounded-xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center group-hover:bg-brand-primary transition-colors"><i data-lucide="book-open" class="text-brand-primary group-hover:text-white w-5 h-5"></i></div>
+                                    <div class="flex-1">
+                                        <h4 class="font-bold text-sm group-hover:text-brand-primary transition-colors">${r.book.Title}</h4>
+                                        <p class="text-[10px] text-slate-400 font-mono font-bold uppercase">${r.book.Author}</p>
+                                    </div>
+                                    <i data-lucide="chevron-right" class="text-slate-300 group-hover:text-brand-primary w-4.5 h-4.5"></i>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <button onclick="startQuiz()" class="w-full mt-10 py-4 rounded-2xl bg-slate-100 dark:bg-slate-800 font-bold hover:bg-brand-primary hover:text-white transition-all">Start Over</button>
+                    </div>
+                `;
+                lucide.createIcons();
+            } else {
+                content.innerHTML = `
+                    <div class="text-center py-20">
+                        <div class="w-12 h-12 border-4 border-brand-primary/20 border-t-brand-primary rounded-full animate-spin mx-auto mb-6"></div>
+                        <p class="text-slate-500 font-medium mb-6">Analyzing your preferences...</p>
+                        <button onclick="handleQuizAnswer(${quizStep}, 'skip')" class="text-brand-primary font-bold hover:underline">Skip to next step</button>
+                    </div>
+                `;
+            }
+        }
+
+        window.handleQuizAnswer = (step, val) => {
+            quizAnswers[step] = val;
+            if (quizStep < 4) {
+                quizStep++;
+                renderQuiz();
+                // Simulate processing
+                setTimeout(() => {
+                    if (quizStep < 5) {
+                        quizStep = 5;
+                        renderQuiz();
+                    }
+                }, 800);
+            } else {
+                quizStep = 5;
+                renderQuiz();
+            }
+        };
+
+        function getQuizRecommendations() {
+            return allBooks.map(b => {
+                let s = 0;
+                const c = (b.Category || '').toLowerCase();
+                if (quizAnswers[1] === 'tech' && c.includes('cse')) s += 3;
+                if (quizAnswers[1] === 'business' && c.includes('bba')) s += 3;
+                s += (voteCounts[b.Title]?.like || 0) * 0.5;
+                return { book: b, score: s };
+            }).sort((a, b) => b.score - a.score).slice(0, 4);
+        }
+
     </script>
 </body>
 </html>
