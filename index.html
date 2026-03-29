@@ -385,27 +385,28 @@
     <!-- Main Script -->
     <script type="module">
         // --- Supabase Configuration ---
-        // AI Studio Settings থেকে VITE_SUPABASE_URL এবং VITE_SUPABASE_ANON_KEY সেট করবি
-        const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || "https://edtsidlxnwysazyzkahu.supabase.co"; 
-        const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || "sb_publishable_dFVu4MM0z_7qbkypUx-goQ_MCixc5qn";
+        let SUPABASE_URL = "";
+        let SUPABASE_ANON_KEY = "";
+        
+        try {
+            // @ts-ignore
+            if (typeof import.meta !== 'undefined' && import.meta.env) {
+                SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || "https://edtsidlxnwysazyzkahu.supabase.co";
+                SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || "sb_publishable_dFVu4MM0z_7qbkypUx-goQ_MCixc5qn";
+            }
+        } catch (e) {
+            console.warn("import.meta.env not available, using empty strings.");
+        }
 
         let supabase = null;
         if (SUPABASE_URL && SUPABASE_URL.startsWith('http')) {
-            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            try {
+                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            } catch (e) {
+                console.error("Failed to initialize Supabase client:", e);
+            }
         } else {
             console.error("Supabase URL is missing or invalid. Please set VITE_SUPABASE_URL in your environment.");
-            // ইউজারকে একটা মেসেজ দেখানো যেতে পারে
-            window.addEventListener('DOMContentLoaded', () => {
-                const container = document.getElementById('book-list');
-                if (container) {
-                    container.innerHTML = `
-                        <div class="col-span-full text-center py-20 bg-red-50 dark:bg-red-900/20 rounded-3xl">
-                            <p class="text-red-500 font-bold">Supabase Configuration Missing!</p>
-                            <p class="text-sm text-slate-500 mt-2">Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your settings.</p>
-                        </div>
-                    `;
-                }
-            });
         }
 
         // --- State ---
@@ -468,7 +469,12 @@
 
         // --- Data Fetching ---
         async function fetchData() {
-            if (!supabase) return;
+            if (!supabase) {
+                console.warn("Supabase not initialized, showing cached data.");
+                displayBooks();
+                updateBookCount();
+                return;
+            }
             try {
                 const [booksRes, votesRes, exRes] = await Promise.all([
                     supabase.from('books').select('*'),
@@ -522,6 +528,8 @@
             const topSection = document.getElementById('top-rated-section');
             const exchangeSection = document.getElementById('exchange-section');
 
+            if (!container) return;
+
             // Hide all sections first
             container.classList.add('hidden');
             topSection.classList.add('hidden');
@@ -529,6 +537,17 @@
 
             if (currentTab === 'all') {
                 container.classList.remove('hidden');
+                
+                if (!supabase && allBooks.length === 0) {
+                    container.innerHTML = `
+                        <div class="col-span-full text-center py-20 bg-red-50 dark:bg-red-900/20 rounded-3xl">
+                            <p class="text-red-500 font-bold">Supabase Configuration Missing!</p>
+                            <p class="text-sm text-slate-500 mt-2">Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your settings to load live data.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
                 let filtered = allBooks;
                 
                 if (currentDept !== 'all') {
@@ -707,7 +726,10 @@
         };
 
         window.handleVoteClick = async (bookTitle, type) => {
-            if (!supabase) return;
+            if (!supabase) {
+                alert('Supabase is not configured. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your settings to enable voting.');
+                return;
+            }
             const prevVote = myVotes[bookTitle];
             if (!voteCounts[bookTitle]) voteCounts[bookTitle] = { like: 0, dislike: 0 };
             
@@ -793,7 +815,10 @@
 
         async function handleRequestSubmit(e) {
             e.preventDefault();
-            if (!supabase) return;
+            if (!supabase) {
+                alert('Supabase is not configured. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your settings to submit requests.');
+                return;
+            }
             const formData = new FormData(e.target);
             const data = Object.fromEntries(formData.entries());
             const btn = e.target.querySelector('button[type="submit"]');
@@ -821,7 +846,10 @@
 
         async function handleExchangeSubmit(e) {
             e.preventDefault();
-            if (!supabase) return;
+            if (!supabase) {
+                alert('Supabase is not configured. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your settings to post on the exchange board.');
+                return;
+            }
             const formData = new FormData(e.target);
             const data = Object.fromEntries(formData.entries());
             const btn = e.target.querySelector('button[type="submit"]');
@@ -925,6 +953,70 @@
                         </div>
                     </div>
                 `;
+            } else if (quizStep === 2) {
+                content.innerHTML = `
+                    <div class="space-y-8">
+                        <div class="flex gap-2.5">
+                            <div class="flex-1 h-2 rounded-full bg-brand-primary"></div>
+                            <div class="flex-1 h-2 rounded-full bg-brand-primary"></div>
+                            <div class="flex-1 h-2 rounded-full bg-slate-100 dark:bg-slate-800"></div>
+                            <div class="flex-1 h-2 rounded-full bg-slate-100 dark:bg-slate-800"></div>
+                        </div>
+                        <h3 class="text-2xl font-display font-bold mb-8 leading-tight">What's your current level? 🚀</h3>
+                        <div class="grid grid-cols-1 gap-4">
+                            <button onclick="handleQuizAnswer(2, 'beginner')" class="p-6 rounded-3xl glass-premium hover:border-brand-primary transition-all text-left flex items-center gap-4 group">
+                                <span class="text-2xl group-hover:scale-110 transition-transform">🌱</span>
+                                <span class="font-bold">Beginner - Just starting out</span>
+                            </button>
+                            <button onclick="handleQuizAnswer(2, 'intermediate')" class="p-6 rounded-3xl glass-premium hover:border-brand-primary transition-all text-left flex items-center gap-4 group">
+                                <span class="text-2xl group-hover:scale-110 transition-transform">🌿</span>
+                                <span class="font-bold">Intermediate - Know the basics</span>
+                            </button>
+                            <button onclick="handleQuizAnswer(2, 'advanced')" class="p-6 rounded-3xl glass-premium hover:border-brand-primary transition-all text-left flex items-center gap-4 group">
+                                <span class="text-2xl group-hover:scale-110 transition-transform">🌳</span>
+                                <span class="font-bold">Advanced - Looking for deep dives</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } else if (quizStep === 3) {
+                content.innerHTML = `
+                    <div class="space-y-8">
+                        <div class="flex gap-2.5">
+                            <div class="flex-1 h-2 rounded-full bg-brand-primary"></div>
+                            <div class="flex-1 h-2 rounded-full bg-brand-primary"></div>
+                            <div class="flex-1 h-2 rounded-full bg-brand-primary"></div>
+                            <div class="flex-1 h-2 rounded-full bg-slate-100 dark:bg-slate-800"></div>
+                        </div>
+                        <h3 class="text-2xl font-display font-bold mb-8 leading-tight">How much time do you have? ⏰</h3>
+                        <div class="grid grid-cols-1 gap-4">
+                            <button onclick="handleQuizAnswer(3, 'quick')" class="p-6 rounded-3xl glass-premium hover:border-brand-primary transition-all text-left flex items-center gap-4 group">
+                                <span class="text-2xl group-hover:scale-110 transition-transform">⚡</span>
+                                <span class="font-bold">Quick read - Under 100 pages</span>
+                            </button>
+                            <button onclick="handleQuizAnswer(3, 'medium')" class="p-6 rounded-3xl glass-premium hover:border-brand-primary transition-all text-left flex items-center gap-4 group">
+                                <span class="text-2xl group-hover:scale-110 transition-transform">📚</span>
+                                <span class="font-bold">Standard - 100 to 300 pages</span>
+                            </button>
+                            <button onclick="handleQuizAnswer(3, 'deep')" class="p-6 rounded-3xl glass-premium hover:border-brand-primary transition-all text-left flex items-center gap-4 group">
+                                <span class="text-2xl group-hover:scale-110 transition-transform">🏛️</span>
+                                <span class="font-bold">Deep dive - 300+ pages</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } else if (quizStep === 4) {
+                content.innerHTML = `
+                    <div class="text-center py-10">
+                        <div class="w-16 h-16 border-4 border-brand-primary/20 border-t-brand-primary rounded-full animate-spin mx-auto mb-8"></div>
+                        <h3 class="text-2xl font-display font-bold mb-4">Finding the perfect match...</h3>
+                        <p class="text-slate-500 font-medium">Our AI is scanning the library for you.</p>
+                    </div>
+                `;
+                setTimeout(() => {
+                    quizStep = 5;
+                    renderQuiz();
+                }, 1500);
             } else if (quizStep === 5) {
                 const recs = getQuizRecommendations();
                 content.innerHTML = `
