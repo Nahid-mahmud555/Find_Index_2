@@ -1,1206 +1,927 @@
 <!DOCTYPE html>
-<html lang="bn" data-theme="light">
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Find_Index | MiM</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&family=Space+Grotesk:wght@700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
-<style>
-[data-theme="light"]{
-  --bg:#f0ecff;--s1:#fdf9ff;--s2:#f3eeff;--s3:#e8dfff;
-  --g:#7c3aed;--g2:#6d28d9;--b:#06b6d4;--y:#f59e0b;--p:#ec4899;
-  --t:#1e1040;--td:#6b6a8a;--tbr:#a89fc0;
-  --br:rgba(124,58,237,0.1);
-  --shadow:0 2px 16px rgba(124,58,237,0.08);
-  --shadow-hover:0 14px 44px rgba(124,58,237,0.16);
-  --card-border:rgba(124,58,237,0.15);
-  --pill-bg:rgba(255,253,255,0.75);--loader-bg:#f0ecff;
-}
-[data-theme="dark"]{
-  --bg:#04080f;--s1:#0a1020;--s2:#0e1628;--s3:#111d30;
-  --g:#00ff9d;--g2:#00cc7d;--b:#38bdf8;--y:#fbbf24;--p:#a78bfa;
-  --t:#e2e8f0;--td:#475569;--tbr:#334155;
-  --br:rgba(255,255,255,0.06);
-  --shadow:0 2px 12px rgba(0,0,0,0.3);
-  --shadow-hover:0 16px 46px rgba(0,0,0,0.5);
-  --card-border:rgba(0,255,157,0.1);
-  --pill-bg:#0a1020;--loader-bg:#04080f;
-}
-*{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth}
-body{font-family:'Hind Siliguri',sans-serif;background:var(--bg);color:var(--t);overflow-x:hidden;cursor:none;transition:background .3s,color .3s}
-[data-theme="light"] body{background:linear-gradient(145deg,#ecdeff 0%,#dff0ff 38%,#e8fff5 70%,#ffedf7 100%) fixed}
-[data-theme="light"] .card{background:rgba(255,253,255,0.82);backdrop-filter:blur(10px)}
-[data-theme="light"] .modal{background:rgba(255,253,255,0.97);backdrop-filter:blur(20px)}
-[data-theme="light"] .pill{background:rgba(255,253,255,0.75);backdrop-filter:blur(8px)}
-[data-theme="light"] .sb{background:rgba(255,253,255,0.85);backdrop-filter:blur(8px)}
-
-/* CURSOR */
-#cur,#cur2{position:fixed;border-radius:50%;pointer-events:none;z-index:99999;top:0;left:0;will-change:transform}
-#cur{width:8px;height:8px;background:var(--g);transform:translate(-50%,-50%);transition:width .15s,height .15s}
-#cur2{width:28px;height:28px;border:1.5px solid var(--g);opacity:.35;transform:translate(-50%,-50%)}
-
-/* BG */
-.bg{position:fixed;inset:0;pointer-events:none;z-index:0}
-.bg-grid{position:absolute;inset:0;background-image:linear-gradient(var(--br) 1px,transparent 1px),linear-gradient(90deg,var(--br) 1px,transparent 1px);background-size:48px 48px;opacity:.5}
-[data-theme="light"] .bg-grid{opacity:.28}
-.orb{position:absolute;border-radius:50%;filter:blur(100px);animation:flt 10s ease-in-out infinite}
-[data-theme="light"] .o1{width:600px;height:600px;background:rgba(168,85,247,.18);top:-200px;right:-150px}
-[data-theme="light"] .o2{width:460px;height:460px;background:rgba(56,189,248,.16);bottom:40px;left:-100px;animation-delay:-4s}
-[data-theme="light"] .o3{width:340px;height:340px;background:rgba(244,114,182,.18);top:40%;right:20%;animation-delay:-7s}
-[data-theme="dark"] .o1{width:520px;height:520px;background:rgba(0,255,157,.05);top:-160px;right:-120px}
-[data-theme="dark"] .o2{width:360px;height:360px;background:rgba(56,189,248,.055);bottom:40px;left:-90px;animation-delay:-4s}
-[data-theme="dark"] .o3{width:220px;height:220px;background:rgba(167,139,250,.04);top:42%;right:22%;animation-delay:-7s}
-@keyframes flt{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-28px) scale(1.04)}}
-
-/* LOADER */
-#ld{position:fixed;inset:0;background:var(--loader-bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:10000;transition:opacity .5s}
-.ld-ring{width:72px;height:72px;position:relative;margin-bottom:20px}
-.ld-ring svg{animation:spin 1.2s linear infinite}
-.ld-ri{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--g);font-weight:700}
-.ld-title{font-family:'Space Grotesk',sans-serif;font-size:2.4rem;background:linear-gradient(135deg,#7c3aed,#06b6d4);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-2px;display:inline-block}
-.ld-bar{width:200px;height:2px;background:var(--br);border-radius:2px;margin-top:16px;overflow:hidden}
-.ld-fill{height:100%;background:linear-gradient(90deg,var(--g),var(--b));animation:ldfill 2s ease forwards}
-@keyframes ldfill{from{width:0}to{width:100%}}
-.ld-txt{font-size:11px;color:var(--td);margin-top:8px;font-family:'JetBrains Mono',monospace;letter-spacing:1px}
-@keyframes spin{to{transform:rotate(360deg)}}
-
-/* TOPBAR */
-.topbar{position:relative;z-index:20;display:flex;justify-content:flex-end;padding:16px 24px 0;animation:fdn .4s ease both}
-.theme-toggle{display:flex;align-items:center;gap:8px;background:var(--s1);border:1px solid var(--br);padding:8px 16px;border-radius:50px;cursor:pointer;font-size:12.5px;font-family:'Hind Siliguri',sans-serif;color:var(--td);box-shadow:var(--shadow);transition:all .25s;user-select:none}
-.theme-toggle:hover{border-color:var(--g);color:var(--g)}
-.toggle-icon{font-size:16px;transition:transform .4s}
-.theme-toggle:hover .toggle-icon{transform:rotate(20deg)}
-
-/* HEADER */
-header{position:relative;z-index:10;text-align:center;padding:28px 20px 44px;display:flex;flex-direction:column;align-items:center}
-.hbadge{display:inline-flex;align-items:center;gap:7px;background:var(--s2);border:1px solid var(--card-border);padding:5px 16px;border-radius:50px;font-size:11px;color:var(--g);font-family:'JetBrains Mono',monospace;letter-spacing:2px;text-transform:uppercase;margin-bottom:18px;animation:fdn .5s ease both;box-shadow:var(--shadow);white-space:nowrap}
-.dot{width:6px;height:6px;background:var(--g);border-radius:50%;animation:blk 1s infinite}
-@keyframes blk{0%,100%{opacity:1}50%{opacity:.2}}
-.logo{font-family:'Space Grotesk',sans-serif;font-size:clamp(2.4rem,6vw,4.8rem);background:linear-gradient(130deg,#7c3aed 0%,#06b6d4 50%,#ec4899 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:-3px;line-height:1.1;animation:fdn .5s .1s ease both;display:block;margin-bottom:6px}
-[data-theme="dark"] .logo{background:linear-gradient(130deg,#00ff9d 0%,#38bdf8 50%,#a78bfa 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
-.logo-sub{font-size:.9rem;color:var(--td);margin-top:6px;animation:fdn .5s .2s ease both}
-.logo-sub b{color:var(--g)}
-
-/* STATUS BAR */
-.sbar{position:relative;z-index:10;display:flex;justify-content:center;gap:10px;flex-wrap:wrap;padding:0 16px 24px;animation:fup .5s .3s ease both}
-.pill{display:inline-flex;align-items:center;gap:7px;background:var(--pill-bg);border:1px solid var(--br);padding:9px 18px;border-radius:50px;font-size:12.5px;box-shadow:var(--shadow);transition:all .22s;cursor:default}
-.pill:hover{border-color:var(--g);box-shadow:var(--shadow-hover);transform:translateY(-1px)}
-.pbtn{background:linear-gradient(135deg,#7c3aed,#06b6d4)!important;color:#fff!important;font-weight:700;border:none!important;cursor:pointer;backdrop-filter:none!important;font-family:'Hind Siliguri',sans-serif}
-[data-theme="dark"] .pbtn{background:linear-gradient(135deg,#00ff9d,#38bdf8)!important;color:#000!important}
-.pbtn:hover{transform:scale(1.05) translateY(-2px)!important;box-shadow:0 6px 22px rgba(124,58,237,.35)!important}
-
-/* SEARCH */
-.sw{max-width:680px;margin:0 auto 28px;padding:0 18px;position:relative;z-index:10;animation:fup .5s .4s ease both}
-.sb{width:100%;padding:15px 52px 15px 22px;background:var(--s1);border:1px solid var(--br);border-radius:14px;color:var(--t);font-size:14.5px;font-family:'Hind Siliguri',sans-serif;outline:none;box-shadow:var(--shadow);transition:all .22s}
-.sb::placeholder{color:var(--tbr)}
-.sb:focus{border-color:var(--g);box-shadow:0 0 0 3px rgba(124,58,237,.09)}
-/* SEARCH SUGGESTIONS */
-.sugg-wrap{position:relative}
-.si-icon{position:absolute;right:34px;top:18px;color:var(--tbr);font-size:17px;pointer-events:none}
-.qbtn{display:block;margin:10px auto 0;background:transparent;border:1px solid var(--br);color:var(--td);padding:9px 22px;border-radius:50px;font-family:'Hind Siliguri',sans-serif;font-size:12.5px;cursor:pointer;transition:all .22s;box-shadow:var(--shadow)}
-.qbtn:hover{border-color:var(--y);color:var(--y)}
-
-/* GRID */
-.con{max-width:1240px;margin:auto;padding:0 18px 60px;position:relative;z-index:10}
-.tabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
-.tab{padding:8px 18px;border-radius:50px;border:1px solid var(--br);background:transparent;color:var(--td);font-family:'Hind Siliguri',sans-serif;font-size:12.5px;cursor:pointer;transition:all .22s;font-weight:600}
-.tab.active,.tab:hover{background:var(--g);color:#fff;border-color:var(--g)}
-[data-theme="dark"] .tab.active,[data-theme="dark"] .tab:hover{color:#000}
-
-.dept-sel-wrap{position:relative;flex:1;max-width:240px}
-.dept-sel-wrap::after{content:'▾';position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--td);pointer-events:none;font-size:13px}
-.dept-select{width:100%;padding:10px 36px 10px 16px;background:var(--s1);border:1px solid var(--br);border-radius:50px;color:var(--t);font-family:'Hind Siliguri',sans-serif;font-size:13px;cursor:pointer;outline:none;appearance:none;-webkit-appearance:none;transition:all .22s;box-shadow:var(--shadow)}
-.dept-select:focus{border-color:var(--g);box-shadow:0 0 0 3px rgba(124,58,237,.08)}
-.dept-select option{background:var(--s1);color:var(--t)}
-
-.sec-title{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--td);letter-spacing:2px;text-transform:uppercase;margin-bottom:18px;display:flex;align-items:center;gap:10px}
-.sec-title::after{content:'';flex:1;height:1px;background:var(--br)}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(295px,1fr));gap:16px}
-
-/* TOP LIST */
-.top-section{margin-bottom:32px}
-.top-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));gap:10px}
-.top-card{background:var(--s1);border:1px solid var(--br);border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow);transition:all .22s;cursor:pointer}
-[data-theme="light"] .top-card{background:rgba(255,253,255,0.82);backdrop-filter:blur(8px)}
-.top-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-hover);border-color:var(--card-border)}
-.top-rank{font-family:'Space Grotesk',sans-serif;font-size:1.3rem;font-weight:800;min-width:30px;text-align:center}
-.top-info{flex:1;min-width:0}
-.top-title{font-size:13px;font-weight:700;color:var(--t);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.top-count{font-size:11px;color:var(--td);margin-top:3px;font-family:'JetBrains Mono',monospace}
-.top-like-badge{display:flex;align-items:center;gap:4px;font-size:12px;font-weight:700;padding:4px 10px;border-radius:20px}
-.like-badge{background:rgba(16,185,129,.1);color:#059669;border:1px solid rgba(16,185,129,.2)}
-.dislike-badge{background:rgba(239,68,68,.1);color:#dc2626;border:1px solid rgba(239,68,68,.2)}
-
-/* BOOK EXCHANGE LIST */
-.exlist{display:grid;gap:12px}
-.ex-card{background:var(--s1);border:1px solid var(--br);border-radius:14px;padding:16px 18px;box-shadow:var(--shadow);transition:all .22s;position:relative;overflow:hidden}
-[data-theme="light"] .ex-card{background:rgba(255,253,255,0.82);backdrop-filter:blur(8px)}
-.ex-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--b),var(--p));opacity:.7}
-.ex-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-hover)}
-.ex-card-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px}
-.ex-title{font-family:'Space Grotesk',sans-serif;font-size:1rem;font-weight:800;color:var(--t);line-height:1.3}
-.ex-badge{font-size:9px;font-family:'JetBrains Mono',monospace;font-weight:700;padding:3px 8px;border-radius:20px;text-transform:uppercase;letter-spacing:1px;white-space:nowrap;margin-left:8px;flex-shrink:0}
-.ex-badge-have{background:rgba(16,185,129,.1);color:#059669;border:1px solid rgba(16,185,129,.2)}
-.ex-badge-want{background:rgba(124,58,237,.1);color:#7c3aed;border:1px solid rgba(124,58,237,.2)}
-.ex-meta{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px}
-.ex-m{font-size:11.5px;color:var(--td);display:flex;align-items:center;gap:4px}
-.ex-m b{color:var(--t)}
-.ex-summary{font-size:12.5px;color:var(--t);opacity:.8;line-height:1.7;margin-bottom:10px}
-.ex-footer{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
-.ex-contact{font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--g);font-weight:700}
-.ex-req-btn{padding:8px 16px;border-radius:8px;border:1px solid var(--card-border);background:transparent;color:var(--g);font-size:12px;font-family:'Hind Siliguri',sans-serif;font-weight:700;cursor:pointer;transition:all .2s}
-.ex-req-btn:hover{background:var(--s2)}
-.ex-empty{text-align:center;padding:40px 20px;color:var(--td)}
-.ex-empty-icon{font-size:2.5rem;margin-bottom:10px}
-
-/* CARD */
-.card{background:var(--s1);border:1px solid var(--br);border-radius:18px;padding:20px;position:relative;overflow:hidden;will-change:transform;transform:translateZ(0);box-shadow:var(--shadow);transition:transform .3s cubic-bezier(.34,1.56,.64,1),border-color .3s,box-shadow .3s;animation:fup .4s ease both}
-.card::after{content:'';position:absolute;inset:0;border-radius:18px;background:radial-gradient(circle at var(--mx,50%) var(--my,50%),rgba(124,58,237,.06),transparent 55%);opacity:0;transition:opacity .3s;pointer-events:none}
-[data-theme="dark"] .card::after{background:radial-gradient(circle at var(--mx,50%) var(--my,50%),rgba(0,255,157,.055),transparent 55%)}
-.card:hover{transform:translateY(-6px) translateZ(0);border-color:var(--card-border);box-shadow:var(--shadow-hover)}
-.card:hover::after{opacity:1}
-.card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--g),var(--b));border-radius:18px 18px 0 0;opacity:0;transition:opacity .3s}
-.card:hover::before{opacity:1}
-
-/* CLEAN CARD TOP — just title+author */
-.card-top{margin-bottom:10px}
-.card-title{font-family:'Space Grotesk',sans-serif;font-size:1.06rem;color:var(--t);line-height:1.3;margin-bottom:5px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.card-author{font-size:12.5px;color:var(--td);display:flex;align-items:center;gap:5px}
-/* expanded details (hidden by default, shown on hover/expand) */
-.card-details{overflow:hidden;max-height:0;transition:max-height .35s cubic-bezier(.4,0,.2,1),opacity .3s;opacity:0}
-.card-details.show{max-height:120px;opacity:1}
-.tag{display:inline-flex;align-items:center;font-size:9.5px;font-family:'JetBrains Mono',monospace;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:4px 10px;border-radius:5px;margin-bottom:10px}
-[data-theme="light"] .tc{background:rgba(124,58,237,.09);color:#7c3aed;border:1px solid rgba(124,58,237,.2)}
-[data-theme="light"] .tb{background:rgba(6,182,212,.09);color:#0891b2;border:1px solid rgba(6,182,212,.2)}
-[data-theme="light"] .to{background:rgba(236,72,153,.08);color:#db2777;border:1px solid rgba(236,72,153,.2)}
-[data-theme="dark"] .tc{background:rgba(0,255,157,.09);color:#00ff9d;border:1px solid rgba(0,255,157,.18)}
-[data-theme="dark"] .tb{background:rgba(56,189,248,.09);color:#38bdf8;border:1px solid rgba(56,189,248,.18)}
-[data-theme="dark"] .to{background:rgba(251,191,36,.09);color:#fbbf24;border:1px solid rgba(251,191,36,.18)}
-.cm{font-size:12px;color:var(--td);margin-bottom:3px;display:flex;align-items:center;gap:5px}
-.cm span{color:var(--t)}
-.cdiv{height:1px;background:var(--br);margin:12px 0}
-
-/* VOTE */
-.vote-row{display:flex;align-items:center;gap:8px;margin-bottom:10px}
-.vote-counts{display:flex;gap:6px}
-.vc{font-size:11px;font-family:'JetBrains Mono',monospace;padding:3px 8px;border-radius:20px;font-weight:700}
-.vc-like{background:rgba(16,185,129,.1);color:#059669}
-.vc-dislike{background:rgba(239,68,68,.1);color:#dc2626}
-.vote-progress{flex:1;height:3px;background:var(--br);border-radius:4px;overflow:hidden}
-.vp-fill{height:100%;background:linear-gradient(90deg,#10b981,#06b6d4);border-radius:4px;transition:width .5s}
-
-.bg2{display:grid;grid-template-columns:1fr 1fr;gap:7px}
-.bg3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:7px}
-.btn{display:flex;align-items:center;justify-content:center;gap:5px;padding:10px 6px;border-radius:10px;border:1px solid var(--br);background:transparent;color:var(--td);font-size:11px;font-family:'Hind Siliguri',sans-serif;font-weight:600;cursor:pointer;transition:all .18s;white-space:nowrap}
-.btn:active{transform:scale(.95)}
-.btn:hover{background:var(--s2);color:var(--t)}
-[data-theme="light"] .bdf{grid-column:span 2;border-color:rgba(124,58,237,.2);color:#7c3aed}
-[data-theme="light"] .bdf:hover{background:rgba(124,58,237,.06)!important}
-[data-theme="dark"] .bdf{grid-column:span 2;border-color:rgba(0,255,157,.18);color:#00ff9d}
-[data-theme="dark"] .bdf:hover{background:rgba(0,255,157,.07)!important}
-[data-theme="light"] .bm:hover{background:rgba(6,182,212,.07)!important;border-color:rgba(6,182,212,.25)!important;color:#0891b2!important}
-[data-theme="dark"] .bm:hover{background:rgba(56,189,248,.07)!important;color:#38bdf8!important}
-[data-theme="light"] .ba:hover{background:rgba(245,158,11,.07)!important;border-color:rgba(245,158,11,.25)!important;color:#d97706!important}
-[data-theme="dark"] .ba:hover{background:rgba(251,191,36,.07)!important;color:#fbbf24!important}
-.btn-like{border-color:rgba(16,185,129,.25);color:#059669;font-size:12px}
-.btn-like:hover,.btn-like.voted{background:rgba(16,185,129,.1)!important;border-color:rgba(16,185,129,.4)!important;color:#059669!important}
-.btn-like.voted{box-shadow:0 0 10px rgba(16,185,129,.2)}
-.btn-dislike{border-color:rgba(239,68,68,.25);color:#dc2626;font-size:12px}
-.btn-dislike:hover,.btn-dislike.voted{background:rgba(239,68,68,.08)!important;border-color:rgba(239,68,68,.35)!important;color:#dc2626!important}
-.btn-dislike.voted{box-shadow:0 0 10px rgba(239,68,68,.15)}
-
-/* OVERLAY & MODAL */
-.ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;backdrop-filter:blur(10px)}
-[data-theme="light"] .ov{background:rgba(15,23,42,.4)}
-.ov.on{display:block;animation:fdin .18s ease}
-@keyframes fdin{from{opacity:0}to{opacity:1}}
-.modal{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--s1);border:1px solid var(--br);width:92%;max-width:560px;border-radius:22px;z-index:1001;box-shadow:0 28px 70px rgba(0,0,0,.18);overflow:hidden;flex-direction:column;max-height:90vh}
-[data-theme="dark"] .modal{box-shadow:0 28px 70px rgba(0,0,0,.6)}
-.modal.on{display:flex;animation:mdin .28s cubic-bezier(.34,1.56,.64,1)}
-@keyframes mdin{from{opacity:0;transform:translate(-50%,-44%)}to{opacity:1;transform:translate(-50%,-50%)}}
-.mh{padding:18px 22px 14px;border-bottom:1px solid var(--br);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
-.mt{font-family:'Space Grotesk',sans-serif;font-size:1.05rem;color:var(--g)}
-.mc{width:30px;height:30px;border-radius:7px;border:1px solid var(--br);background:transparent;color:var(--td);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .18s}
-.mc:hover{background:var(--s2);color:var(--t)}
-.mb{padding:20px 22px 24px;overflow-y:auto;flex:1}
-.mb::-webkit-scrollbar{width:3px}
-.mb::-webkit-scrollbar-thumb{background:var(--br);border-radius:2px}
-
-/* DETAIL MODAL */
-.dbt{font-family:'Space Grotesk',sans-serif;font-size:1.35rem;color:var(--t);margin-bottom:12px;line-height:1.3}
-.dir{display:flex;align-items:flex-start;gap:8px;margin-bottom:7px;font-size:13px}
-.dil{color:var(--td);width:75px;flex-shrink:0;font-family:'JetBrains Mono',monospace;font-size:11px;padding-top:1px}
-.div2{height:1px;background:var(--br);margin:14px 0}
-.dsl{font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--td);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px}
-.dst{font-size:13.5px;color:var(--t);line-height:1.88;opacity:.85}
-
-/* AUDIO */
-.ap{background:var(--s2);border:1px solid var(--br);border-radius:13px;padding:14px;display:flex;align-items:center;gap:12px;margin-top:10px;box-shadow:var(--shadow)}
-.apb{width:40px;height:40px;border-radius:10px;border:none;background:linear-gradient(135deg,var(--y),#f97316);cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform .2s;color:#fff}
-.apb:hover{transform:scale(1.1)}
-.api{flex:1;min-width:0}
-.apt{font-size:12.5px;font-weight:600;color:var(--t);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.aps{font-size:11px;color:var(--td);margin-top:2px}
-.apbar{width:100%;height:3px;background:var(--br);border-radius:2px;margin-top:7px;cursor:pointer;overflow:hidden}
-.apfill{height:100%;background:linear-gradient(90deg,var(--y),#f97316);border-radius:2px;width:0%;transition:width .3s}
-audio{display:none}
-
-/* YOUTUBE */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/* MAP */
-.rack-b{display:inline-block;background:var(--s2);border:1px solid var(--card-border);color:var(--g);font-size:1.2rem;font-weight:700;padding:7px 18px;border-radius:9px;font-family:'Space Grotesk',sans-serif;margin-bottom:14px;box-shadow:var(--shadow)}
-.mc2{width:100%;border-radius:14px;overflow:hidden;border:1px solid var(--br)}
-.mc2 svg{width:100%;display:block}
-
-/* FORM */
-.fg{margin-bottom:11px}
-.fl{font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--td);letter-spacing:1px;text-transform:uppercase;margin-bottom:5px;display:block}
-.fi,.fsel,.fta{width:100%;padding:11px 13px;background:var(--s2);border:1px solid var(--br);border-radius:10px;color:var(--t);font-family:'Hind Siliguri',sans-serif;font-size:13.5px;outline:none;transition:all .2s}
-.fi:focus,.fsel:focus,.fta:focus{border-color:var(--g);box-shadow:0 0 0 2px rgba(124,58,237,.08)}
-.fi::placeholder,.fta::placeholder{color:var(--tbr)}
-.fsel option{background:var(--s1)}
-.fta{resize:vertical;min-height:76px}
-.sbtn{width:100%;padding:13px;background:linear-gradient(135deg,var(--g),var(--b));border:none;border-radius:10px;color:#fff;font-weight:700;font-size:14.5px;font-family:'Hind Siliguri',sans-serif;cursor:pointer;margin-top:6px;transition:transform .2s,box-shadow .2s}
-[data-theme="dark"] .sbtn{color:#000}
-.sbtn:hover{transform:scale(1.02);box-shadow:0 6px 20px rgba(124,58,237,.25)}
-.sbtn:disabled{opacity:.5;cursor:not-allowed;transform:none}
-
-/* QUIZ */
-.quiz-step{display:none}.quiz-step.active{display:block}
-.q-question{font-size:1.08rem;font-family:'Space Grotesk',sans-serif;color:var(--t);margin-bottom:16px;line-height:1.4}
-.q-hint{font-size:12px;color:var(--td);margin-bottom:12px;font-family:'JetBrains Mono',monospace}
-.q-options{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:12px}
-.q-opt{padding:11px 13px;border-radius:12px;border:1px solid var(--br);background:var(--s2);color:var(--t);font-size:13px;font-family:'Hind Siliguri',sans-serif;cursor:pointer;text-align:left;transition:all .2s}
-.q-opt:hover{border-color:var(--g);background:var(--s3)}
-.q-opt.selected{border-color:var(--g);box-shadow:0 0 0 2px var(--g)}
-.q-opt .q-em{font-size:18px;display:block;margin-bottom:3px}
-.q-progress{display:flex;gap:6px;margin-bottom:18px}
-.q-dot{width:8px;height:8px;border-radius:50%;background:var(--br);transition:background .3s}
-.q-dot.done{background:var(--g)}
-.quiz-result{text-align:center;padding:8px 0}
-.qr-title{font-family:'Space Grotesk',sans-serif;font-size:1.25rem;color:var(--g);margin-bottom:6px}
-.qr-sub{font-size:13px;color:var(--td);margin-bottom:18px;line-height:1.6}
-.qr-books{text-align:left}
-.qr-book-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--s2);border-radius:10px;margin-bottom:8px;border:1px solid var(--br);cursor:pointer;transition:all .2s}
-.qr-book-item:hover{border-color:var(--g);transform:translateX(4px)}
-.qr-book-name{font-size:13px;font-weight:700;color:var(--t)}
-.qr-book-auth{font-size:11px;color:var(--td)}
-
-/* DISLIKE FEEDBACK */
-.fb-box{margin-top:12px;background:var(--s2);border:1px solid rgba(239,68,68,.2);border-radius:12px;padding:13px;animation:fup .3s ease}
-.fb-label{font-size:11px;font-family:'JetBrains Mono',monospace;color:#dc2626;letter-spacing:1px;text-transform:uppercase;margin-bottom:7px}
-.fb-ta{width:100%;padding:9px 12px;background:var(--s1);border:1px solid rgba(239,68,68,.2);border-radius:8px;color:var(--t);font-family:'Hind Siliguri',sans-serif;font-size:13px;outline:none;resize:none;min-height:68px}
-.fb-ta:focus{border-color:#dc2626}
-.fb-send{width:100%;margin-top:7px;padding:10px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);border-radius:8px;color:#dc2626;font-family:'Hind Siliguri',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s}
-.fb-send:hover{background:rgba(239,68,68,.18)}
-
-/* EMPTY/LOADING */
-.emp{grid-column:1/-1;text-align:center;padding:50px 20px;color:var(--td)}
-.sp{width:30px;height:30px;border:2.5px solid var(--br);border-top-color:var(--g);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 12px}
-
-/* TOAST */
-#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--s1);border:1px solid var(--br);color:var(--t);padding:11px 22px;border-radius:50px;z-index:99999;font-size:13px;font-family:'Hind Siliguri',sans-serif;box-shadow:0 10px 36px rgba(0,0,0,.15);opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
-
-/* ANIMATIONS */
-@keyframes fdn{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:translateY(0)}}
-@keyframes fup{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
-.card:nth-child(1){animation-delay:.03s}.card:nth-child(2){animation-delay:.06s}.card:nth-child(3){animation-delay:.09s}
-.card:nth-child(4){animation-delay:.12s}.card:nth-child(5){animation-delay:.15s}.card:nth-child(6){animation-delay:.18s}
-.card:nth-child(7){animation-delay:.21s}.card:nth-child(8){animation-delay:.24s}.card:nth-child(9){animation-delay:.27s}
-::-webkit-scrollbar{width:5px}
-::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:var(--s3);border-radius:3px}
-
-@media(max-width:580px){
-  .logo{letter-spacing:-1px}
-  .grid,.top-grid{grid-template-columns:1fr}
-  .bg2{grid-template-columns:1fr}
-  .bdf{grid-column:span 1}
-  .modal{width:96%}
-  .q-options{grid-template-columns:1fr}
-  .topbar{padding:12px 16px 0}
-  .bg3{grid-template-columns:1fr 1fr}
-}
-</style>
-</head>
-<body>
-<div id="cur"></div><div id="cur2"></div>
-<div class="bg"><div class="bg-grid"></div><div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div></div>
-
-<!-- LOADER -->
-<div id="ld">
-  <div class="ld-ring">
-    <svg viewBox="0 0 72 72" width="72" height="72">
-      <circle cx="36" cy="36" r="30" fill="none" stroke="var(--br)" stroke-width="5"/>
-      <circle cx="36" cy="36" r="30" fill="none" stroke="url(#lg)" stroke-width="5" stroke-dasharray="44 145" stroke-linecap="round"/>
-      <defs><linearGradient id="lg" x1="0%" y1="0%" x2="100%" y2="0%">
-        <stop id="lg1" offset="0%" stop-color="#7c3aed"/>
-        <stop id="lg2" offset="100%" stop-color="#06b6d4"/>
-      </linearGradient></defs>
-    </svg>
-    <div class="ld-ri">FI</div>
-  </div>
-  <div class="ld-title">Find_Index</div>
-  <div class="ld-bar"><div class="ld-fill"></div></div>
-  <div class="ld-txt">LOADING v7.0...</div>
-</div>
-
-<!-- TOPBAR -->
-<div class="topbar">
-  <button class="theme-toggle" onclick="toggleTheme()">
-    <span class="toggle-icon" id="themeIcon">🌙</span>
-    <span id="themeLabel">Dark Mode</span>
-  </button>
-</div>
-
-<!-- HEADER -->
-<header>
-  <div class="hbadge"><span class="dot"></span>LIBRARY SYSTEM v7.0</div>
-  <h1 class="logo">Find_Index</h1>
-  <p class="logo-sub">A small gift for VU students from <b>MN Group</b></p>
-</header>
-
-<!-- STATUS BAR -->
-<div class="sbar">
-  <div class="pill"><span class="dot"></span>লাইব্রেরি খোলা</div>
-  <div class="pill">📚 <span id="totalB">—</span> টি বই</div>
-  <div class="pill">❤️ <span id="topLikedName">—</span></div>
-  <button class="pill pbtn" onclick="openM('reqM')">➕ বই রিকোয়েস্ট</button>
-  <button class="pill pbtn" style="background:linear-gradient(135deg,#06b6d4,#ec4899)!important" onclick="switchTab('exchange',document.querySelector('[data-tab=exchange]'))">🔄 বুক এক্সচেঞ্জ</button>
-  <div class="dept-sel-wrap">
-    <select class="dept-select" id="deptSelect" onchange="filterDept(this.value)">
-      <option value="all">📚 সব ডিপার্টমেন্ট</option>
-      <option value="CSE">💻 CSE</option>
-      <option value="BBA">📊 BBA</option>
-      <option value="Other">📖 অন্যান্য</option>
-    </select>
-  </div>
-</div>
-
-<!-- SEARCH -->
-<div class="sw">
-  <div class="sugg-wrap">
-    <input type="text" id="search" class="sb" placeholder="🔍  বই, লেখক বা ক্যাটাগরি লিখুন..." oninput="onSearch()" onkeydown="onSearchKey(event)" autocomplete="off">
-    <span class="si-icon">⌘</span>
-  </div>
-  <button class="qbtn" onclick="openSmartQuiz()">🧠 স্মার্ট বুক ডিসিশন — প্রশ্নোত্তরে বই খুঁজুন</button>
-</div>
-
-<!-- MAIN -->
-<div class="con">
-  <div class="tabs">
-    <button class="tab active" data-tab="all" onclick="switchTab('all',this)">📚 সব বই</button>
-    <button class="tab" data-tab="top" onclick="switchTab('top',this)">🏆 টপ লিস্ট</button>
-    <button class="tab" data-tab="exchange" onclick="switchTab('exchange',this)">🔄 বুক এক্সচেঞ্জ</button>
-  </div>
-
-  <!-- ALL BOOKS -->
-  <div id="tabAll">
-
-    <div class="grid" id="grid">
-      <div class="emp"><div class="sp"></div><p>ডেটা লোড হচ্ছে...</p></div>
-    </div>
-  </div>
-
-  <!-- TOP LIST -->
-  <div id="tabTop" style="display:none">
-    <div class="top-section">
-      <div class="sec-title">❤️ সবচেয়ে বেশি পছন্দের বই</div>
-      <div class="top-grid" id="topLikedGrid"><div class="emp"><p>এখনো কোনো ভোট নেই</p></div></div>
-    </div>
-    <div class="top-section">
-      <div class="sec-title">👎 সবচেয়ে বেশি অপছন্দের বই</div>
-      <div class="top-grid" id="topDislikedGrid"><div class="emp"><p>এখনো কোনো ভোট নেই</p></div></div>
-    </div>
-  </div>
-
-  <!-- BOOK EXCHANGE -->
-  <div id="tabExchange" style="display:none">
-    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:18px">
-      <div class="sec-title" style="margin-bottom:0;flex:1">🔄 বুক এক্সচেঞ্জ বোর্ড</div>
-      <button class="pill pbtn" style="background:linear-gradient(135deg,#06b6d4,#7c3aed)!important;font-size:12px" onclick="openM('exAddM')">➕ আমার বই দিতে চাই / চাই</button>
-    </div>
-    <div class="exlist" id="exList">
-      <div class="ex-empty"><div class="ex-empty-icon">📖</div><p>এখনো কোনো এক্সচেঞ্জ পোস্ট নেই</p></div>
-    </div>
-  </div>
-</div>
-
-<!-- OVERLAY -->
-<div class="ov" id="ov" onclick="closeAll()"></div>
-
-<!-- DETAIL MODAL -->
-<div class="modal" id="detM">
-  <div class="mh"><span class="mt">📖 বিস্তারিত তথ্য</span><button class="mc" onclick="closeAll()">✕</button></div>
-  <div class="mb">
-    <div class="dbt" id="dT"></div>
-    <div class="dir"><span class="dil">লেখক</span><span id="dA"></span></div>
-    <div class="dir"><span class="dil">এডিশন</span><span id="dE"></span></div>
-    <div class="dir"><span class="dil">ক্যাটাগরি</span><span id="dC"></span></div>
-    <div class="dir"><span class="dil">র‍্যাক</span><span id="dR"></span></div>
-    <div class="div2"></div>
-    <div class="dsl">📋 সামারি</div>
-    <div class="dst" id="dS"></div>
-    <div id="auSec" style="display:none;margin-top:14px">
-      <div class="dsl" style="margin-bottom:8px">🎧 ভয়েস সামারি</div>
-      <div class="ap">
-        <button class="apb" id="apb" onclick="toggleAu()">▶</button>
-        <div class="api">
-          <div class="apt" id="apTitle"></div>
-          <div class="aps">ভয়েস সামারি</div>
-          <div class="apbar" onclick="seekAu(event)"><div class="apfill" id="apf"></div></div>
-        </div>
-      </div>
-      <audio id="au" ontimeupdate="auTick()" onended="auEnd()"></audio>
-    </div>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find_Index | Smart Library</title>
     
-    </div>
-  </div>
-</div>
+    <!-- Preconnect for speed -->
+    <link rel="preconnect" href="https://unpkg.com">
+    <link rel="preconnect" href="https://cdn.tailwindcss.com">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-<!-- MAP MODAL -->
-<div class="modal" id="mapM">
-  <div class="mh"><span class="mt">📍 লাইব্রেরি ম্যাপ</span><button class="mc" onclick="closeAll()">✕</button></div>
-  <div class="mb">
-    <div style="font-size:12px;color:var(--td);font-family:'JetBrains Mono',monospace;margin-bottom:5px">আপনার র‍্যাক</div>
-    <div class="rack-b" id="rackLbl">—</div>
-    <div class="mc2">
-      <svg id="mapSVG" viewBox="0 0 460 290" xmlns="http://www.w3.org/2000/svg">
-        <rect width="460" height="290" fill="var(--s2)" rx="12"/>
-        <rect x="10" y="10" width="440" height="265" fill="none" stroke="var(--br)" stroke-width="1.5" rx="10"/>
-        <rect x="185" y="265" width="90" height="14" rx="3" fill="var(--s3)"/>
-        <text x="230" y="276" font-size="8" fill="var(--td)" text-anchor="middle" font-family="monospace">ENTRANCE</text>
-        <g id="racks">
-          <g data-rack="RACK-A"><rect x="28" y="28" width="58" height="26" rx="5" fill="var(--s3)" stroke="var(--b)" stroke-width="1"/><text x="57" y="45" font-size="10" fill="var(--b)" text-anchor="middle" font-weight="bold" font-family="monospace">A</text></g>
-          <g data-rack="RACK-B"><rect x="108" y="28" width="58" height="26" rx="5" fill="var(--s3)" stroke="var(--b)" stroke-width="1"/><text x="137" y="45" font-size="10" fill="var(--b)" text-anchor="middle" font-weight="bold" font-family="monospace">B</text></g>
-          <g data-rack="RACK-C"><rect x="188" y="28" width="58" height="26" rx="5" fill="var(--s3)" stroke="var(--b)" stroke-width="1"/><text x="217" y="45" font-size="10" fill="var(--b)" text-anchor="middle" font-weight="bold" font-family="monospace">C</text></g>
-          <g data-rack="RACK-D"><rect x="268" y="28" width="58" height="26" rx="5" fill="var(--s3)" stroke="var(--b)" stroke-width="1"/><text x="297" y="45" font-size="10" fill="var(--b)" text-anchor="middle" font-weight="bold" font-family="monospace">D</text></g>
-          <g data-rack="RACK-E"><rect x="348" y="28" width="90" height="26" rx="5" fill="var(--s3)" stroke="var(--b)" stroke-width="1"/><text x="393" y="45" font-size="10" fill="var(--b)" text-anchor="middle" font-weight="bold" font-family="monospace">E</text></g>
-          <g data-rack="RACK-F"><rect x="28" y="94" width="58" height="26" rx="5" fill="var(--s3)" stroke="var(--b)" stroke-width="1"/><text x="57" y="111" font-size="10" fill="var(--b)" text-anchor="middle" font-weight="bold" font-family="monospace">F</text></g>
-          <g data-rack="RACK-G"><rect x="108" y="94" width="58" height="26" rx="5" fill="var(--s3)" stroke="var(--b)" stroke-width="1"/><text x="137" y="111" font-size="10" fill="var(--b)" text-anchor="middle" font-weight="bold" font-family="monospace">G</text></g>
-          <g data-rack="RACK-H"><rect x="188" y="94" width="58" height="26" rx="5" fill="var(--s3)" stroke="var(--b)" stroke-width="1"/><text x="217" y="111" font-size="10" fill="var(--b)" text-anchor="middle" font-weight="bold" font-family="monospace">H</text></g>
-          <g data-rack="RACK-I"><rect x="268" y="94" width="58" height="26" rx="5" fill="var(--s3)" stroke="var(--b)" stroke-width="1"/><text x="297" y="111" font-size="10" fill="var(--b)" text-anchor="middle" font-weight="bold" font-family="monospace">I</text></g>
-          <g data-rack="RACK-J"><rect x="348" y="94" width="90" height="26" rx="5" fill="var(--s3)" stroke="var(--b)" stroke-width="1"/><text x="393" y="111" font-size="10" fill="var(--b)" text-anchor="middle" font-weight="bold" font-family="monospace">J</text></g>
-          <g data-rack="RACK-K"><rect x="28" y="160" width="58" height="26" rx="5" fill="var(--s3)" stroke="var(--b)" stroke-width="1"/><text x="57" y="177" font-size="10" fill="var(--b)" text-anchor="middle" font-weight="bold" font-family="monospace">K</text></g>
-          <g data-rack="RACK-L"><rect x="108" y="160" width="58" height="26" rx="5" fill="var(--s3)" stroke="var(--b)" stroke-width="1"/><text x="137" y="177" font-size="10" fill="var(--b)" text-anchor="middle" font-weight="bold" font-family="monospace">L</text></g>
-          <g data-rack="RACK-M"><rect x="188" y="160" width="58" height="26" rx="5" fill="var(--s3)" stroke="var(--b)" stroke-width="1"/><text x="217" y="177" font-size="10" fill="var(--b)" text-anchor="middle" font-weight="bold" font-family="monospace">M</text></g>
-          <g data-rack="RACK-N"><rect x="268" y="160" width="58" height="26" rx="5" fill="var(--s3)" stroke="var(--b)" stroke-width="1"/><text x="297" y="177" font-size="10" fill="var(--b)" text-anchor="middle" font-weight="bold" font-family="monospace">N</text></g>
-        </g>
-        <rect x="348" y="150" width="100" height="90" rx="7" fill="var(--bg)" stroke="var(--br)" stroke-width="1"/>
-        <text x="398" y="184" font-size="8" fill="var(--td)" text-anchor="middle" font-family="monospace">READING</text>
-        <text x="398" y="196" font-size="8" fill="var(--td)" text-anchor="middle" font-family="monospace">AREA</text>
-        <circle cx="368" cy="213" r="4" fill="var(--s3)" stroke="var(--br)" stroke-width="1"/>
-        <circle cx="388" cy="213" r="4" fill="var(--s3)" stroke="var(--br)" stroke-width="1"/>
-        <circle cx="408" cy="213" r="4" fill="var(--s3)" stroke="var(--br)" stroke-width="1"/>
-        <circle cx="428" cy="213" r="4" fill="var(--s3)" stroke="var(--br)" stroke-width="1"/>
-        <g id="arrowLayer"></g>
-        <g id="youM" style="display:none">
-          <circle id="youC" r="9" fill="rgba(0,200,100,.15)" stroke="var(--g)" stroke-width="1.5"/>
-          <text id="youTx" font-size="7" fill="var(--g)" text-anchor="middle" dy="2.5" font-family="monospace" font-weight="bold">YOU</text>
-        </g>
-      </svg>
-    </div>
-    <p style="font-size:11px;color:var(--td);margin-top:8px">🟢 আপনার অবস্থান &nbsp;|&nbsp; 🔵 র‍্যাক &nbsp;|&nbsp; ➡️ পথ দেখাচ্ছে</p>
-  </div>
-</div>
+    <!-- CDNs -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-<!-- REQUEST MODAL -->
-<div class="modal" id="reqM">
-  <div class="mh"><span class="mt">➕ বই রিকোয়েস্ট</span><button class="mc" onclick="closeAll()">✕</button></div>
-  <div class="mb">
-    <div class="fg"><label class="fl">নাম ও স্টুডেন্ট আইডি</label><input class="fi" id="rName" placeholder="আপনার নাম এবং আইডি"></div>
-    <div class="fg"><label class="fl">বইয়ের নাম</label><input class="fi" id="rBook" placeholder="বইয়ের নাম লিখুন"></div>
-    <div class="fg"><label class="fl">ক্যাটাগরি</label>
-      <select class="fsel" id="rCat"><option value="">বেছে নিন</option><option value="CSE">💻 CSE</option><option value="BBA">📊 BBA</option><option value="Other">📚 অন্যান্য</option></select>
-    </div>
-    <div class="fg"><label class="fl">বিস্তারিত</label><textarea class="fta" id="rNote" placeholder="কেন দরকার বা ভুল তথ্য থাকলে জানান..."></textarea></div>
-    <button class="sbtn" onclick="submitReq()">📬 রিকোয়েস্ট পাঠান</button>
-  </div>
-</div>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
 
-<!-- BOOK EXCHANGE ADD MODAL -->
-<div class="modal" id="exAddM" style="max-width:520px">
-  <div class="mh"><span class="mt">🔄 বুক এক্সচেঞ্জ পোস্ট</span><button class="mc" onclick="closeAll()">✕</button></div>
-  <div class="mb">
-    <div class="fg">
-      <label class="fl">আপনি কী করতে চান?</label>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-        <button class="q-opt" id="exTypeHave" onclick="setExType('have')" style="text-align:center"><span class="q-em">📤</span>বই দিতে চাই</button>
-        <button class="q-opt" id="exTypeWant" onclick="setExType('want')" style="text-align:center"><span class="q-em">📥</span>বই নিতে চাই</button>
-      </div>
-    </div>
-    <div class="fg"><label class="fl">বইয়ের নাম</label><input class="fi" id="exBook" placeholder="বইয়ের নাম লিখুন"></div>
-    <div class="fg"><label class="fl">লেখকের নাম</label><input class="fi" id="exAuthor" placeholder="লেখকের নাম (optional)"></div>
-    <div class="fg"><label class="fl">ডিপার্টমেন্ট / কারণ</label><input class="fi" id="exDept" placeholder="যেমন: CSE 2nd year, পরীক্ষার জন্য দরকার..."></div>
-    <div class="fg"><label class="fl">সংক্ষিপ্ত বিবরণ</label><textarea class="fta" id="exSummary" placeholder="বইটি কেমন বা কেন দরকার সেটা লিখুন..."></textarea></div>
-    <div class="fg"><label class="fl">যোগাযোগ নম্বর</label><input class="fi" id="exContact" placeholder="01XXXXXXXXX" type="tel"></div>
-    <button class="sbtn" id="exSubmitBtn" onclick="submitExchange()">📤 পোস্ট করুন</button>
-  </div>
-</div>
+        :root {
+            --brand-primary: #6366f1;
+            --brand-secondary: #a855f7;
+            --brand-accent: #10b981;
+            --bg-light: #fdfdfd;
+            --bg-dark: #020617;
+        }
 
-<!-- EXCHANGE REQUEST MODAL (contact someone) -->
-<div class="modal" id="exReqM" style="max-width:460px">
-  <div class="mh"><span class="mt">📞 যোগাযোগ করুন</span><button class="mc" onclick="closeAll()">✕</button></div>
-  <div class="mb">
-    <div id="exReqInfo"></div>
-    <div class="div2"></div>
-    <div class="fg"><label class="fl">আপনার নাম</label><input class="fi" id="erName" placeholder="আপনার নাম"></div>
-    <div class="fg"><label class="fl">আপনার নম্বর</label><input class="fi" id="erPhone" placeholder="01XXXXXXXXX" type="tel"></div>
-    <div class="fg"><label class="fl">বার্তা</label><textarea class="fta" id="erMsg" placeholder="বইটি নিতে / দিতে আগ্রহী, যোগাযোগ করুন..."></textarea></div>
-    <button class="sbtn" onclick="submitExReq()">📬 রিকোয়েস্ট পাঠান</button>
-  </div>
-</div>
+        body {
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
 
-<!-- SMART QUIZ MODAL -->
-<div class="modal" id="quizM" style="max-width:560px">
-  <div class="mh"><span class="mt">🧠 স্মার্ট বুক ডিসিশন</span><button class="mc" onclick="closeAll()">✕</button></div>
-  <div class="mb">
-    <div class="q-progress" id="qProgress"></div>
-    <div class="quiz-step active" id="qs1">
-      <div class="q-question">আজকে কোন ধরনের বিষয় পড়তে চাও? 🎯</div>
-      <div class="q-hint">একটি অপশন বেছে নাও</div>
-      <div class="q-options">
-        <button class="q-opt" onclick="qAnswer(1,'tech')"><span class="q-em">💻</span>টেকনিক্যাল / কোডিং</button>
-        <button class="q-opt" onclick="qAnswer(1,'business')"><span class="q-em">📊</span>বিজনেস / ম্যানেজমেন্ট</button>
-        <button class="q-opt" onclick="qAnswer(1,'concept')"><span class="q-em">🧩</span>থিওরি / কনসেপ্ট</button>
-        <button class="q-opt" onclick="qAnswer(1,'practical')"><span class="q-em">🔧</span>প্র্যাকটিক্যাল / প্রজেক্ট</button>
-      </div>
-    </div>
-    <div class="quiz-step" id="qs2">
-      <div class="q-question">তোমার অভিজ্ঞতার স্তর কেমন? 📈</div>
-      <div class="q-hint">সৎভাবে বেছে নাও</div>
-      <div class="q-options">
-        <button class="q-opt" onclick="qAnswer(2,'beginner')"><span class="q-em">🌱</span>একেবারে নতুন</button>
-        <button class="q-opt" onclick="qAnswer(2,'intermediate')"><span class="q-em">🌿</span>কিছুটা জানি</button>
-        <button class="q-opt" onclick="qAnswer(2,'advanced')"><span class="q-em">🌳</span>ভালো জানি</button>
-        <button class="q-opt" onclick="qAnswer(2,'expert')"><span class="q-em">🔥</span>এক্সপার্ট লেভেল</button>
-      </div>
-    </div>
-    <div class="quiz-step" id="qs3">
-      <div class="q-question">কতক্ষণ পড়তে চাও আজকে? ⏰</div>
-      <div class="q-hint">সময় অনুযায়ী বই সাজেস্ট করবো</div>
-      <div class="q-options">
-        <button class="q-opt" onclick="qAnswer(3,'short')"><span class="q-em">⚡</span>৩০ মিনিটের কম</button>
-        <button class="q-opt" onclick="qAnswer(3,'medium')"><span class="q-em">📖</span>১-২ ঘণ্টা</button>
-        <button class="q-opt" onclick="qAnswer(3,'long')"><span class="q-em">🌙</span>সারাদিন পড়বো</button>
-        <button class="q-opt" onclick="qAnswer(3,'reference')"><span class="q-em">🔍</span>শুধু রেফারেন্স</button>
-      </div>
-    </div>
-    <div class="quiz-step" id="qs4">
-      <div class="q-question">পড়ার উদ্দেশ্য কী? 🎓</div>
-      <div class="q-hint">লক্ষ্য অনুযায়ী সেরা বই দেবো</div>
-      <div class="q-options">
-        <button class="q-opt" onclick="qAnswer(4,'exam')"><span class="q-em">📝</span>পরীক্ষার প্রস্তুতি</button>
-        <button class="q-opt" onclick="qAnswer(4,'skill')"><span class="q-em">💡</span>নতুন স্কিল শিখতে</button>
-        <button class="q-opt" onclick="qAnswer(4,'project')"><span class="q-em">🚀</span>প্রজেক্টের জন্য</button>
-        <button class="q-opt" onclick="qAnswer(4,'interest')"><span class="q-em">😊</span>শুধু আগ্রহ থেকে</button>
-      </div>
-    </div>
-    <div class="quiz-step" id="qsResult">
-      <div class="quiz-result">
-        <div class="qr-title" id="qrTitle"></div>
-        <div class="qr-sub" id="qrSub"></div>
-        <div class="qr-books" id="qrBooks"></div>
-        <button class="sbtn" style="margin-top:14px" onclick="closeAll()">✅ ঠিক আছে!</button>
-      </div>
-    </div>
-  </div>
-</div>
+        .font-display { font-family: 'Outfit', sans-serif; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
 
-<div id="toast"></div>
+        .glass-premium {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+        }
 
-<script>
-/* ══════════════════════════════════════════
-   CONFIG — এখানে URL গুলো দাও
-   Books Sheet columns: Title|Author|Edition|Category|Rack|Summary|AudioURL
-   Exchange Sheet columns: Type|BookName|Author|Dept|Summary|Contact|Timestamp
-   Feedback Sheet columns: BookTitle|Feedback|Timestamp
-   Votes Sheet columns: BookTitle|Likes|Dislikes|Timestamp
-══════════════════════════════════════════ */
-const BOOKS_URL    = "https://script.google.com/macros/s/AKfycbw-v-Wl_O2jg-bpEck5ebviYbxhw6-wcOCm7QrRp_UWTSma027hf5GSOZArhekOLurzFA/exec";   // Books Apps Script URL
-const EXCHANGE_URL = "https://script.google.com/macros/s/AKfycbw-v-Wl_O2jg-bpEck5ebviYbxhw6-wcOCm7QrRp_UWTSma027hf5GSOZArhekOLurzFA/exec";   // Exchange Apps Script URL
-const FEEDBACK_URL = "https://script.google.com/macros/s/AKfycbw-v-Wl_O2jg-bpEck5ebviYbxhw6-wcOCm7QrRp_UWTSma027hf5GSOZArhekOLurzFA/exec";   // Feedback Apps Script URL
+        .dark .glass-premium {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+        }
 
-/* ══ DATA ══ */
-const SAMPLE = [];
+        .text-gradient {
+            background: linear-gradient(135deg, var(--brand-primary), var(--brand-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
 
-let books = [];
-let exchanges = [];
-let exType = 'have';
-let curExBook = null;
+        .card-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            will-change: transform, opacity;
+        }
 
-/* ══ THEME ══ */
-const html = document.documentElement;
-let dark = false;
-function toggleTheme(){
-  dark = !dark;
-  html.setAttribute('data-theme', dark?'dark':'light');
-  document.getElementById('themeIcon').textContent = dark?'☀️':'🌙';
-  document.getElementById('themeLabel').textContent = dark?'Light Mode':'Dark Mode';
-  document.getElementById('lg1').setAttribute('stop-color', dark?'#00ff9d':'#7c3aed');
-  document.getElementById('lg2').setAttribute('stop-color', dark?'#38bdf8':'#06b6d4');
-}
+        .card-hover:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 20px 40px rgba(99, 102, 241, 0.12);
+        }
 
-/* ══ CURSOR ══ */
-const cur=document.getElementById('cur'),cur2=document.getElementById('cur2');
-let mx=0,my=0,tx=0,ty=0;
-document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cur.style.left=mx+'px';cur.style.top=my+'px';});
-(function loop(){tx+=(mx-tx)*.16;ty+=(my-ty)*.16;cur2.style.left=tx+'px';cur2.style.top=ty+'px';requestAnimationFrame(loop);})();
-document.addEventListener('mouseover',e=>{if(e.target.closest('button,a,.pill,.card,.q-opt,.qr-book-item,.ex-card,.top-card')){cur.style.width='18px';cur.style.height='18px';}});
-document.addEventListener('mouseout',e=>{if(e.target.closest('button,a,.pill,.card,.q-opt,.qr-book-item,.ex-card,.top-card')){cur.style.width='8px';cur.style.height='8px';}});
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(99, 102, 241, 0.2);
+            border-radius: 10px;
+        }
 
-/* ══ CARD GLOW ══ */
-document.addEventListener('mousemove',e=>{
-  const c=e.target.closest('.card');if(!c)return;
-  const r=c.getBoundingClientRect();
-  c.style.setProperty('--mx',((e.clientX-r.left)/r.width*100)+'%');
-  c.style.setProperty('--my',((e.clientY-r.top)/r.height*100)+'%');
-});
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-/* ══ VOTE STORAGE — Sheet based (global) + localStorage (instant UI) ══ */
-let globalVoteCounts={};  // loaded from Sheet — shared across all devices
-function getVotes(){try{return JSON.parse(localStorage.getItem('fi_votes')||'{}');}catch{return {};}}
-function saveVotes(v){try{localStorage.setItem('fi_votes',JSON.stringify(v));}catch{}}
-function getVoteCounts(){return globalVoteCounts;}
-function saveVoteCounts(v){globalVoteCounts=v;try{localStorage.setItem('fi_vcounts',JSON.stringify(v));}catch{}}
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
 
-async function loadVoteCounts(){
-  // load from local first for instant render
-  try{const s=localStorage.getItem('fi_vcounts');if(s)globalVoteCounts=JSON.parse(s);}catch{}
-  // then fetch from sheet
-  if(!BOOKS_URL)return;
-  try{
-    const url=BOOKS_URL+(BOOKS_URL.includes('?')?'&':'?')+'sheet=Votes';
-    const ctrl=new AbortController();
-    setTimeout(()=>ctrl.abort(),5000);
-    const res=await fetch(url,{signal:ctrl.signal,redirect:'follow',mode:'cors',credentials:'omit'});
-    const text=await res.text();
-    const rows=JSON.parse(text);
-    if(!Array.isArray(rows))return;
-    const counts={};
-    rows.forEach(r=>{
-      if(r.BookTitle)counts[r.BookTitle]={like:parseInt(r.Likes)||0,dislike:parseInt(r.Dislikes)||0};
-    });
-    globalVoteCounts=counts;
-    try{localStorage.setItem('fi_vcounts',JSON.stringify(counts));}catch{}
-  }catch(err){console.warn('Votes fetch failed:',err);}
-}
+        .animate-float { animation: float 4s ease-in-out infinite; }
 
-async function pushVoteToSheet(bookTitle,likes,dislikes){
-  if(!BOOKS_URL)return;
-  try{
-    const payload={Type:'vote',BookTitle:bookTitle,Likes:likes,Dislikes:dislikes,Timestamp:new Date().toLocaleString('bn-BD')};
-    await fetch(BOOKS_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-  }catch{}
-}
+        /* GPU Acceleration */
+        .gpu {
+            transform: translateZ(0);
+            backface-visibility: hidden;
+            perspective: 1000px;
+        }
 
-/* ══ YT HELPERS ══ */
+        /* Skeleton Loading Animation */
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #f8f8f8 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite linear;
+        }
+        .dark .skeleton {
+            background: linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%);
+            background-size: 200% 100%;
+        }
+    </style>
 
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            primary: '#6366f1',
+                            secondary: '#a855f7',
+                            accent: '#10b981',
+                        },
+                        bg: {
+                            light: '#fdfdfd',
+                            dark: '#020617',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-bg-light dark:bg-bg-dark text-slate-900 dark:text-slate-100 overflow-x-hidden custom-scrollbar">
+    <div id="root"></div>
 
+    <script type="text/babel">
+        const { useState, useEffect, useMemo, useRef, useCallback, memo } = React;
+        const { motion, AnimatePresence } = window.Motion || { motion: { div: 'div' }, AnimatePresence: ({ children }) => children };
 
+        // --- Supabase Configuration ---
+        const SUPABASE_URL = "https://edtsidlxnwysazyzkahu.supabase.co"; 
+        const SUPABASE_ANON_KEY = "sb_publishable_dFVu4MM0z_7qbkypUx-goQ_MCixc5qn";
 
-/* ══ LOAD BOOKS (fast fetch + cache) ══ */
-async function loadBooks(){
-  if(!BOOKS_URL){books=SAMPLE;renderBooks();updateStatus();return;}
+        let supabase = null;
+        try {
+            if (SUPABASE_URL && SUPABASE_URL.startsWith("http")) {
+                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            }
+        } catch (e) {
+            console.error("Supabase Init Error:", e);
+        }
 
-  // ১. localStorage থেকে instantly দেখাও — refresh এও instant
-  try{
-    const cached=localStorage.getItem('fi_books');
-    if(cached){
-      books=JSON.parse(cached);
-      await loadVoteCounts();
-      renderBooks();updateStatus();
-    }
-  }catch{}
+        // --- Optimized Icon Component ---
+        // Using a debounced global update to prevent multiple createIcons calls
+        let iconTimeout;
+        const updateIcons = () => {
+            clearTimeout(iconTimeout);
+            iconTimeout = setTimeout(() => {
+                if (window.lucide) window.lucide.createIcons();
+            }, 50);
+        };
 
-  // ২. Background এ fresh data fetch — চুপচাপ update
-  try{
-    const url=BOOKS_URL+(BOOKS_URL.includes('?')?'&':'?')+'sheet=Books';
-    const ctrl=new AbortController();
-    const tid=setTimeout(()=>ctrl.abort(),8000);
-    const res=await fetch(url,{signal:ctrl.signal,redirect:'follow',mode:'cors',credentials:'omit'});
-    clearTimeout(tid);
-    const text=await res.text();
-    const fresh=JSON.parse(text);
-    if(!Array.isArray(fresh)||fresh.length===0)throw new Error('empty');
-    books=fresh;
-    localStorage.setItem('fi_books',JSON.stringify(books));
-    await loadVoteCounts();
-    renderBooks();updateStatus();
-  }catch(err){
-    console.warn('Sheet fetch failed:',err);
-    if(!books.length){books=SAMPLE;renderBooks();updateStatus();}
-  }
-}
+        const Icon = memo(({ name, size = 20, className = "" }) => {
+            useEffect(() => {
+                updateIcons();
+            }, [name]);
+            return <i data-lucide={name} className={`${className} shrink-0`} style={{ width: size, height: size }}></i>;
+        });
 
-/* ══ LOAD EXCHANGES ══ */
-async function loadExchanges(){
-  if(!EXCHANGE_URL){renderExchanges();return;}
-  try{
-    const url=EXCHANGE_URL+(EXCHANGE_URL.includes('?')?'&':'?')+'sheet=Exchange';
-    const ctrl=new AbortController();
-    setTimeout(()=>ctrl.abort(),6000);
-    const res=await fetch(url,{signal:ctrl.signal,redirect:'follow',mode:'cors',credentials:'omit'});
-    const text=await res.text();
-    const fresh=JSON.parse(text);
-    if(Array.isArray(fresh))exchanges=fresh;
-  }catch(err){console.warn('Exchange fetch failed:',err);}
-  renderExchanges();
-}
+        const Badge = memo(({ children, className = "" }) => (
+            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-mono font-bold tracking-wider uppercase border ${className}`}>
+                {children}
+            </span>
+        ));
 
-function updateStatus(){
-  document.getElementById('totalB').textContent=books.length;
-  const top=getTopLiked();
-  document.getElementById('topLikedName').textContent=top?top.substring(0,18)+'…':'সর্বোচ্চ পছন্দ';
-}
+        const Modal = memo(({ isOpen, onClose, title, children }) => {
+            useEffect(() => {
+                if (isOpen) document.body.style.overflow = 'hidden';
+                else document.body.style.overflow = '';
+                return () => { document.body.style.overflow = ''; };
+            }, [isOpen]);
 
-function tagCls(cat){const c=(cat||'').toLowerCase();if(c.includes('cse'))return'tc';if(c.includes('bba')||c.includes('bus'))return'tb';return'to';}
+            return (
+                <AnimatePresence>
+                    {isOpen && (
+                        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                            <motion.div 
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                onClick={onClose}
+                                className="fixed inset-0 bg-slate-950/40 backdrop-blur-md"
+                            />
+                            <motion.div 
+                                initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                                animate={{ opacity: 1, scale: 1, y: 0 }}
+                                exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                                transition={{ type: 'spring', damping: 25, stiffness: 400 }}
+                                className="relative w-full max-w-lg glass-premium rounded-[2.5rem] overflow-hidden shadow-2xl flex flex-col max-h-[90vh] border border-white/20 dark:border-white/10 gpu"
+                            >
+                                <div className="p-8 pb-4 flex items-center justify-between shrink-0">
+                                    <h3 className="text-xl font-display font-bold text-slate-900 dark:text-white">{title}</h3>
+                                    <button 
+                                        onClick={onClose} 
+                                        className="w-10 h-10 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-white/10 rounded-full transition-all text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                                    >
+                                        <Icon name="x" size={20} />
+                                    </button>
+                                </div>
+                                <div className="p-8 pt-4 overflow-y-auto flex-1 custom-scrollbar">
+                                    {children}
+                                </div>
+                            </motion.div>
+                        </div>
+                    )}
+                </AnimatePresence>
+            );
+        });
 
-/* ══ SHUFFLE ══ */
-function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
-let displayBooks=[];
-let curDept='all';
+        const BookCard = memo(({ book, counts, myVote, onVote, onDetail, onMap }) => {
+            const total = counts.like + counts.dislike;
+            const likePct = total ? Math.round((counts.like / total) * 100) : 50;
+            const isCSE = (book.Category || '').toLowerCase().includes('cse');
+            const isBBA = (book.Category || '').toLowerCase().includes('bba') || (book.Category || '').toLowerCase().includes('bus');
 
-/* ══ RENDER BOOKS ══ */
-function renderBooks(){
-  // shuffle on every fresh load — different order for every user/session
-  displayBooks=shuffle(books);
-  applyDeptFilter();
-}
-function applyDeptFilter(){
-  const g=document.getElementById('grid');
-  const filtered=curDept==='all'?displayBooks:displayBooks.filter(b=>{
-    const c=(b.Category||'').toLowerCase();
-    if(curDept==='CSE')return c.includes('cse');
-    if(curDept==='BBA')return c.includes('bba')||c.includes('bus');
-    if(curDept==='Other')return!c.includes('cse')&&!c.includes('bba')&&!c.includes('bus');
-    return true;
-  });
-  if(!filtered.length){g.innerHTML='<div class="emp"><p>এই ডিপার্টমেন্টে কোনো বই নেই 😔</p></div>';return;}
-  const vc=getVoteCounts(),uv=getVotes();
-  const f=document.createDocumentFragment();
-  filtered.forEach((b,i)=>{
-    const key=b.Title;
-    const lk=vc[key]?.like||0,dk=vc[key]?.dislike||0,total=lk+dk;
-    const lpct=total?Math.round(lk/total*100):50;
-    const myVote=uv[key]||null;
+            return (
+                <motion.div 
+                    layout="position"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="card-hover glass-premium rounded-[2rem] p-8 flex flex-col gap-6 group gpu"
+                >
+                    <div className="flex justify-between items-start">
+                        <Badge className={
+                            isCSE ? "bg-indigo-500/10 text-indigo-500 border-indigo-500/20" :
+                            isBBA ? "bg-cyan-500/10 text-cyan-500 border-cyan-500/20" :
+                            "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
+                        }>
+                            {book.Category || 'General'}
+                        </Badge>
+                        <button 
+                            onClick={() => onMap(book.Rack)}
+                            className="p-2.5 hover:bg-brand-primary/10 rounded-xl transition-colors text-slate-400 hover:text-brand-primary"
+                        >
+                            <Icon name="map" size={18} />
+                        </button>
+                    </div>
 
-    const d=document.createElement('div');
-    d.className='card';d.style.animationDelay=(i*.045)+'s';
-    d.dataset.title=(b.Title||'').toLowerCase();
-    d.dataset.author=(b.Author||'').toLowerCase();
-    d.dataset.cat=(b.Category||'').toLowerCase();
-    // CLEAN CARD: title + author visible, details collapsed
-    d.innerHTML=`
-      <span class="tag ${tagCls(b.Category)}">${b.Category||'General'}</span>
-      <div class="card-top">
-        <div class="card-title">${b.Title||'Unknown'}</div>
-        <div class="card-author">✍️ ${b.Author||'—'}</div>
-      </div>
-      <div class="card-details" id="cd_${i}">
-        <div class="cm" style="margin-top:8px">📌 <span>Edition: ${b.Edition||'—'}</span></div>
-        <div class="cm">📍 <span>Rack: ${b.Rack||'—'}</span></div>
-      </div>
-      <div class="cdiv"></div>
-      <div class="vote-row">
-        <div class="vote-counts"><span class="vc vc-like">❤️ ${lk}</span><span class="vc vc-dislike">👎 ${dk}</span></div>
-        <div class="vote-progress"><div class="vp-fill" style="width:${lpct}%"></div></div>
-      </div>
-      <div class="bg3">
-        <button class="btn btn-like${myVote==='like'?' voted':''}" id="like_${i}" onclick='vote(${JSON.stringify(b)},${i},"like")'>❤️ পছন্দ</button>
-        <button class="btn btn-dislike${myVote==='dislike'?' voted':''}" id="dislike_${i}" onclick='vote(${JSON.stringify(b)},${i},"dislike")'>👎 অপছন্দ</button>
-        <button class="btn bm" onclick="showMap('${b.Rack||''}')">📍 ম্যাপ</button>
-      </div>
-      <div class="bg2">
-        <button class="btn bdf" onclick='showDet(${JSON.stringify(b)})'>📖 বিস্তারিত ও সামারি</button>
-        <button class="btn ba" onclick='playAudio(${JSON.stringify(b)})'>🔊 অডিও</button>
-      </div>
-      <div class="fb-box" id="fb_${i}" style="display:none">
-        <div class="fb-label">💬 কেন অপছন্দ করলে?</div>
-        <textarea class="fb-ta" id="fbt_${i}" placeholder="তোমার মতামত লেখো..."></textarea>
-        <button class="fb-send" onclick='sendFeedback(${JSON.stringify(b)},${i})'>📤 পাঠাও</button>
-      </div>`;
-    // expand details on card hover
-    d.addEventListener('mouseenter',()=>document.getElementById(`cd_${i}`)?.classList.add('show'));
-    d.addEventListener('mouseleave',()=>document.getElementById(`cd_${i}`)?.classList.remove('show'));
-    f.appendChild(d);
-  });
-  g.innerHTML='';g.appendChild(f);
-}
+                    <div className="flex-1">
+                        <h3 className="text-xl font-display font-bold leading-tight mb-2 group-hover:text-brand-primary transition-colors line-clamp-2">
+                            {book.Title}
+                        </h3>
+                        <p className="text-sm text-slate-500 dark:text-slate-400 font-medium truncate">✍️ {book.Author || 'Unknown Author'}</p>
+                    </div>
 
-/* ══ DEPT FILTER ══ */
-function filterDept(dept){
-  curDept=dept;
-  document.getElementById('search').value='';
-  applyDeptFilter();
-}
-/* ══ SMART SEARCH ══ */
-let searchTimer;
-function onSearch(){
-  clearTimeout(searchTimer);
-  searchTimer=setTimeout(()=>{
-    const q=document.getElementById('search').value.toLowerCase().trim();
-    if(!q){applyDeptFilter();return;}
-    // search across ALL books ignoring dept filter
-    const g=document.getElementById('grid');
-    const matched=displayBooks.filter(b=>(b.Title||'').toLowerCase().includes(q)||(b.Author||'').toLowerCase().includes(q)||(b.Category||'').toLowerCase().includes(q));
-    if(!matched.length){g.innerHTML='<div class="emp"><p>কোনো বই পাওয়া যায়নি 😔</p></div>';return;}
-    // re-render only matched
-    const vc=getVoteCounts(),uv=getVotes();
-    const f=document.createDocumentFragment();
-    matched.forEach((b,i)=>{
-      const key=b.Title;
-      const lk=vc[key]?.like||0,dk=vc[key]?.dislike||0,total=lk+dk;
-      const lpct=total?Math.round(lk/total*100):50;
-      const myVote=uv[key]||null;
-      const d=document.createElement('div');
-      d.className='card';d.style.animationDelay=(i*.045)+'s';
-      d.dataset.title=(b.Title||'').toLowerCase();
-      d.dataset.author=(b.Author||'').toLowerCase();
-      d.dataset.cat=(b.Category||'').toLowerCase();
-      d.innerHTML=`
-      <span class="tag ${tagCls(b.Category)}">${b.Category||'General'}</span>
-      <div class="card-top">
-        <div class="card-title">${b.Title||'Unknown'}</div>
-        <div class="card-author">✍️ ${b.Author||'—'}</div>
-      </div>
-      <div class="card-details" id="sd_${i}">
-        <div class="cm" style="margin-top:8px">📌 <span>Edition: ${b.Edition||'—'}</span></div>
-        <div class="cm">📍 <span>Rack: ${b.Rack||'—'}</span></div>
-      </div>
-      <div class="cdiv"></div>
-      <div class="vote-row">
-        <div class="vote-counts"><span class="vc vc-like">❤️ ${lk}</span><span class="vc vc-dislike">👎 ${dk}</span></div>
-        <div class="vote-progress"><div class="vp-fill" style="width:${lpct}%"></div></div>
-      </div>
-      <div class="bg3">
-        <button class="btn btn-like${myVote==='like'?' voted':''}" id="slike_${i}" onclick='vote(${JSON.stringify(b)},${i},"like")'>❤️ পছন্দ</button>
-        <button class="btn btn-dislike${myVote==='dislike'?' voted':''}" id="sdislike_${i}" onclick='vote(${JSON.stringify(b)},${i},"dislike")'>👎 অপছন্দ</button>
-        <button class="btn bm" onclick="showMap('${b.Rack||''}')">📍 ম্যাপ</button>
-      </div>
-      <div class="bg2">
-        <button class="btn bdf" onclick='showDet(${JSON.stringify(b)})'>📖 বিস্তারিত ও সামারি</button>
-        <button class="btn ba" onclick='playAudio(${JSON.stringify(b)})'>🔊 অডিও</button>
-      </div>
-      <div class="fb-box" id="sfb_${i}" style="display:none">
-        <div class="fb-label">💬 কেন অপছন্দ করলে?</div>
-        <textarea class="fb-ta" id="sfbt_${i}" placeholder="তোমার মতামত লেখো..."></textarea>
-        <button class="fb-send" onclick='sendFeedback(${JSON.stringify(b)},${i})'>📤 পাঠাও</button>
-      </div>`;
-      d.addEventListener('mouseenter',()=>document.getElementById(`sd_${i}`)?.classList.add('show'));
-      d.addEventListener('mouseleave',()=>document.getElementById(`sd_${i}`)?.classList.remove('show'));
-      f.appendChild(d);
-    });
-    g.innerHTML='';g.appendChild(f);
-  },80);
-}
-function onSearchKey(e){
-  if(e.key==='Escape'){document.getElementById('search').value='';document.querySelectorAll('.card').forEach(c=>c.style.display='');}
-}
+                    <div className="space-y-4">
+                        <div className="space-y-2">
+                            <div className="flex justify-between text-[10px] font-mono font-bold uppercase tracking-wider">
+                                <span className="text-brand-accent">Likes: {counts.like}</span>
+                                <span className="text-red-500">Dislikes: {counts.dislike}</span>
+                            </div>
+                            <div className="h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                                <motion.div 
+                                    initial={{ width: 0 }}
+                                    animate={{ width: `${likePct}%` }}
+                                    transition={{ duration: 0.8, ease: "easeOut" }}
+                                    className="h-full bg-gradient-to-r from-brand-accent to-brand-secondary"
+                                />
+                            </div>
+                        </div>
 
-/* ══ VOTE ══ */
-function vote(book,idx,type){
-  const key=book.Title,uv=getVotes(),vc=getVoteCounts();
-  const prev=uv[key]||null;
-  if(!vc[key])vc[key]={like:0,dislike:0};
-  if(prev===type){uv[key]=null;vc[key][type]=Math.max(0,vc[key][type]-1);}
-  else{if(prev)vc[key][prev]=Math.max(0,vc[key][prev]-1);uv[key]=type;vc[key][type]++;}
-  saveVotes(uv);saveVoteCounts(vc);
-  // push to sheet so all devices see updated counts
-  pushVoteToSheet(key,vc[key].like,vc[key].dislike);
-  const lk=vc[key].like,dk=vc[key].dislike,total=lk+dk,lpct=total?Math.round(lk/total*100):50;
-  const card=document.getElementById(`like_${idx}`)?.closest('.card');
-  if(card){
-    card.querySelectorAll('.vc')[0].textContent=`❤️ ${lk}`;
-    card.querySelectorAll('.vc')[1].textContent=`👎 ${dk}`;
-    card.querySelector('.vp-fill').style.width=lpct+'%';
-    document.getElementById(`like_${idx}`).classList.toggle('voted',uv[key]==='like');
-    document.getElementById(`dislike_${idx}`).classList.toggle('voted',uv[key]==='dislike');
-    const fb=document.getElementById(`fb_${idx}`);
-    fb.style.display=uv[key]==='dislike'?'block':'none';
-  }
-  renderTopList();
-  const top=getTopLiked();
-  document.getElementById('topLikedName').textContent=top?top.substring(0,18)+'…':'সর্বোচ্চ পছন্দ';
-  toast(type==='like'?'❤️ পছন্দ করা হয়েছে!':'👎 অপছন্দ জানানো হয়েছে');
-}
+                        <div className="grid grid-cols-2 gap-3">
+                            <button 
+                                onClick={() => onVote(book.Title, 'like')}
+                                className={`flex items-center justify-center gap-2 py-3 rounded-2xl text-xs font-bold transition-all border ${
+                                    myVote === 'like' 
+                                        ? "bg-brand-accent/10 border-brand-accent text-brand-accent shadow-lg shadow-brand-accent/20" 
+                                        : "border-slate-200 dark:border-white/5 hover:bg-brand-accent/5 hover:border-brand-accent/30 text-slate-500"
+                                }`}
+                            >
+                                <Icon name="thumbs-up" size={14} /> Like
+                            </button>
+                            <button 
+                                onClick={() => onVote(book.Title, 'dislike')}
+                                className={`flex items-center justify-center gap-2 py-3 rounded-2xl text-xs font-bold transition-all border ${
+                                    myVote === 'dislike' 
+                                        ? "bg-red-500/10 border-red-500 text-red-500 shadow-lg shadow-red-500/20" 
+                                        : "border-slate-200 dark:border-white/5 hover:bg-red-500/5 hover:border-red-500/30 text-slate-500"
+                                }`}
+                            >
+                                <Icon name="thumbs-down" size={14} /> Dislike
+                            </button>
+                        </div>
 
-async function sendFeedback(book,idx){
-  const txt=document.getElementById(`fbt_${idx}`).value.trim();
-  const payload={bookTitle:book.Title,feedback:txt||'(কোনো মন্তব্য নেই)',timestamp:new Date().toLocaleString('bn-BD')};
-  if(FEEDBACK_URL){try{await fetch(FEEDBACK_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});}catch{}}
-  document.getElementById(`fb_${idx}`).style.display='none';
-  toast('✅ ফিডব্যাক পাঠানো হয়েছে! ধন্যবাদ 🙏');
-}
+                        <button 
+                            onClick={() => onDetail(book)}
+                            className="w-full py-4 rounded-2xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-brand-primary hover:text-white dark:hover:bg-brand-primary transition-all text-sm font-bold flex items-center justify-center gap-2"
+                        >
+                            <Icon name="book-open" size={18} /> View Details
+                        </button>
+                    </div>
+                </motion.div>
+            );
+        });
 
-/* ══ TOP LIST ══ */
-function getTopLiked(){const vc=getVoteCounts();const s=Object.entries(vc).sort((a,b)=>(b[1].like||0)-(a[1].like||0));return s[0]?s[0][0]:null;}
-function renderTopList(){
-  const vc=getVoteCounts();
-  const liked=Object.entries(vc).filter(([,v])=>v.like>0).sort((a,b)=>b[1].like-a[1].like).slice(0,5);
-  const disliked=Object.entries(vc).filter(([,v])=>v.dislike>0).sort((a,b)=>b[1].dislike-a[1].dislike).slice(0,5);
-  const medals=['🥇','🥈','🥉','4️⃣','5️⃣'];
-  renderTopGrid('topLikedGrid',liked,'like',medals);
-  renderTopGrid('topDislikedGrid',disliked,'dislike',medals);
-}
-function renderTopGrid(id,list,type,medals){
-  const g=document.getElementById(id);
-  if(!list.length){g.innerHTML='<div class="emp"><p>এখনো কোনো ভোট নেই</p></div>';return;}
-  g.innerHTML=list.map(([title,vc],i)=>{
-    const b=books.find(x=>x.Title===title)||{};
-    const cnt=type==='like'?vc.like:vc.dislike;
-    return`<div class="top-card" onclick='showDet(${JSON.stringify(b)})'>
-      <div class="top-rank">${medals[i]}</div>
-      <div class="top-info"><div class="top-title">${title}</div><div class="top-count">${b.Author||'—'} · ${b.Category||''}</div></div>
-      <div class="top-like-badge ${type==='like'?'like-badge':'dislike-badge'}">${type==='like'?'❤️':'👎'} ${cnt}</div>
-    </div>`;
-  }).join('');
-}
+        function App() {
+            const [isDarkMode, setIsDarkMode] = useState(() => {
+                return localStorage.getItem('theme') === 'dark' || 
+                    (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            });
 
-/* ══ EXCHANGE ══ */
-function setExType(t){
-  exType=t;
-  document.getElementById('exTypeHave').classList.toggle('selected',t==='have');
-  document.getElementById('exTypeWant').classList.toggle('selected',t==='want');
-}
-setExType('have');
+            const [books, setBooks] = useState(() => JSON.parse(localStorage.getItem('fi_books') || '[]'));
+            const [exchanges, setExchanges] = useState([]);
+            const [voteCounts, setVoteCounts] = useState({});
+            const [myVotes, setMyVotes] = useState(() => JSON.parse(localStorage.getItem('fi_votes') || '{}'));
+            const [loading, setLoading] = useState(true);
+            const [searchQuery, setSearchQuery] = useState('');
+            const [activeTab, setActiveTab] = useState('all');
+            const [selectedDept, setSelectedDept] = useState('all');
+            
+            const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+            const [selectedBook, setSelectedBook] = useState(null);
+            const [isMapModalOpen, setIsMapModalOpen] = useState(false);
+            const [selectedRack, setSelectedRack] = useState('');
+            const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
+            const [isExchangeModalOpen, setIsExchangeModalOpen] = useState(false);
+            const [isQuizModalOpen, setIsQuizModalOpen] = useState(false);
+            
+            const [exForm, setExForm] = useState({ type: 'দিতে চাই', bookName: '', author: '', dept: '', summary: '', contact: '' });
+            const [reqForm, setReqForm] = useState({ name: '', number: '', bookName: '', dept: '', semester: '' });
+            const [isSubmittingEx, setIsSubmittingEx] = useState(false);
+            const [isSubmittingReq, setIsSubmittingReq] = useState(false);
+            const [quizStep, setQuizStep] = useState(1);
+            const [quizAnswers, setQuizAnswers] = useState({});
 
-async function submitExchange(){
-  const book=document.getElementById('exBook').value.trim();
-  const contact=document.getElementById('exContact').value.trim();
-  if(!book||!contact){toast('বইয়ের নাম ও নম্বর দিন ⚠️');return;}
-  const btn=document.getElementById('exSubmitBtn');
-  btn.disabled=true;btn.textContent='পাঠানো হচ্ছে...';
-  const payload={
-    Type:exType==='have'?'দিতে চাই':'নিতে চাই',
-    BookName:book,
-    Author:document.getElementById('exAuthor').value.trim(),
-    Dept:document.getElementById('exDept').value.trim(),
-    Summary:document.getElementById('exSummary').value.trim(),
-    Contact:contact,
-    Timestamp:new Date().toLocaleString('bn-BD')
-  };
-  // show instantly in UI
-  exchanges.unshift(payload);
-  renderExchanges();
-  if(EXCHANGE_URL){
-    try{await fetch(EXCHANGE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});}catch{}
-  }
-  toast('✅ পোস্ট করা হয়েছে!');
-  ['exBook','exAuthor','exDept','exSummary','exContact'].forEach(id=>document.getElementById(id).value='');
-  btn.disabled=false;btn.textContent='📤 পোস্ট করুন';
-  closeAll();
-  switchTab('exchange',document.querySelector('[data-tab=exchange]'));
-}
+            // --- Optimized Handlers ---
+            const toggleTheme = useCallback(() => setIsDarkMode(prev => !prev), []);
 
-function renderExchanges(){
-  const g=document.getElementById('exList');
-  if(!exchanges.length){
-    g.innerHTML='<div class="ex-empty"><div class="ex-empty-icon">📖</div><p>এখনো কোনো এক্সচেঞ্জ পোস্ট নেই</p><p style="font-size:12px;color:var(--tbr);margin-top:6px">প্রথম পোস্ট করো 👆</p></div>';
-    return;
-  }
-  g.innerHTML=exchanges.map((ex,i)=>`
-    <div class="ex-card">
-      <div class="ex-card-head">
-        <div class="ex-title">${ex.BookName||'—'}</div>
-        <span class="ex-badge ${ex.Type==='দিতে চাই'?'ex-badge-have':'ex-badge-want'}">${ex.Type==='দিতে চাই'?'📤 দিতে চাই':'📥 নিতে চাই'}</span>
-      </div>
-      <div class="ex-meta">
-        ${ex.Author?`<span class="ex-m">✍️ <b>${ex.Author}</b></span>`:''}
-        ${ex.Dept?`<span class="ex-m">🏛️ <b>${ex.Dept}</b></span>`:''}
-      </div>
-      ${ex.Summary?`<div class="ex-summary">${ex.Summary}</div>`:''}
-      <div class="ex-footer">
-        <span class="ex-contact">📞 ${ex.Contact}</span>
-        <button class="ex-req-btn" onclick='openExReq(${JSON.stringify(ex)})'>💬 আগ্রহী আছি</button>
-      </div>
-    </div>`).join('');
-}
+            const handleVote = useCallback(async (bookTitle, type) => {
+                const prevVote = myVotes[bookTitle];
+                const newVotes = { ...myVotes };
+                const newCounts = { ...voteCounts };
+                if (!newCounts[bookTitle]) newCounts[bookTitle] = { like: 0, dislike: 0 };
+                
+                if (prevVote === type) {
+                    newVotes[bookTitle] = null;
+                    newCounts[bookTitle][type] = Math.max(0, newCounts[bookTitle][type] - 1);
+                } else {
+                    if (prevVote) newCounts[bookTitle][prevVote] = Math.max(0, newCounts[bookTitle][prevVote] - 1);
+                    newVotes[bookTitle] = type;
+                    newCounts[bookTitle][type]++;
+                }
+                
+                setMyVotes(newVotes);
+                setVoteCounts(newCounts);
+                localStorage.setItem('fi_votes', JSON.stringify(newVotes));
 
-function openExReq(ex){
-  curExBook=ex;
-  document.getElementById('exReqInfo').innerHTML=`
-    <div style="background:var(--s2);border-radius:10px;padding:12px 14px;border:1px solid var(--br)">
-      <div style="font-family:'Space Grotesk',sans-serif;font-size:1rem;font-weight:800;color:var(--t);margin-bottom:4px">${ex.BookName}</div>
-      <div style="font-size:12px;color:var(--td)">${ex.Type} · ${ex.Dept||''}</div>
-    </div>`;
-  openM('exReqM');
-}
+                if (supabase) {
+                    try {
+                        await supabase.from('votes').upsert({ 
+                            book_title: bookTitle, 
+                            likes: newCounts[bookTitle].like, 
+                            dislikes: newCounts[bookTitle].dislike 
+                        }, { onConflict: 'book_title' });
+                    } catch (err) { console.error('Vote sync failed:', err); }
+                }
+            }, [myVotes, voteCounts]);
 
-async function submitExReq(){
-  const name=document.getElementById('erName').value.trim();
-  const phone=document.getElementById('erPhone').value.trim();
-  if(!name||!phone){toast('নাম ও নম্বর দিন ⚠️');return;}
-  const payload={
-    Type:'আগ্রহী',
-    BookName:curExBook?.BookName||'',
-    Author:name,
-    Contact:phone,
-    Summary:document.getElementById('erMsg').value.trim(),
-    Dept:'যোগাযোগ রিকোয়েস্ট',
-    Timestamp:new Date().toLocaleString('bn-BD')
-  };
-  if(EXCHANGE_URL){try{await fetch(EXCHANGE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});}catch{}}
-  toast('✅ রিকোয়েস্ট পাঠানো হয়েছে!');
-  ['erName','erPhone','erMsg'].forEach(id=>document.getElementById(id).value='');
-  closeAll();
-}
+            const handleDetail = useCallback((book) => {
+                setSelectedBook(book);
+                setIsDetailModalOpen(true);
+            }, []);
 
-/* ══ TAB SWITCH ══ */
-function switchTab(tab,el){
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  if(el)el.classList.add('active');
-  document.getElementById('tabAll').style.display=tab==='all'?'':'none';
-  document.getElementById('tabTop').style.display=tab==='top'?'':'none';
-  document.getElementById('tabExchange').style.display=tab==='exchange'?'':'none';
-  if(tab==='top')renderTopList();
-  if(tab==='exchange')loadExchanges();
-}
+            const handleMap = useCallback((rack) => {
+                setSelectedRack(rack || '');
+                setIsMapModalOpen(true);
+            }, []);
 
-/* ══ MODALS ══ */
-function openM(id){document.getElementById('ov').classList.add('on');document.getElementById(id).classList.add('on');}
-function closeAll(){
-  document.getElementById('ov').classList.remove('on');
-  document.querySelectorAll('.modal').forEach(m=>m.classList.remove('on'));
-  const a=document.getElementById('au');if(a){a.pause();a.src='';}
-  document.getElementById('apb').textContent='▶';
-  document.getElementById('apf').style.width='0%';
+            // --- Data Fetching ---
+            useEffect(() => {
+                document.documentElement.classList.toggle('dark', isDarkMode);
+                localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+            }, [isDarkMode]);
 
-}
+            useEffect(() => {
+                const fetchData = async () => {
+                    if (!supabase) {
+                        setLoading(false);
+                        return;
+                    }
+                    try {
+                        const [booksRes, votesRes, exRes] = await Promise.all([
+                            supabase.from('books').select('*'),
+                            supabase.from('votes').select('*'),
+                            supabase.from('exchanges').select('*').order('created_at', { ascending: false })
+                        ]);
 
-/* ══ DETAIL ══ */
+                        if (booksRes.data) {
+                            const mapped = booksRes.data.map(b => ({
+                                Title: b.title, Author: b.author, Edition: b.edition,
+                                Category: b.category, Rack: b.rack, Summary: b.summary
+                            }));
+                            setBooks(mapped);
+                            localStorage.setItem('fi_books', JSON.stringify(mapped));
+                        }
 
-function showDet(b){
-  document.getElementById('dT').textContent=b.Title||'—';
-  document.getElementById('dA').textContent=b.Author||'—';
-  document.getElementById('dE').textContent=b.Edition||'—';
-  document.getElementById('dC').textContent=b.Category||'—';
-  document.getElementById('dR').textContent=b.Rack||'—';
-  document.getElementById('dS').textContent=b.Summary||'সামারি যোগ করা হয়নি।';
-  document.getElementById('apTitle').textContent=b.Title||'—';
-  const au=document.getElementById('au'),auSec=document.getElementById('auSec');
-  if(b.AudioURL){au.src=b.AudioURL;auSec.style.display='block';}else{au.src='';auSec.style.display='none';}
+                        if (votesRes.data) {
+                            const counts = {};
+                            votesRes.data.forEach(v => {
+                                counts[v.book_title] = { like: v.likes || 0, dislike: v.dislikes || 0 };
+                            });
+                            setVoteCounts(counts);
+                        }
 
-  openM('detM');
-}
+                        if (exRes.data) {
+                            const mappedEx = exRes.data.map(e => ({
+                                Type: e.type, bookName: e.book_name, author: e.author,
+                                dept: e.dept, summary: e.summary, contact: e.contact
+                            }));
+                            setExchanges(mappedEx);
+                        }
+                    } catch (err) {
+                        console.error('Fetch error:', err);
+                    } finally {
+                        setLoading(false);
+                    }
+                };
 
+                fetchData();
+            }, []);
 
-/* ══ AUDIO ══ */
-function playAudio(b){if(!b.AudioURL){toast('এই বইয়ের অডিও নেই 😔');return;}showDet(b);setTimeout(()=>{document.getElementById('au').play();document.getElementById('apb').textContent='⏸';},200);}
-function toggleAu(){const a=document.getElementById('au');if(!a.src||a.src===location.href){toast('অডিও পাওয়া যায়নি');return;}if(a.paused){a.play();document.getElementById('apb').textContent='⏸';}else{a.pause();document.getElementById('apb').textContent='▶';}}
-function auTick(){const a=document.getElementById('au');if(a.duration)document.getElementById('apf').style.width=(a.currentTime/a.duration*100)+'%';}
-function auEnd(){document.getElementById('apb').textContent='▶';document.getElementById('apf').style.width='0%';}
-function seekAu(e){const a=document.getElementById('au');if(!a.duration)return;const r=e.currentTarget.getBoundingClientRect();a.currentTime=((e.clientX-r.left)/r.width)*a.duration;}
+            // --- Memoized Logic ---
+            const filteredBooks = useMemo(() => {
+                let result = books;
+                if (selectedDept !== 'all') {
+                    result = result.filter(b => {
+                        const cat = (b.Category || '').toLowerCase();
+                        if (selectedDept === 'CSE') return cat.includes('cse');
+                        if (selectedDept === 'BBA') return cat.includes('bba') || cat.includes('bus');
+                        if (selectedDept === 'Other') return !cat.includes('cse') && !cat.includes('bba') && !cat.includes('bus');
+                        return true;
+                    });
+                }
+                if (searchQuery.trim()) {
+                    const q = searchQuery.toLowerCase();
+                    result = result.filter(b => 
+                        (b.Title || '').toLowerCase().includes(q) || 
+                        (b.Author || '').toLowerCase().includes(q) || 
+                        (b.Category || '').toLowerCase().includes(q)
+                    );
+                }
+                return result;
+            }, [books, selectedDept, searchQuery]);
 
-/* ══ MAP ══ */
-const RP={'RACK-A':{x:57,y:41},'RACK-B':{x:137,y:41},'RACK-C':{x:217,y:41},'RACK-D':{x:297,y:41},'RACK-E':{x:393,y:41},'RACK-F':{x:57,y:107},'RACK-G':{x:137,y:107},'RACK-H':{x:217,y:107},'RACK-I':{x:297,y:107},'RACK-J':{x:393,y:107},'RACK-K':{x:57,y:173},'RACK-L':{x:137,y:173},'RACK-M':{x:217,y:173},'RACK-N':{x:297,y:173}};
-const YOU={x:230,y:272};
-function showMap(rack){
-  document.getElementById('rackLbl').textContent=rack||'—';
-  const al=document.getElementById('arrowLayer');al.innerHTML='';
-  document.querySelectorAll('#racks rect').forEach(r=>{r.setAttribute('fill','var(--s3)');r.setAttribute('stroke','var(--b)');r.setAttribute('stroke-width','1');});
-  const pos=RP[rack];
-  if(pos){
-    document.querySelectorAll(`#racks [data-rack="${rack}"] rect`).forEach(r=>{r.setAttribute('fill','rgba(124,58,237,.15)');r.setAttribute('stroke','var(--g)');r.setAttribute('stroke-width','2');});
-    const sx=YOU.x,sy=YOU.y-8,ex=pos.x,ey=pos.y+18;
-    const path=document.createElementNS('http://www.w3.org/2000/svg','path');
-    path.setAttribute('d',`M${sx},${sy} Q${sx},${(sy+ey)/2} ${ex},${ey}`);
-    path.setAttribute('fill','none');path.setAttribute('stroke','var(--g)');path.setAttribute('stroke-width','1.8');path.setAttribute('stroke-dasharray','5 4');path.setAttribute('opacity','.65');
-    const anim=document.createElementNS('http://www.w3.org/2000/svg','animate');
-    anim.setAttribute('attributeName','stroke-dashoffset');anim.setAttribute('from','18');anim.setAttribute('to','0');anim.setAttribute('dur','0.8s');anim.setAttribute('repeatCount','indefinite');
-    path.appendChild(anim);al.appendChild(path);
-    const ah=document.createElementNS('http://www.w3.org/2000/svg','polygon');
-    ah.setAttribute('points',`${ex},${ey-8} ${ex-5},${ey-16} ${ex+5},${ey-16}`);ah.setAttribute('fill','var(--g)');al.appendChild(ah);
-    document.getElementById('youC').setAttribute('cx',YOU.x);document.getElementById('youC').setAttribute('cy',YOU.y-8);
-    document.getElementById('youTx').setAttribute('x',YOU.x);document.getElementById('youTx').setAttribute('y',YOU.y-8);
-    document.getElementById('youM').style.display='block';
-  }else{document.getElementById('youM').style.display='none';}
-  openM('mapM');
-}
+            const topLikedBooks = useMemo(() => {
+                return Object.entries(voteCounts)
+                    .filter(([, v]) => v.like > 0)
+                    .sort((a, b) => b[1].like - a[1].like)
+                    .slice(0, 5)
+                    .map(([title]) => books.find(b => b.Title === title))
+                    .filter(Boolean);
+            }, [books, voteCounts]);
 
-/* ══ SMART QUIZ ══ */
-const quizAns={};
-function openSmartQuiz(){
-  Object.keys(quizAns).forEach(k=>delete quizAns[k]);
-  document.querySelectorAll('.quiz-step').forEach(s=>s.classList.remove('active'));
-  document.getElementById('qs1').classList.add('active');
-  document.querySelectorAll('.q-opt').forEach(o=>o.classList.remove('selected'));
-  buildProgress(1);openM('quizM');
-}
-function buildProgress(step){
-  const p=document.getElementById('qProgress');
-  p.innerHTML=Array.from({length:4},(_,i)=>`<div class="q-dot${i<step-1?' done':''}"></div>`).join('');
-}
-function qAnswer(step,val){
-  quizAns[step]=val;
-  event.currentTarget.classList.add('selected');
-  setTimeout(()=>{
-    document.getElementById(`qs${step}`).classList.remove('active');
-    if(step<4){buildProgress(step+1);document.getElementById(`qs${step+1}`).classList.add('active');}
-    else{buildProgress(5);showQuizResult();}
-  },280);
-}
-function showQuizResult(){
-  document.getElementById('qsResult').classList.add('active');
-  const a=quizAns;
-  const scored=books.map(b=>{
-    let s=0;const c=(b.Category||'').toLowerCase();
-    if(a[1]==='tech'&&c.includes('cse'))s+=3;
-    if(a[1]==='business'&&c.includes('bba'))s+=3;
-    if(a[1]==='concept')s+=1;
-    if(a[1]==='practical'&&c.includes('cse'))s+=2;
-    if(a[2]==='beginner')s+=1;if(a[2]==='advanced'||a[2]==='expert')s+=2;
-    if(a[3]==='short')s+=(b.Edition==='1st'?2:1);if(a[3]==='long')s+=2;if(a[3]==='reference')s+=2;
-    if(a[4]==='exam')s+=2;if(a[4]==='skill'&&c.includes('cse'))s+=2;if(a[4]==='project'&&c.includes('cse'))s+=3;if(a[4]==='interest')s+=1;
-    const vc=getVoteCounts();s+=(vc[b.Title]?.like||0)*.5;
-    return{book:b,score:s};
-  }).sort((a,b)=>b.score-a.score).slice(0,4);
-  const mood={tech:'💻 টেক গুরু',business:'📊 বিজনেস মাইন্ড',concept:'🧩 থিওরি লাভার',practical:'🔧 প্র্যাকটিক্যাল বিল্ডার'};
-  document.getElementById('qrTitle').textContent=`তোমার মুড: ${mood[a[1]]||'📚 বই প্রেমী'}`;
-  document.getElementById('qrSub').textContent='তোমার উত্তরের ভিত্তিতে এই বইগুলো সেরা হতে পারে 👇';
-  document.getElementById('qrBooks').innerHTML=scored.map(({book:b})=>`
-    <div class="qr-book-item" onclick='closeAll();showDet(${JSON.stringify(b)})'>
-      <span style="font-size:18px">${(b.Category||'').includes('CSE')?'💻':'📊'}</span>
-      <div><div class="qr-book-name">${b.Title}</div><div class="qr-book-auth">${b.Author||'—'} · ${b.Rack||''}</div></div>
-    </div>`).join('');
-}
+            const handleExchangeSubmit = async (e) => {
+                e.preventDefault();
+                if (!supabase) return alert('Supabase not configured');
+                setIsSubmittingEx(true);
+                try {
+                    const { error } = await supabase.from('exchanges').insert([{
+                        type: exForm.type, book_name: exForm.bookName, author: exForm.author,
+                        dept: exForm.dept, summary: exForm.summary, contact: exForm.contact
+                    }]);
+                    if (error) throw error;
+                    setExchanges(prev => [{ ...exForm, Type: exForm.type }, ...prev]);
+                    setExForm({ type: 'দিতে চাই', bookName: '', author: '', dept: '', summary: '', contact: '' });
+                    setIsExchangeModalOpen(false);
+                } catch (err) { console.error(err); } finally { setIsSubmittingEx(false); }
+            };
 
-/* ══ REQUEST ══ */
-function submitReq(){
-  const n=document.getElementById('rName').value.trim(),b=document.getElementById('rBook').value.trim();
-  if(!n||!b){toast('নাম এবং বইয়ের নাম দিন ⚠️');return;}
-  toast('✅ রিকোয়েস্ট পাঠানো হয়েছে!');
-  document.getElementById('rName').value='';document.getElementById('rBook').value='';document.getElementById('rNote').value='';
-  closeAll();
-}
+            const handleRequestSubmit = async (e) => {
+                e.preventDefault();
+                if (!supabase) return alert('Supabase not configured');
+                setIsSubmittingReq(true);
+                try {
+                    const { error } = await supabase.from('requests').insert([{
+                        name: reqForm.name, number: reqForm.number, book_name: reqForm.bookName,
+                        dept: reqForm.dept, semester: reqForm.semester
+                    }]);
+                    if (error) throw error;
+                    setIsRequestModalOpen(false);
+                    setReqForm({ name: '', number: '', bookName: '', dept: '', semester: '' });
+                    alert('Request submitted!');
+                } catch (err) { console.error(err); } finally { setIsSubmittingReq(false); }
+            };
 
-/* ══ TOAST ══ */
-let tt;
-function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.style.opacity='1';clearTimeout(tt);tt=setTimeout(()=>t.style.opacity='0',2800);}
+            const handleQuizAnswer = (step, val) => {
+                setQuizAnswers(prev => ({ ...prev, [step]: val }));
+                if (step < 4) setQuizStep(step + 1);
+                else setQuizStep(5);
+            };
 
-/* ══ INIT ══ */
-window.addEventListener('load',()=>{
-  setTimeout(()=>{
-    const ld=document.getElementById('ld');
-    ld.style.opacity='0';
-    setTimeout(()=>{ld.style.display='none';loadBooks();},500);
-  },2000);
-});
-</script>
+            const getQuizRecommendations = () => {
+                const a = quizAnswers;
+                return books.map(b => {
+                    let s = 0;
+                    const c = (b.Category || '').toLowerCase();
+                    if (a[1] === 'tech' && c.includes('cse')) s += 3;
+                    if (a[1] === 'business' && c.includes('bba')) s += 3;
+                    if (a[2] === 'beginner') s += 1;
+                    if (a[2] === 'advanced') s += 2;
+                    s += (voteCounts[b.Title]?.like || 0) * 0.5;
+                    return { book: b, score: s };
+                }).sort((a, b) => b.score - a.score).slice(0, 4);
+            };
+
+            return (
+                <div className="min-h-screen selection:bg-brand-primary selection:text-white">
+                    {/* Background */}
+                    <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+                        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-brand-primary/5 blur-[120px] rounded-full animate-pulse" />
+                        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-brand-secondary/5 blur-[120px] rounded-full animate-pulse delay-1000" />
+                        <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:32px_32px]" />
+                    </div>
+
+                    {/* Nav */}
+                    <nav className="relative z-50 flex justify-between items-center px-6 py-6 max-w-7xl mx-auto">
+                        <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-xl bg-brand-primary flex items-center justify-center shadow-lg shadow-brand-primary/30">
+                                <Icon name="library" size={22} className="text-white" />
+                            </div>
+                            <span className="font-display font-bold text-xl tracking-tight">Find_Index</span>
+                        </motion.div>
+                        <motion.button initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} onClick={toggleTheme} className="glass-premium p-3 rounded-2xl hover:scale-110 transition-transform">
+                            {isDarkMode ? <Icon name="sun" size={20} className="text-yellow-400" /> : <Icon name="moon" size={20} className="text-brand-primary" />}
+                        </motion.button>
+                    </nav>
+
+                    {/* Hero */}
+                    <header className="relative z-10 max-w-4xl mx-auto px-6 pt-12 pb-16 text-center">
+                        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-brand-primary/10 border border-brand-primary/20 mb-8">
+                            <span className="w-2 h-2 rounded-full bg-brand-primary animate-ping" />
+                            <span className="text-[10px] font-mono font-bold tracking-widest uppercase text-brand-primary">Smart Library v8.0</span>
+                        </motion.div>
+                        <motion.h1 initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="text-6xl md:text-8xl font-display font-extrabold tracking-tighter mb-6 text-gradient">Find_Index</motion.h1>
+                        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="text-slate-500 dark:text-slate-400 text-lg max-w-2xl mx-auto leading-relaxed">
+                            A small gift for VU students from <span className="font-bold text-brand-primary">MN Group</span>. 
+                            Discover, exchange, and explore books with ease.
+                        </motion.p>
+                    </header>
+
+                    {/* Search & Actions */}
+                    <section className="relative z-10 max-w-6xl mx-auto px-6 mb-16">
+                        <div className="flex flex-wrap justify-center gap-4 mb-10">
+                            <div className="glass-premium px-6 py-3 rounded-2xl flex items-center gap-3 text-sm font-bold">
+                                <Icon name="trending-up" size={18} className="text-brand-accent" />
+                                <span>{books.length} Books Available</span>
+                            </div>
+                            <button onClick={() => setIsRequestModalOpen(true)} className="bg-brand-primary text-white px-8 py-3 rounded-2xl text-sm font-bold hover:scale-105 transition-transform shadow-xl shadow-brand-primary/25 flex items-center gap-2">
+                                <Icon name="plus" size={18} /> Request Book
+                            </button>
+                            <button onClick={() => setActiveTab('exchange')} className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-8 py-3 rounded-2xl text-sm font-bold hover:scale-105 transition-transform shadow-xl flex items-center gap-2">
+                                <Icon name="repeat" size={18} /> Exchange Board
+                            </button>
+                        </div>
+
+                        <div className="max-w-3xl mx-auto relative group">
+                            <div className="absolute inset-0 bg-brand-primary/10 blur-3xl group-focus-within:bg-brand-primary/20 transition-all rounded-[2rem]" />
+                            <div className="relative glass-premium rounded-[2rem] p-2 flex items-center gap-4">
+                                <div className="pl-6 text-slate-400"><Icon name="search" size={24} /></div>
+                                <input 
+                                    type="text"
+                                    placeholder="Search by title, author, or category..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className="flex-1 bg-transparent border-none outline-none py-4 text-lg font-sans placeholder:text-slate-400"
+                                />
+                                <button onClick={() => setIsQuizModalOpen(true)} className="hidden md:flex items-center gap-2 px-6 py-3 rounded-2xl bg-brand-primary/10 text-brand-primary hover:bg-brand-primary hover:text-white transition-all text-sm font-bold">
+                                    <Icon name="brain" size={18} /> Smart Decision
+                                </button>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Main Content */}
+                    <main className="relative z-10 max-w-7xl mx-auto px-6 pb-32">
+                        <div className="flex items-center justify-between mb-10 overflow-x-auto pb-4 no-scrollbar gap-8">
+                            <div className="flex gap-3">
+                                {[
+                                    { id: 'all', label: 'All Books', icon: 'layout-grid' },
+                                    { id: 'top', label: 'Top Rated', icon: 'trophy' },
+                                    { id: 'exchange', label: 'Exchange', icon: 'repeat' },
+                                ].map(tab => (
+                                    <button
+                                        key={tab.id}
+                                        onClick={() => setActiveTab(tab.id)}
+                                        className={`flex items-center gap-2 px-8 py-3 rounded-2xl text-sm font-bold transition-all whitespace-nowrap ${
+                                            activeTab === tab.id 
+                                                ? "bg-brand-primary text-white shadow-2xl shadow-brand-primary/30" 
+                                                : "glass-premium text-slate-500 hover:bg-white dark:hover:bg-slate-800"
+                                        }`}
+                                    >
+                                        <Icon name={tab.icon} size={18} /> {tab.label}
+                                    </button>
+                                ))}
+                            </div>
+
+                            <select 
+                                value={selectedDept}
+                                onChange={(e) => setSelectedDept(e.target.value)}
+                                className="glass-premium px-6 py-3 rounded-2xl text-sm font-bold outline-none cursor-pointer hover:border-brand-primary transition-colors min-w-[200px]"
+                            >
+                                <option value="all">All Departments</option>
+                                <option value="CSE">CSE Department</option>
+                                <option value="BBA">BBA Department</option>
+                                <option value="Other">Other Subjects</option>
+                            </select>
+                        </div>
+
+                        <AnimatePresence mode="wait">
+                            {activeTab === 'all' && (
+                                <motion.div key="all-books" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                                    {loading && books.length === 0 ? (
+                                        Array.from({ length: 8 }).map((_, i) => (
+                                            <div key={i} className="glass-premium rounded-[2rem] p-8 h-80 skeleton" />
+                                        ))
+                                    ) : filteredBooks.length > 0 ? (
+                                        filteredBooks.map((book, i) => (
+                                            <BookCard 
+                                                key={book.Title + i}
+                                                book={book}
+                                                counts={voteCounts[book.Title] || { like: 0, dislike: 0 }}
+                                                myVote={myVotes[book.Title]}
+                                                onVote={handleVote}
+                                                onDetail={handleDetail}
+                                                onMap={handleMap}
+                                            />
+                                        ))
+                                    ) : (
+                                        <div className="col-span-full py-32 text-center">
+                                            <div className="text-7xl mb-6">🔍</div>
+                                            <h3 className="text-2xl font-bold mb-2">No books found</h3>
+                                            <p className="text-slate-500">Try adjusting your search or filters</p>
+                                        </div>
+                                    )}
+                                </motion.div>
+                            )}
+
+                            {activeTab === 'top' && (
+                                <motion.div key="top-rated" initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.98 }} className="max-w-4xl mx-auto">
+                                    <div className="flex items-center gap-4 mb-10">
+                                        <div className="p-3 rounded-2xl bg-brand-accent/10 text-brand-accent"><Icon name="trophy" size={28} /></div>
+                                        <h2 className="text-3xl font-display font-bold">Most Loved Books</h2>
+                                    </div>
+                                    <div className="space-y-6">
+                                        {topLikedBooks.map((book, i) => (
+                                            <motion.div 
+                                                key={book.Title}
+                                                initial={{ opacity: 0, x: -20 }}
+                                                animate={{ opacity: 1, x: 0 }}
+                                                transition={{ delay: i * 0.05 }}
+                                                className="glass-premium p-6 rounded-[2rem] flex items-center gap-6 hover:border-brand-accent/30 transition-all cursor-pointer group gpu"
+                                                onClick={() => handleDetail(book)}
+                                            >
+                                                <div className="w-14 h-14 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center font-display font-extrabold text-2xl text-brand-primary">#{i + 1}</div>
+                                                <div className="flex-1">
+                                                    <h4 className="text-xl font-bold group-hover:text-brand-primary transition-colors">{book.Title}</h4>
+                                                    <p className="text-sm text-slate-500 font-medium">{book.Author}</p>
+                                                </div>
+                                                <div className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-brand-accent/10 text-brand-accent font-mono font-bold">
+                                                    <Icon name="thumbs-up" size={18} /> {voteCounts[book.Title]?.like}
+                                                </div>
+                                            </motion.div>
+                                        ))}
+                                    </div>
+                                </motion.div>
+                            )}
+
+                            {activeTab === 'exchange' && (
+                                <motion.div key="exchange-board" initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} className="space-y-10">
+                                    <div className="flex justify-between items-center">
+                                        <h2 className="text-3xl font-display font-bold">Community Exchange</h2>
+                                        <button onClick={() => setIsExchangeModalOpen(true)} className="bg-brand-primary text-white px-8 py-3 rounded-2xl text-sm font-bold shadow-xl shadow-brand-primary/20 flex items-center gap-2">
+                                            <Icon name="plus" size={18} /> Create Post
+                                        </button>
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                        {exchanges.length > 0 ? (
+                                            exchanges.map((ex, i) => (
+                                                <motion.div key={i} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }} className="glass-premium rounded-[2.5rem] p-10 relative overflow-hidden group border-t-4 border-t-brand-secondary gpu">
+                                                    <div className="absolute top-8 right-8">
+                                                        <Badge className={ex.Type === 'দিতে চাই' ? "bg-brand-accent/10 text-brand-accent border-brand-accent/20" : "bg-brand-primary/10 text-brand-primary border-brand-primary/20"}>{ex.Type === 'দিতে চাই' ? 'Available' : 'Wanted'}</Badge>
+                                                    </div>
+                                                    <h4 className="text-2xl font-display font-bold mb-4 pr-24">{ex.bookName}</h4>
+                                                    <div className="flex flex-wrap gap-4 mb-6">
+                                                        {ex.author && <span className="text-sm text-slate-500 font-medium">✍️ {ex.author}</span>}
+                                                        {ex.dept && <span className="text-sm text-slate-500 font-medium">🏛️ {ex.dept}</span>}
+                                                    </div>
+                                                    <p className="text-slate-600 dark:text-slate-400 mb-8 line-clamp-3 leading-relaxed">{ex.summary}</p>
+                                                    <div className="flex items-center justify-between pt-6 border-t border-slate-100 dark:border-white/5">
+                                                        <div className="flex items-center gap-3 text-brand-primary font-mono font-bold"><Icon name="phone" size={18} /> {ex.contact}</div>
+                                                        <button className="px-6 py-3 rounded-2xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-bold hover:bg-brand-primary hover:text-white transition-all">Contact</button>
+                                                    </div>
+                                                </motion.div>
+                                            ))
+                                        ) : (
+                                            <div className="col-span-full py-32 text-center glass-premium rounded-[2rem]">
+                                                <div className="text-7xl mb-6">🔄</div>
+                                                <h3 className="text-2xl font-bold mb-2">No exchange posts yet</h3>
+                                                <p className="text-slate-500">Be the first to share a book!</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </main>
+
+                    {/* Modals */}
+                    <Modal isOpen={isDetailModalOpen} onClose={() => setIsDetailModalOpen(false)} title="Book Details">
+                        {selectedBook && (
+                            <div className="space-y-10">
+                                <div className="text-center">
+                                    <div className="w-24 h-24 bg-brand-primary/10 rounded-3xl flex items-center justify-center mx-auto mb-6 text-brand-primary"><Icon name="book" size={40} /></div>
+                                    <h2 className="text-3xl font-display font-bold mb-3 leading-tight text-slate-900 dark:text-white">{selectedBook.Title}</h2>
+                                    <p className="text-brand-primary font-mono font-bold uppercase tracking-widest text-xs">{selectedBook.Author}</p>
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    {[
+                                        { label: 'Edition', value: selectedBook.Edition, icon: 'layers' },
+                                        { label: 'Category', value: selectedBook.Category, icon: 'tag' },
+                                        { label: 'Rack No', value: selectedBook.Rack, icon: 'hash' },
+                                        { label: 'Status', value: 'Available', icon: 'check-circle' },
+                                    ].map(item => (
+                                        <div key={item.label} className="p-5 rounded-3xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-white/5 group hover:border-brand-primary/30 transition-all">
+                                            <div className="flex items-center gap-3 mb-2 text-slate-400"><Icon name={item.icon} size={14} /><p className="text-[10px] font-mono font-bold uppercase tracking-wider">{item.label}</p></div>
+                                            <p className="text-sm font-bold text-slate-700 dark:text-slate-200">{item.value || '—'}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                                <div className="relative">
+                                    <div className="absolute -left-4 top-0 bottom-0 w-1 bg-brand-primary/20 rounded-full" />
+                                    <h4 className="text-xs font-mono font-bold text-slate-400 uppercase mb-4 flex items-center gap-2"><Icon name="align-left" size={14} /> Description</h4>
+                                    <p className="text-base leading-relaxed text-slate-600 dark:text-slate-300 font-medium">{selectedBook.Summary || 'This book is a valuable resource for students and researchers alike.'}</p>
+                                </div>
+                                <button onClick={() => setIsDetailModalOpen(false)} className="w-full py-5 rounded-[2rem] bg-brand-primary text-white font-bold shadow-xl shadow-brand-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all">Close Details</button>
+                            </div>
+                        )}
+                    </Modal>
+
+                    <Modal isOpen={isMapModalOpen} onClose={() => setIsMapModalOpen(false)} title="Library Map">
+                        <div className="space-y-6">
+                            <div className="flex items-center justify-between p-4 rounded-2xl bg-brand-primary/5 border border-brand-primary/10">
+                                <span className="text-sm font-medium text-slate-500">Target Rack:</span>
+                                <span className="px-6 py-2 rounded-xl bg-brand-primary text-white font-bold shadow-lg shadow-brand-primary/20">{selectedRack || '—'}</span>
+                            </div>
+                            <div className="aspect-[4/3] bg-slate-100 dark:bg-slate-800/50 rounded-3xl border border-slate-200 dark:border-white/5 flex flex-col items-center justify-center p-12 text-center">
+                                <Icon name="map" size={64} className="text-brand-primary/30 mb-6" />
+                                <p className="text-sm text-slate-500 font-medium">Map visualization loading... Rack {selectedRack} has been highlighted in the physical library.</p>
+                            </div>
+                        </div>
+                    </Modal>
+
+                    <Modal isOpen={isRequestModalOpen} onClose={() => setIsRequestModalOpen(false)} title="Request a Book">
+                        <form className="space-y-6" onSubmit={handleRequestSubmit}>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider">Your Name</label>
+                                    <div className="relative">
+                                        <Icon name="user" size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" />
+                                        <input type="text" required value={reqForm.name} onChange={(e) => setReqForm({ ...reqForm, name: e.target.value })} className="w-full pl-14 pr-6 py-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-white/5 focus:border-brand-primary outline-none transition-all" placeholder="Full Name" />
+                                    </div>
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider">Contact Number</label>
+                                    <div className="relative">
+                                        <Icon name="phone" size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" />
+                                        <input type="tel" required value={reqForm.number} onChange={(e) => setReqForm({ ...reqForm, number: e.target.value })} className="w-full pl-14 pr-6 py-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-white/5 focus:border-brand-primary outline-none transition-all" placeholder="017XXXXXXXX" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider">Book Name</label>
+                                <div className="relative">
+                                    <Icon name="book" size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" />
+                                    <input type="text" required value={reqForm.bookName} onChange={(e) => setReqForm({ ...reqForm, bookName: e.target.value })} className="w-full pl-14 pr-6 py-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-white/5 focus:border-brand-primary outline-none transition-all" placeholder="Which book do you need?" />
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-2 gap-6">
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider">Department</label>
+                                    <input type="text" required value={reqForm.dept} onChange={(e) => setReqForm({ ...reqForm, dept: e.target.value })} className="w-full px-6 py-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-white/5 focus:border-brand-primary outline-none transition-all" placeholder="CSE, BBA, etc." />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider">Semester</label>
+                                    <input type="text" required value={reqForm.semester} onChange={(e) => setReqForm({ ...reqForm, semester: e.target.value })} className="w-full px-6 py-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-white/5 focus:border-brand-primary outline-none transition-all" placeholder="1st, 2nd, etc." />
+                                </div>
+                            </div>
+                            <button disabled={isSubmittingReq} className="w-full py-5 rounded-2xl bg-brand-primary text-white font-bold shadow-2xl shadow-brand-primary/30 flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                                {isSubmittingReq ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Icon name="send" size={20} />}
+                                {isSubmittingReq ? 'Submitting...' : 'Submit Request'}
+                            </button>
+                        </form>
+                    </Modal>
+
+                    <Modal isOpen={isExchangeModalOpen} onClose={() => setIsExchangeModalOpen(false)} title="Exchange Board">
+                        <form className="space-y-6" onSubmit={handleExchangeSubmit}>
+                            <div className="flex p-1.5 rounded-2xl bg-slate-100 dark:bg-slate-800/50">
+                                {['দিতে চাই', 'নিতে চাই'].map(t => (
+                                    <button key={t} type="button" onClick={() => setExForm({ ...exForm, type: t })} className={`flex-1 py-3 rounded-xl text-sm font-bold transition-all ${exForm.type === t ? "bg-white dark:bg-slate-700 shadow-sm text-brand-primary" : "text-slate-500"}`}>{t}</button>
+                                ))}
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider">Book Name</label>
+                                    <input type="text" required value={exForm.bookName} onChange={(e) => setExForm({ ...exForm, bookName: e.target.value })} className="w-full px-6 py-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-white/5 focus:border-brand-primary outline-none transition-all" placeholder="Enter book title" />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider">Author</label>
+                                    <input type="text" value={exForm.author} onChange={(e) => setExForm({ ...exForm, author: e.target.value })} className="w-full px-6 py-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-white/5 focus:border-brand-primary outline-none transition-all" placeholder="Author name" />
+                                </div>
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider">Department / Subject</label>
+                                <input type="text" value={exForm.dept} onChange={(e) => setExForm({ ...exForm, dept: e.target.value })} className="w-full px-6 py-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-white/5 focus:border-brand-primary outline-none transition-all" placeholder="e.g. CSE, BBA, Math" />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider">Summary / Condition</label>
+                                <textarea value={exForm.summary} onChange={(e) => setExForm({ ...exForm, summary: e.target.value })} className="w-full p-6 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-white/5 focus:border-brand-primary outline-none transition-all min-h-[100px]" placeholder="Briefly describe the book or your requirement..." />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider">Contact Number</label>
+                                <div className="relative">
+                                    <Icon name="phone" size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" />
+                                    <input type="tel" required value={exForm.contact} onChange={(e) => setExForm({ ...exForm, contact: e.target.value })} className="w-full pl-14 pr-6 py-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-white/5 focus:border-brand-primary outline-none transition-all" placeholder="017XXXXXXXX" />
+                                </div>
+                            </div>
+                            <button disabled={isSubmittingEx} className="w-full py-5 rounded-2xl bg-brand-primary text-white font-bold shadow-2xl shadow-brand-primary/30 flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50">
+                                {isSubmittingEx ? <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" /> : <Icon name="plus-circle" size={20} />}
+                                {isSubmittingEx ? 'Posting...' : 'Create Post'}
+                            </button>
+                        </form>
+                    </Modal>
+
+                    <Modal isOpen={isQuizModalOpen} onClose={() => { setIsQuizModalOpen(false); setQuizStep(1); }} title="Smart Book Decision">
+                        <div className="space-y-8">
+                            <div className="flex gap-2.5">
+                                {[1, 2, 3, 4].map(s => (
+                                    <div key={s} className={`flex-1 h-2 rounded-full transition-all duration-500 ${s <= quizStep ? "bg-brand-primary" : "bg-slate-100 dark:bg-slate-800"}`} />
+                                ))}
+                            </div>
+                            {quizStep === 1 && (
+                                <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
+                                    <h3 className="text-2xl font-display font-bold mb-8 leading-tight">What would you like to learn today? 🎯</h3>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        {[
+                                            { id: 'tech', label: 'Technical', icon: '💻' },
+                                            { id: 'business', label: 'Business', icon: '📊' },
+                                            { id: 'concept', label: 'Theory', icon: '🧩' },
+                                            { id: 'practical', label: 'Practical', icon: '🔧' },
+                                        ].map(opt => (
+                                            <button key={opt.id} onClick={() => handleQuizAnswer(1, opt.id)} className="p-6 rounded-3xl glass-premium hover:border-brand-primary transition-all text-left group">
+                                                <span className="text-3xl block mb-3 group-hover:scale-110 transition-transform">{opt.icon}</span>
+                                                <span className="font-bold text-sm">{opt.label}</span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </motion.div>
+                            )}
+                            {quizStep === 5 && (
+                                <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="text-center">
+                                    <div className="w-20 h-20 rounded-[2rem] bg-brand-primary/10 text-brand-primary flex items-center justify-center mx-auto mb-6"><Icon name="brain" size={40} /></div>
+                                    <h3 className="text-2xl font-display font-bold mb-3">Top Recommendations!</h3>
+                                    <p className="text-slate-500 mb-8 font-medium">Based on your interests, we think you'll love these:</p>
+                                    <div className="space-y-4 text-left">
+                                        {getQuizRecommendations().map(({ book }, i) => (
+                                            <div key={i} onClick={() => { handleDetail(book); setIsQuizModalOpen(false); }} className="p-5 rounded-2xl glass-premium hover:border-brand-primary transition-all cursor-pointer flex items-center gap-5 group">
+                                                <div className="w-12 h-12 rounded-xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center group-hover:bg-brand-primary transition-colors"><Icon name="book-open" size={20} className="text-brand-primary group-hover:text-white" /></div>
+                                                <div className="flex-1">
+                                                    <h4 className="font-bold text-sm group-hover:text-brand-primary transition-colors">{book.Title}</h4>
+                                                    <p className="text-[10px] text-slate-400 font-mono font-bold uppercase">{book.Author}</p>
+                                                </div>
+                                                <Icon name="chevron-right" size={18} className="text-slate-300 group-hover:text-brand-primary" />
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <button onClick={() => { setIsQuizModalOpen(false); setQuizStep(1); }} className="w-full mt-10 py-4 rounded-2xl bg-slate-100 dark:bg-slate-800 font-bold hover:bg-brand-primary hover:text-white transition-all">Start Over</button>
+                                </motion.div>
+                            )}
+                            {quizStep > 1 && quizStep < 5 && (
+                                <div className="text-center py-20">
+                                    <div className="w-12 h-12 border-4 border-brand-primary/20 border-t-brand-primary rounded-full animate-spin mx-auto mb-6" />
+                                    <p className="text-slate-500 font-medium mb-6">Analyzing your preferences...</p>
+                                    <button onClick={() => setQuizStep(quizStep + 1)} className="text-brand-primary font-bold hover:underline">Skip to next step</button>
+                                </div>
+                            )}
+                        </div>
+                    </Modal>
+
+                    {/* Footer */}
+                    <footer className="relative z-10 py-20 border-t border-slate-200 dark:border-white/5 text-center">
+                        <div className="max-w-7xl mx-auto px-6">
+                            <div className="flex items-center justify-center gap-3 mb-8">
+                                <div className="w-10 h-10 rounded-xl bg-brand-primary text-white flex items-center justify-center font-display font-bold text-xl">FI</div>
+                                <span className="font-display font-bold text-2xl tracking-tight">Find_Index</span>
+                            </div>
+                            <p className="text-sm text-slate-500 max-w-md mx-auto mb-10 leading-relaxed">Empowering students with knowledge through a modern, accessible library experience.</p>
+                            <div className="flex justify-center gap-8 mb-12">
+                                {[{ icon: 'info', label: 'About' }, { icon: 'phone', label: 'Contact' }, { icon: 'user', label: 'Profile' }].map(link => (
+                                    <a key={link.label} href="#" className="flex items-center gap-2 text-slate-400 hover:text-brand-primary transition-colors font-bold text-sm"><Icon name={link.icon} size={18} /> {link.label}</a>
+                                ))}
+                            </div>
+                            <div className="pt-10 border-t border-slate-100 dark:border-white/5">
+                                <p className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-[0.3em]">© 2026 MN Group · Built for Excellence</p>
+                            </div>
+                        </div>
+                    </footer>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
 </body>
 </html>
