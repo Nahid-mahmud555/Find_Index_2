@@ -111,6 +111,19 @@
             max-height: 90vh;
             overflow-y: auto;
         }
+
+        /* Chip for editions/authors */
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.15rem 0.65rem;
+            border-radius: 9999px;
+            font-size: 10px;
+            font-weight: 700;
+            background: rgba(99, 102, 241, 0.08);
+            color: var(--brand-primary);
+            border: 1px solid rgba(99, 102, 241, 0.15);
+        }
     </style>
 
     <script>
@@ -160,7 +173,7 @@
     <header class="relative z-10 max-w-4xl mx-auto px-6 pt-12 pb-16 text-center">
         <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-brand-primary/10 border border-brand-primary/20 mb-8">
             <span class="w-2 h-2 rounded-full bg-brand-primary animate-ping"></span>
-            <span class="text-[10px] font-mono font-bold tracking-widest uppercase text-brand-primary">Smart Library v8.0</span>
+            <span class="text-[10px] font-mono font-bold tracking-widest uppercase text-brand-primary">Smart Library v8.1</span>
         </div>
         <h1 class="text-6xl md:text-8xl font-display font-extrabold tracking-tighter mb-6 text-gradient">Find_Index</h1>
         <p class="text-slate-500 dark:text-slate-400 text-lg max-w-2xl mx-auto leading-relaxed">
@@ -182,6 +195,9 @@
             <button onclick="switchTab('exchange')" class="bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-8 py-3 rounded-2xl text-sm font-bold hover:scale-105 transition-transform shadow-xl flex items-center gap-2">
                 <i data-lucide="repeat" class="w-4 h-4"></i> Exchange Board
             </button>
+            <button onclick="switchTab('innovation')" class="bg-gradient-to-r from-brand-secondary to-brand-primary text-white px-8 py-3 rounded-2xl text-sm font-bold hover:scale-105 transition-transform shadow-xl flex items-center gap-2">
+                <i data-lucide="rocket" class="w-4 h-4"></i> Innovation Hub
+            </button>
         </div>
 
         <div class="max-w-3xl mx-auto relative group">
@@ -191,13 +207,36 @@
                 <input 
                     type="text"
                     id="search-input"
-                    placeholder="Search by title, author, or category..."
+                    placeholder="Search by title, author, category, or topic (e.g. programming)..."
                     class="flex-1 bg-transparent border-none outline-none py-4 text-lg font-sans placeholder:text-slate-400"
                 />
                 <button onclick="openModal('quiz-modal')" class="hidden md:flex items-center gap-2 px-6 py-3 rounded-2xl bg-brand-primary/10 text-brand-primary hover:bg-brand-primary hover:text-white transition-all text-sm font-bold">
                     <i data-lucide="brain" class="w-4 h-4"></i> Smart Decision
                 </button>
             </div>
+        </div>
+
+        <!-- Syllabus Mapping Engine -->
+        <div class="max-w-3xl mx-auto mt-4 flex flex-wrap justify-center items-center gap-3">
+            <div class="glass-premium rounded-2xl p-2 flex items-center gap-2 flex-1 min-w-[280px]">
+                <div class="pl-4 text-brand-secondary"><i data-lucide="graduation-cap" class="w-5 h-5"></i></div>
+                <input
+                    type="text"
+                    id="course-code-input"
+                    placeholder="Syllabus Search: Course Code (e.g. CSE-211, BBA-101)"
+                    class="flex-1 bg-transparent border-none outline-none py-2.5 text-sm font-mono placeholder:text-slate-400"
+                    onkeydown="if(event.key==='Enter'){handleCourseSearch();}"
+                />
+                <button onclick="handleCourseSearch()" class="px-5 py-2.5 rounded-xl bg-brand-secondary text-white text-xs font-bold hover:scale-105 transition-transform whitespace-nowrap">
+                    Find Textbooks
+                </button>
+            </div>
+            <button onclick="clearCourseSearch()" id="clear-course-btn" class="hidden glass-premium px-5 py-2.5 rounded-xl text-xs font-bold text-slate-500 hover:text-red-500 transition-colors">
+                ✕ Clear
+            </button>
+        </div>
+        <div id="course-search-tag" class="hidden max-w-3xl mx-auto mt-3 text-center">
+            <span class="chip"></span>
         </div>
     </section>
 
@@ -214,6 +253,9 @@
                 </button>
                 <button onclick="switchTab('exchange')" id="tab-exchange" class="tab-btn flex items-center gap-2 px-8 py-3 rounded-2xl text-sm font-bold transition-all whitespace-nowrap glass-premium text-slate-500 hover:bg-white dark:hover:bg-slate-800">
                     <i data-lucide="repeat" class="w-4 h-4"></i> Exchange
+                </button>
+                <button onclick="switchTab('innovation')" id="tab-innovation" class="tab-btn flex items-center gap-2 px-8 py-3 rounded-2xl text-sm font-bold transition-all whitespace-nowrap glass-premium text-slate-500 hover:bg-white dark:hover:bg-slate-800">
+                    <i data-lucide="rocket" class="w-4 h-4"></i> Innovation Hub
                 </button>
             </div>
 
@@ -251,6 +293,20 @@
                 </button>
             </div>
             <div id="exchange-list" class="grid grid-cols-1 md:grid-cols-2 gap-8"></div>
+        </div>
+
+        <!-- Innovation Hub Section (Hidden by default) -->
+        <div id="innovation-section" class="hidden space-y-10">
+            <div class="flex flex-wrap justify-between items-center gap-4">
+                <div>
+                    <h2 class="text-3xl font-display font-bold">Innovation Hub</h2>
+                    <p class="text-sm text-slate-500 mt-1">Student projects, theses & innovations — an archive built by seniors, for juniors.</p>
+                </div>
+                <button onclick="openModal('innovation-modal')" class="bg-brand-primary text-white px-8 py-3 rounded-2xl text-sm font-bold shadow-xl shadow-brand-primary/20 flex items-center gap-2 whitespace-nowrap">
+                    <i data-lucide="plus" class="w-4 h-4"></i> Add Project
+                </button>
+            </div>
+            <div id="innovation-list" class="grid grid-cols-1 md:grid-cols-2 gap-8"></div>
         </div>
     </main>
 
@@ -353,6 +409,57 @@
         </div>
     </div>
 
+    <!-- Innovation Hub Submission Modal -->
+    <div id="innovation-modal" class="modal-overlay" onclick="closeModalOnOverlay(event)">
+        <div class="modal-content glass-premium rounded-[2.5rem] p-8 relative shadow-2xl">
+            <button onclick="closeModal('innovation-modal')" class="absolute top-6 right-6 w-10 h-10 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-white/10 rounded-full transition-all text-slate-400">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            <h3 class="text-xl font-display font-bold mb-6">Showcase Your Project</h3>
+            <form id="innovation-form" class="space-y-6">
+                <div class="space-y-2">
+                    <label class="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider">Project / Thesis Title</label>
+                    <input type="text" name="title" required class="w-full px-6 py-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-white/5 focus:border-brand-primary outline-none transition-all" placeholder="e.g. Smart Traffic Management System" />
+                </div>
+                <div class="space-y-2">
+                    <label class="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider">Abstract</label>
+                    <textarea name="abstract" required class="w-full p-6 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-white/5 focus:border-brand-primary outline-none transition-all min-h-[120px]" placeholder="A short summary of the project or research..."></textarea>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider">Developer(s) / Researcher(s)</label>
+                        <input type="text" name="developers" required class="w-full px-6 py-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-white/5 focus:border-brand-primary outline-none transition-all" placeholder="Name 1, Name 2..." />
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider">Batch</label>
+                        <input type="text" name="batch" class="w-full px-6 py-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-white/5 focus:border-brand-primary outline-none transition-all" placeholder="e.g. 45th" />
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <label class="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider">Department</label>
+                    <input type="text" name="dept" required class="w-full px-6 py-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-white/5 focus:border-brand-primary outline-none transition-all" placeholder="CSE, BBA, etc." />
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider">GitHub Link (optional)</label>
+                        <input type="url" name="github_url" class="w-full px-6 py-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-white/5 focus:border-brand-primary outline-none transition-all" placeholder="https://github.com/..." />
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider">Live Project Link (optional)</label>
+                        <input type="url" name="live_url" class="w-full px-6 py-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-white/5 focus:border-brand-primary outline-none transition-all" placeholder="https://..." />
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <label class="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider">Contact (optional)</label>
+                    <input type="text" name="contact" class="w-full px-6 py-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-white/5 focus:border-brand-primary outline-none transition-all" placeholder="Email or phone" />
+                </div>
+                <button type="submit" class="w-full py-5 rounded-2xl bg-brand-primary text-white font-bold shadow-2xl shadow-brand-primary/30 flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-[0.98] transition-all">
+                    <i data-lucide="rocket" class="w-5 h-5"></i> Submit Project
+                </button>
+            </form>
+        </div>
+    </div>
+
     <div id="quiz-modal" class="modal-overlay" onclick="closeModalOnOverlay(event)">
         <div class="modal-content glass-premium rounded-[2.5rem] p-8 relative shadow-2xl">
             <button onclick="closeModal('quiz-modal')" class="absolute top-6 right-6 w-10 h-10 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-white/10 rounded-full transition-all text-slate-400">
@@ -411,12 +518,28 @@
 
         // --- State ---
         let allBooks = JSON.parse(localStorage.getItem('fi_books') || '[]');
+        let groupedBooksCache = [];
         let voteCounts = {};
         let myVotes = JSON.parse(localStorage.getItem('fi_votes') || '{}');
         let currentTab = 'all';
         let currentDept = 'all';
         let searchQuery = '';
         let exchanges = [];
+        let innovations = [];
+        let courseMap = {};        // COURSE_CODE -> [book titles]
+        let activeCourseFilter = null;
+
+        // Simple keyword/topic map used for lightweight semantic matching.
+        // Searching "programming" will also surface books tagged/described with these related terms.
+        const TAG_SYNONYMS = {
+            programming: ['code', 'coding', 'developer', 'software', 'python', 'java', 'javascript', 'c++', 'algorithm', 'programming'],
+            business: ['management', 'finance', 'marketing', 'economics', 'entrepreneur', 'accounting', 'business'],
+            math: ['calculus', 'algebra', 'statistics', 'mathematics', 'geometry', 'math'],
+            networking: ['network', 'protocol', 'tcp', 'router', 'networking'],
+            database: ['sql', 'db', 'data', 'database'],
+            design: ['ui', 'ux', 'graphics', 'design'],
+            ai: ['artificial intelligence', 'machine learning', 'ml', 'deep learning', 'ai'],
+        };
 
         // --- Initialization ---
         window.addEventListener('DOMContentLoaded', () => {
@@ -465,12 +588,14 @@
 
             document.getElementById('request-form').addEventListener('submit', handleRequestSubmit);
             document.getElementById('exchange-form').addEventListener('submit', handleExchangeSubmit);
+            document.getElementById('innovation-form').addEventListener('submit', handleInnovationSubmit);
         }
 
         // --- Data Fetching ---
         async function fetchData() {
             if (!supabase) {
                 console.warn("Supabase not initialized, showing cached data.");
+                groupedBooksCache = groupBooksByTitle(allBooks);
                 displayBooks();
                 updateBookCount();
                 return;
@@ -485,7 +610,8 @@
                 if (booksRes.data) {
                     allBooks = booksRes.data.map(b => ({
                         Title: b.title, Author: b.author, Edition: b.edition,
-                        Category: b.category, Rack: b.rack, Summary: b.summary
+                        Category: b.category, Rack: b.rack, Summary: b.summary,
+                        CourseCodes: (b.course_codes || '').split(',').map(s => s.trim().toUpperCase()).filter(Boolean)
                     }));
                     localStorage.setItem('fi_books', JSON.stringify(allBooks));
                 }
@@ -503,16 +629,105 @@
                     }));
                 }
 
+                groupedBooksCache = groupBooksByTitle(allBooks);
+
+                // Best-effort fetches for optional tables — won't break the app if missing.
+                await Promise.all([loadInnovations(), loadCourseMap()]);
+
                 displayBooks();
                 updateBookCount();
             } catch (err) {
                 console.error('Fetch error:', err);
+                groupedBooksCache = groupBooksByTitle(allBooks);
                 displayBooks(); // Render from cache if available
             }
         }
 
+        async function loadInnovations() {
+            if (!supabase) return;
+            try {
+                const { data, error } = await supabase.from('innovations').select('*').order('created_at', { ascending: false });
+                if (!error && data) {
+                    innovations = data.map(p => ({
+                        title: p.title, abstract: p.abstract, developers: p.developers,
+                        batch: p.batch, dept: p.dept, github_url: p.github_url,
+                        live_url: p.live_url, contact: p.contact
+                    }));
+                }
+            } catch (err) {
+                console.warn("'innovations' table not found yet — Innovation Hub will show an empty state until it's created in Supabase.");
+            }
+        }
+
+        async function loadCourseMap() {
+            if (!supabase) return;
+            try {
+                const { data, error } = await supabase.from('course_mapping').select('*');
+                if (!error && data && data.length) {
+                    courseMap = {};
+                    data.forEach(row => {
+                        const code = (row.course_code || '').toUpperCase().trim();
+                        if (!code) return;
+                        if (!courseMap[code]) courseMap[code] = [];
+                        courseMap[code].push(row.book_title);
+                    });
+                }
+            } catch (err) {
+                console.warn("'course_mapping' table not found yet — syllabus search will fall back to text matching against category/summary.");
+            }
+        }
+
         function updateBookCount() {
-            document.getElementById('book-count').textContent = `${allBooks.length} Books Available`;
+            document.getElementById('book-count').textContent = `${groupedBooksCache.length} Books Available`;
+        }
+
+        // --- Duplicate Handling: group multiple editions/authors under one title ---
+        function groupBooksByTitle(books) {
+            const map = new Map();
+            books.forEach(b => {
+                const key = (b.Title || '').trim().toLowerCase();
+                if (!key) return;
+                if (!map.has(key)) {
+                    map.set(key, {
+                        Title: b.Title,
+                        Authors: new Set(),
+                        Editions: new Set(),
+                        Category: b.Category,
+                        Rack: b.Rack,
+                        Summary: b.Summary,
+                        CourseCodes: new Set(b.CourseCodes || [])
+                    });
+                }
+                const g = map.get(key);
+                if (b.Author) g.Authors.add(b.Author);
+                if (b.Edition) g.Editions.add(b.Edition);
+                if (!g.Summary && b.Summary) g.Summary = b.Summary;
+                if (!g.Rack && b.Rack) g.Rack = b.Rack;
+                (b.CourseCodes || []).forEach(c => g.CourseCodes.add(c));
+            });
+            return Array.from(map.values()).map(g => {
+                const authors = Array.from(g.Authors);
+                const editions = Array.from(g.Editions);
+                return {
+                    ...g,
+                    Authors: authors,
+                    Editions: editions,
+                    CourseCodes: Array.from(g.CourseCodes),
+                    Author: authors.join(', ') || 'Unknown Author'
+                };
+            });
+        }
+
+        // --- Semantic-ish search expansion ---
+        function expandQueryTerms(q) {
+            const terms = new Set([q]);
+            Object.entries(TAG_SYNONYMS).forEach(([key, syns]) => {
+                if (q === key || syns.includes(q)) {
+                    terms.add(key);
+                    syns.forEach(s => terms.add(s));
+                }
+            });
+            return Array.from(terms);
         }
 
         // --- Rendering ---
@@ -527,6 +742,7 @@
             const container = document.getElementById('book-list');
             const topSection = document.getElementById('top-rated-section');
             const exchangeSection = document.getElementById('exchange-section');
+            const innovationSection = document.getElementById('innovation-section');
 
             if (!container) return;
 
@@ -534,11 +750,12 @@
             container.classList.add('hidden');
             topSection.classList.add('hidden');
             exchangeSection.classList.add('hidden');
+            innovationSection.classList.add('hidden');
 
             if (currentTab === 'all') {
                 container.classList.remove('hidden');
                 
-                if (!supabase && allBooks.length === 0) {
+                if (!supabase && groupedBooksCache.length === 0) {
                     container.innerHTML = `
                         <div class="col-span-full text-center py-20 bg-red-50 dark:bg-red-900/20 rounded-3xl">
                             <p class="text-red-500 font-bold">Supabase Configuration Missing!</p>
@@ -548,7 +765,7 @@
                     return;
                 }
 
-                let filtered = allBooks;
+                let filtered = groupedBooksCache;
                 
                 if (currentDept !== 'all') {
                     filtered = filtered.filter(b => {
@@ -561,12 +778,29 @@
                 }
 
                 if (searchQuery.trim()) {
-                    const q = searchQuery.toLowerCase();
-                    filtered = filtered.filter(b => 
-                        (b.Title || '').toLowerCase().includes(q) || 
-                        (b.Author || '').toLowerCase().includes(q) || 
-                        (b.Category || '').toLowerCase().includes(q)
-                    );
+                    const q = searchQuery.toLowerCase().trim();
+                    const terms = expandQueryTerms(q);
+                    filtered = filtered.filter(b => {
+                        const hay = `${b.Title} ${b.Author} ${b.Category} ${b.Summary || ''}`.toLowerCase();
+                        return hay.includes(q) || terms.some(t => hay.includes(t));
+                    });
+                }
+
+                if (activeCourseFilter) {
+                    const mapped = courseMap[activeCourseFilter] || [];
+                    if (mapped.length) {
+                        const mappedLower = mapped.map(t => (t || '').toLowerCase());
+                        filtered = filtered.filter(b =>
+                            mappedLower.includes((b.Title || '').toLowerCase()) ||
+                            (b.CourseCodes || []).includes(activeCourseFilter)
+                        );
+                    } else {
+                        filtered = filtered.filter(b =>
+                            (b.CourseCodes || []).includes(activeCourseFilter) ||
+                            (b.Summary || '').toUpperCase().includes(activeCourseFilter) ||
+                            (b.Category || '').toUpperCase().includes(activeCourseFilter)
+                        );
+                    }
                 }
 
                 if (filtered.length === 0) {
@@ -587,9 +821,16 @@
             } else if (currentTab === 'exchange') {
                 exchangeSection.classList.remove('hidden');
                 renderExchanges();
+            } else if (currentTab === 'innovation') {
+                innovationSection.classList.remove('hidden');
+                renderInnovations();
             }
 
             lucide.createIcons();
+        }
+
+        function safeAttr(str) {
+            return (str || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
         }
 
         function renderBookCard(book, index) {
@@ -604,13 +845,19 @@
                               isBBA ? "bg-cyan-500/10 text-cyan-500 border-cyan-500/20" :
                               "bg-emerald-500/10 text-emerald-500 border-emerald-500/20";
 
+            const editionChips = (book.Editions || []).length > 1
+                ? `<div class="flex flex-wrap gap-1.5 mt-2">${book.Editions.map(ed => `<span class="chip">${ed}</span>`).join('')}</div>`
+                : '';
+
+            const titleKey = safeAttr(book.Title);
+
             return `
                 <div class="card-hover glass-premium rounded-[2rem] p-8 flex flex-col gap-6 group">
                     <div class="flex justify-between items-start">
                         <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-mono font-bold tracking-wider uppercase border ${badgeClass}">
                             ${book.Category || 'General'}
                         </span>
-                        <button onclick="handleMapClick('${book.Rack}')" class="p-2.5 hover:bg-brand-primary/10 rounded-xl transition-colors text-slate-400 hover:text-brand-primary">
+                        <button onclick="handleMapClick('${safeAttr(book.Rack)}')" class="p-2.5 hover:bg-brand-primary/10 rounded-xl transition-colors text-slate-400 hover:text-brand-primary">
                             <i data-lucide="map" class="w-4.5 h-4.5"></i>
                         </button>
                     </div>
@@ -620,6 +867,7 @@
                             ${book.Title}
                         </h3>
                         <p class="text-sm text-slate-500 dark:text-slate-400 font-medium truncate">✍️ ${book.Author || 'Unknown Author'}</p>
+                        ${editionChips}
                     </div>
 
                     <div class="space-y-4">
@@ -634,15 +882,15 @@
                         </div>
 
                         <div class="grid grid-cols-2 gap-3">
-                            <button onclick="handleVoteClick('${book.Title}', 'like')" class="flex items-center justify-center gap-2 py-3 rounded-2xl text-xs font-bold transition-all border ${myVote === 'like' ? 'bg-brand-accent/10 border-brand-accent text-brand-accent' : 'border-slate-200 dark:border-white/5 text-slate-500'}">
+                            <button onclick="handleVoteClick('${titleKey}', 'like')" class="flex items-center justify-center gap-2 py-3 rounded-2xl text-xs font-bold transition-all border ${myVote === 'like' ? 'bg-brand-accent/10 border-brand-accent text-brand-accent' : 'border-slate-200 dark:border-white/5 text-slate-500'}">
                                 <i data-lucide="thumbs-up" class="w-3.5 h-3.5"></i> Like
                             </button>
-                            <button onclick="handleVoteClick('${book.Title}', 'dislike')" class="flex items-center justify-center gap-2 py-3 rounded-2xl text-xs font-bold transition-all border ${myVote === 'dislike' ? 'bg-red-500/10 border-red-500 text-red-500' : 'border-slate-200 dark:border-white/5 text-slate-500'}">
+                            <button onclick="handleVoteClick('${titleKey}', 'dislike')" class="flex items-center justify-center gap-2 py-3 rounded-2xl text-xs font-bold transition-all border ${myVote === 'dislike' ? 'bg-red-500/10 border-red-500 text-red-500' : 'border-slate-200 dark:border-white/5 text-slate-500'}">
                                 <i data-lucide="thumbs-down" class="w-3.5 h-3.5"></i> Dislike
                             </button>
                         </div>
 
-                        <button onclick="handleDetailClick('${book.Title}')" class="w-full py-4 rounded-2xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-brand-primary hover:text-white dark:hover:bg-brand-primary transition-all text-sm font-bold flex items-center justify-center gap-2">
+                        <button onclick="handleDetailClick('${titleKey}')" class="w-full py-4 rounded-2xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-brand-primary hover:text-white dark:hover:bg-brand-primary transition-all text-sm font-bold flex items-center justify-center gap-2">
                             <i data-lucide="book-open" class="w-4.5 h-4.5"></i> View Details
                         </button>
                     </div>
@@ -656,7 +904,7 @@
                 .filter(([, v]) => v.like > 0)
                 .sort((a, b) => b[1].like - a[1].like)
                 .slice(0, 5)
-                .map(([title]) => allBooks.find(b => b.Title === title))
+                .map(([title]) => groupedBooksCache.find(b => b.Title === title))
                 .filter(Boolean);
 
             if (topBooks.length === 0) {
@@ -665,7 +913,7 @@
             }
 
             list.innerHTML = topBooks.map((book, i) => `
-                <div onclick="handleDetailClick('${book.Title}')" class="glass-premium p-6 rounded-[2rem] flex items-center gap-6 hover:border-brand-accent/30 transition-all cursor-pointer group">
+                <div onclick="handleDetailClick('${safeAttr(book.Title)}')" class="glass-premium p-6 rounded-[2rem] flex items-center gap-6 hover:border-brand-accent/30 transition-all cursor-pointer group">
                     <div class="w-14 h-14 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center font-display font-extrabold text-2xl text-brand-primary">#${i + 1}</div>
                     <div class="flex-1">
                         <h4 class="text-xl font-bold group-hover:text-brand-primary transition-colors">${book.Title}</h4>
@@ -712,6 +960,63 @@
             `).join('');
         }
 
+        function renderInnovations() {
+            const list = document.getElementById('innovation-list');
+            let items = innovations;
+
+            if (currentDept !== 'all') {
+                items = items.filter(p => {
+                    const d = (p.dept || '').toLowerCase();
+                    if (currentDept === 'CSE') return d.includes('cse');
+                    if (currentDept === 'BBA') return d.includes('bba') || d.includes('bus');
+                    if (currentDept === 'Other') return !d.includes('cse') && !d.includes('bba') && !d.includes('bus');
+                    return true;
+                });
+            }
+
+            if (items.length === 0) {
+                list.innerHTML = `
+                    <div class="col-span-full py-32 text-center glass-premium rounded-[2rem]">
+                        <div class="text-7xl mb-6">🚀</div>
+                        <h3 class="text-2xl font-bold mb-2">No projects yet</h3>
+                        <p class="text-slate-500">Be the first to showcase your work!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            list.innerHTML = items.map(p => `
+                <div class="glass-premium rounded-[2.5rem] p-10 relative overflow-hidden group border-t-4 border-t-brand-accent">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-mono font-bold tracking-wider uppercase border bg-brand-accent/10 text-brand-accent border-brand-accent/20 mb-4">
+                        ${p.dept || 'General'} · Batch ${p.batch || '—'}
+                    </span>
+                    <h4 class="text-2xl font-display font-bold mb-4">${p.title}</h4>
+                    <p class="text-sm text-slate-500 font-medium mb-4">👤 ${p.developers}</p>
+                    <p class="text-slate-600 dark:text-slate-400 mb-8 line-clamp-4 leading-relaxed">${p.abstract}</p>
+                    <div class="flex flex-wrap items-center gap-3 pt-6 border-t border-slate-100 dark:border-white/5">
+                        ${p.github_url ? `<a href="${p.github_url}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 px-5 py-3 rounded-2xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-bold hover:bg-brand-primary hover:text-white transition-all"><i data-lucide="github" class="w-4 h-4"></i> GitHub</a>` : ''}
+                        ${p.live_url ? `<a href="${p.live_url}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 px-5 py-3 rounded-2xl bg-brand-primary text-white text-xs font-bold hover:scale-105 transition-transform"><i data-lucide="external-link" class="w-4 h-4"></i> Live Demo</a>` : ''}
+                        ${p.contact ? `<span class="flex items-center gap-2 text-xs text-slate-400 font-mono font-bold ml-auto"><i data-lucide="phone" class="w-3.5 h-3.5"></i> ${p.contact}</span>` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // --- ChatGPT Auto-Prompt Integration ---
+        function buildChatGPTLink(book) {
+            const prompt = `Act as an elite university professor and senior technical mentor. For the textbook: "${book.Title}" by ${book.Author || 'Unknown'}, provide a comprehensive student mastery guide covering the following 3 core sections in detail:
+1. Viva & Interview Prep Questions:
+- List the top 3-5 trickiest, high-yield questions typically asked in viva boards or job interviews from this specific book/topic.
+- Provide crisp, highly strategic, and short conceptual answers for each.
+2. Practical Project & Industry Use-Case:
+- Explain how the core theoretical concepts of this book are directly applied in real-world software development or industry projects.
+- Give a short, actionable roadmap or blueprint on how a student can build a mini-project using this concept.
+3. Step-by-Step Numerical & Coding Blueprint:
+- For the primary numerical or algorithmic problem types in this book, break down the core logic step-by-step (avoiding blind memorization).
+- Provide a clean Python or standard code implementation blueprint demonstrating how to solve or simulate the concept programmatically.`;
+            return `https://chatgpt.com/?q=${encodeURIComponent(prompt)}`;
+        }
+
         // --- Event Handlers ---
         window.switchTab = (tab) => {
             currentTab = tab;
@@ -755,20 +1060,22 @@
         };
 
         window.handleDetailClick = (title) => {
-            const book = allBooks.find(b => b.Title === title);
+            const book = groupedBooksCache.find(b => b.Title === title);
             if (!book) return;
             const content = document.getElementById('detail-content');
+            const authorsLine = (book.Authors && book.Authors.length > 1) ? book.Authors.join(' · ') : book.Author;
+            const editionsLine = (book.Editions && book.Editions.length > 0) ? book.Editions.join(', ') : '—';
             content.innerHTML = `
                 <div class="space-y-10">
                     <div class="text-center">
                         <div class="w-24 h-24 bg-brand-primary/10 rounded-3xl flex items-center justify-center mx-auto mb-6 text-brand-primary"><i data-lucide="book" class="w-10 h-10"></i></div>
                         <h2 class="text-3xl font-display font-bold mb-3 leading-tight text-slate-900 dark:text-white">${book.Title}</h2>
-                        <p class="text-brand-primary font-mono font-bold uppercase tracking-widest text-xs">${book.Author}</p>
+                        <p class="text-brand-primary font-mono font-bold uppercase tracking-widest text-xs">${authorsLine}</p>
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div class="p-5 rounded-3xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-white/5">
-                            <p class="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 mb-2">Edition</p>
-                            <p class="text-sm font-bold text-slate-700 dark:text-slate-200">${book.Edition || '—'}</p>
+                            <p class="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 mb-2">Edition(s)</p>
+                            <p class="text-sm font-bold text-slate-700 dark:text-slate-200">${editionsLine}</p>
                         </div>
                         <div class="p-5 rounded-3xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-white/5">
                             <p class="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 mb-2">Category</p>
@@ -788,6 +1095,9 @@
                         <h4 class="text-xs font-mono font-bold text-slate-400 uppercase mb-4 flex items-center gap-2"><i data-lucide="align-left" class="w-3.5 h-3.5"></i> Description</h4>
                         <p class="text-base leading-relaxed text-slate-600 dark:text-slate-300 font-medium">${book.Summary || 'This book is a valuable resource for students and researchers alike.'}</p>
                     </div>
+                    <a href="${buildChatGPTLink(book)}" target="_blank" rel="noopener noreferrer" class="w-full py-5 rounded-[2rem] bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold shadow-xl flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-[0.98] transition-all">
+                        <i data-lucide="sparkles" class="w-5 h-5"></i> Ask ChatGPT about this book
+                    </a>
                     <button onclick="closeModal('detail-modal')" class="w-full py-5 rounded-[2rem] bg-brand-primary text-white font-bold shadow-xl shadow-brand-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all">Close Details</button>
                 </div>
             `;
@@ -811,6 +1121,30 @@
             `;
             openModal('map-modal');
             lucide.createIcons();
+        };
+
+        // --- Syllabus Mapping Engine ---
+        window.handleCourseSearch = () => {
+            const raw = document.getElementById('course-code-input').value.trim();
+            if (!raw) return;
+            activeCourseFilter = raw.toUpperCase();
+            document.getElementById('clear-course-btn').classList.remove('hidden');
+            const tagWrap = document.getElementById('course-search-tag');
+            tagWrap.classList.remove('hidden');
+            tagWrap.querySelector('.chip').textContent = `🎓 Showing textbooks for ${activeCourseFilter}`;
+            if (currentTab !== 'all') {
+                switchTab('all');
+            } else {
+                displayBooks();
+            }
+        };
+
+        window.clearCourseSearch = () => {
+            activeCourseFilter = null;
+            document.getElementById('course-code-input').value = '';
+            document.getElementById('clear-course-btn').classList.add('hidden');
+            document.getElementById('course-search-tag').classList.add('hidden');
+            displayBooks();
         };
 
         async function handleRequestSubmit(e) {
@@ -872,6 +1206,39 @@
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = '<i data-lucide="plus-circle" class="w-5 h-5"></i> Create Post';
+                lucide.createIcons();
+            }
+        }
+
+        async function handleInnovationSubmit(e) {
+            e.preventDefault();
+            if (!supabase) {
+                alert('Supabase is not configured. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your settings to submit a project.');
+                return;
+            }
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+            const btn = e.target.querySelector('button[type="submit"]');
+            btn.disabled = true;
+            btn.innerHTML = '<div class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> Submitting...';
+
+            try {
+                const { error } = await supabase.from('innovations').insert([{
+                    title: data.title, abstract: data.abstract, developers: data.developers,
+                    batch: data.batch, dept: data.dept, github_url: data.github_url,
+                    live_url: data.live_url, contact: data.contact
+                }]);
+                if (error) throw error;
+                innovations.unshift({ ...data });
+                displayBooks();
+                closeModal('innovation-modal');
+                e.target.reset();
+            } catch (err) {
+                console.error(err);
+                alert("Failed to submit project. Make sure the 'innovations' table exists in Supabase.");
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i data-lucide="rocket" class="w-5 h-5"></i> Submit Project';
                 lucide.createIcons();
             }
         }
@@ -1052,7 +1419,7 @@
                         <p class="text-slate-500 mb-8 font-medium">Based on your interests, we think you'll love these:</p>
                         <div class="space-y-4 text-left">
                             ${recs.map(r => `
-                                <div onclick="handleDetailClick('${r.book.Title}'); closeModal('quiz-modal');" class="p-5 rounded-2xl glass-premium hover:border-brand-primary transition-all cursor-pointer flex items-center gap-5 group">
+                                <div onclick="handleDetailClick('${safeAttr(r.book.Title)}'); closeModal('quiz-modal');" class="p-5 rounded-2xl glass-premium hover:border-brand-primary transition-all cursor-pointer flex items-center gap-5 group">
                                     <div class="w-12 h-12 rounded-xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center group-hover:bg-brand-primary transition-colors"><i data-lucide="book-open" class="text-brand-primary group-hover:text-white w-5 h-5"></i></div>
                                     <div class="flex-1">
                                         <h4 class="font-bold text-sm group-hover:text-brand-primary transition-colors">${r.book.Title}</h4>
@@ -1081,7 +1448,7 @@
         };
 
         function getQuizRecommendations() {
-            return allBooks.map(b => {
+            return groupedBooksCache.map(b => {
                 let s = 0;
                 const c = (b.Category || '').toLowerCase();
                 const t = (b.Title || '').toLowerCase();
