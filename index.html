@@ -1004,16 +1004,17 @@
 
         // --- ChatGPT Auto-Prompt Integration ---
         function buildChatGPTLink(book) {
-            const prompt = `Act as an elite university professor and senior technical mentor. For the textbook: "${book.Title}" by ${book.Author || 'Unknown'}, provide a comprehensive student mastery guide covering the following 3 core sections in detail:
-1. Viva & Interview Prep Questions:
-- List the top 3-5 trickiest, high-yield questions typically asked in viva boards or job interviews from this specific book/topic.
-- Provide crisp, highly strategic, and short conceptual answers for each.
-2. Practical Project & Industry Use-Case:
-- Explain how the core theoretical concepts of this book are directly applied in real-world software development or industry projects.
-- Give a short, actionable roadmap or blueprint on how a student can build a mini-project using this concept.
-3. Step-by-Step Numerical & Coding Blueprint:
-- For the primary numerical or algorithmic problem types in this book, break down the core logic step-by-step (avoiding blind memorization).
-- Provide a clean Python or standard code implementation blueprint demonstrating how to solve or simulate the concept programmatically.`;
+            const prompt = `Act as an experienced university professor and academic mentor. For the book: "${book.Title}" by ${book.Author || 'Unknown'} (Category: ${book.Category || 'General'}), provide a comprehensive student study guide covering the following 4 sections in detail:
+1. Most Important Topics & Easy Examples:
+- List the most important topics/chapters from this book in simple language.
+- Explain each with a clear, relatable real-life example so it's easy to understand and remember.
+2. Top 7 Viva & Job Interview Questions:
+- List the top 7 trickiest, high-yield questions typically asked in viva boards or job/career interviews from this book or topic.
+- Provide crisp, strategic, and easy-to-recall answers for each.
+3. Curated Further Reading & Standard Resources:
+- Suggest a short list of world-standard reference books, well-known authors, or notable research papers/resources for going deeper into this subject.
+4. Short Full Summary (5-10 lines):
+- Summarize the entire book's core message and key takeaways in simple, flowing language within 5 to 10 lines.`;
             return `https://chatgpt.com/?q=${encodeURIComponent(prompt)}`;
         }
 
